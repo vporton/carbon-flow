@@ -139,7 +139,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         @param _id     ID of the Token
         @return        The _owner's balance of the Token type requested
      */
-    function balanceOf(address _owner, uint256 _id) external view override returns (uint256) {
+    function balanceOf(address _owner, uint256 _id) external view virtual override returns (uint256) {
         // The balance of any account can be calculated from the Transfer events history.
         // However, since we need to keep the balances to validate transfer request,
         // there is no extra cost to also privide a querry function.
@@ -153,7 +153,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         @param _ids    ID of the Tokens
         @return        The _owner's balance of the Token types requested (i.e. balance for each (owner, id) pair)
      */
-    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view override returns (uint256[] memory) {
+    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view virtual override returns (uint256[] memory) {
 
         require(_owners.length == _ids.length);
 
