@@ -15,14 +15,14 @@ contract SumOfTokens is ERC1155
         bytes32 next;
     }
 
-    uint256 maxTokenId;
+    uint256 public maxTokenId;
 
-    mapping (uint256 => address) tokenOwners;
+    mapping (uint256 => address) public tokenOwners;
 
-    mapping (uint256 => uint256) parentToken;
+    mapping (uint256 => uint256) public parentToken;
 
     // token => !updated
-    mapping (uint256 => bool) tokenBalancesNotUpdated;
+    mapping (uint256 => bool) public tokenBalancesNotUpdated;
 
     // user => (parent => obj)
     mapping (address => mapping (uint256 => bytes32)) userTokens;
@@ -250,21 +250,23 @@ contract SumOfTokens is ERC1155
     }
 
     function setTokenParent(uint256 _child, uint256 _parent) external {
-        uint256 _ancestor = _child;
-        // if(_ancestor == parent) return; // TODO
-        for(;;) {
-            _ancestor = parentToken[_child];
-            if(_ancestor == 0) break;
-            tokenBalancesNotUpdated[_ancestor] = true;
-        }
+        require(tokenOwners[_parent] == msg.sender);
+
+        // uint256 _ancestor = _child;
+        // // if(_ancestor == parent) return; // TODO
+        // for(;;) {
+        //     _ancestor = parentToken[_child];
+        //     if(_ancestor == 0) break;
+        //     tokenBalancesNotUpdated[_ancestor] = true;
+        // }
         
-        parentToken[_child] = _parent;
-        _ancestor = _parent;
-        for(;;) {
-            require(_ancestor != _child); // no loops
-            tokenBalancesNotUpdated[_ancestor] = true;
-            _ancestor = parentToken[_child];
-            if(_ancestor == 0) break;
-        }
+        // parentToken[_child] = _parent;
+        // _ancestor = _parent;
+        // for(;;) {
+        //     require(_ancestor != _child); // no loops
+        //     tokenBalancesNotUpdated[_ancestor] = true;
+        //     _ancestor = parentToken[_child];
+        //     if(_ancestor == 0) break;
+        // }
     }
 }
