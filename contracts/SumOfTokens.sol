@@ -73,26 +73,31 @@ contract SumOfToken is ERC1155
     // FIXME
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
         uint256 _parentToken = parentToken[_id];
-        bytes32 _userTokenAddr = userTokens[_from][_parentToken][_id];
-        require(_userTokenAddr != 0);
-        UserToken storage _userToken = userTokensObjects[_userTokenAddr];
-        uint256 _oldBalance = parentToken[_id] != 0 ? _recalculateBalanceOf(_from, _id) : 0;
-        if(_oldBalance >= _value) {
+        uint256 _oldBalance = _recalculateBalanceOf(_from, _id);
+        if(_parentToken == 0) {
+            require(_oldBalance >= _value);
             _oldBalance -= _value;
         } else {
-            bytes32 _nextTokenAddr = _userToken.next;
-            require(_nextTokenAddr != 0);
+            bytes32 _userTokenAddr = userTokens[_from][_parentToken][_id];
+            require(_userTokenAddr != 0);
+            UserToken storage _userToken = userTokensObjects[_userTokenAddr];
+            if(_oldBalance >= _value) {
+                _oldBalance -= _value;
+            } else {
+                bytes32 _nextTokenAddr = _userToken.next;
+                require(_nextTokenAddr != 0);
 
-            // TODO: Join these two variables into one?
-            balances[_id][_from] = 0;
-            userTokens[_from][_parentToken][_id] = 0;
-            
-            // Remove from user's list
-            if(_userToken.prev != 0) userTokensObjects[_userToken.prev].next = _userToken.next;
-            if(_userToken.next != 0) userTokensObjects[_userToken.next].prev = _userToken.prev;
+                // TODO: Join these two variables into one?
+                balances[_id][_from] = 0;
+                userTokens[_from][_parentToken][_id] = 0;
+                
+                // Remove from user's list
+                if(_userToken.prev != 0) userTokensObjects[_userToken.prev].next = _userToken.next;
+                if(_userToken.next != 0) userTokensObjects[_userToken.next].prev = _userToken.prev;
 
-            uint256 _nextToken = userTokensObjects[_nextTokenAddr].token;
-            _doTransferFrom(_from, _to, _nextToken, _value - _oldBalance); // TODO: Use a loop instead.
+                uint256 _nextToken = userTokensObjects[_nextTokenAddr].token;
+                _doTransferFrom(_from, _to, _nextToken, _value - _oldBalance); // TODO: Use a loop instead.
+            }
         }
         balances[_id][_to] = _value.add(balances[_id][_to]);
     }
