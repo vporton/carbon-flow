@@ -158,7 +158,7 @@ contract SumOfToken is ERC1155
     function _doMintChilds(address _to, uint256 _id, uint256 _value) internal {
         uint256 _childId = _id;
         for(;;) {
-            bytes32 _tokenAddr = userTokens[_to][_childId]; // defined because parents were already processed
+            bytes32 _tokenAddr = userTokens[_to][_childId]; // defined for the first loop iteration because parents were already processed
             bytes32 _childAddr = userTokensObjects[_tokenAddr].next; // FIXME: does it exist?
              if(_childAddr == 0) break;
              _childId = userTokensObjects[_childAddr].token;
