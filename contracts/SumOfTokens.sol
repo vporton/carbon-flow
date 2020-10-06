@@ -6,8 +6,14 @@ import "./ERC1155.sol";
 // A sample implementation of core ERC1155 function.
 contract SumOfToken is ERC1155
 {
+    struct ChildToken {
+        uint256 token;
+        bytes32 next;
+    }
+
     mapping (uint256 => uint256) parentToken;
-    mapping (uint256 => uint256[]) childTokens;
+    mapping (uint256 => bytes32) childTokens;
+    mapping (bytes32 => ChildToken) public childTokenObjects;
 
     // token => updated
     mapping (uint256 => bool) tokenBalancesUpdated; // FIXME: negate?
@@ -28,22 +34,18 @@ contract SumOfToken is ERC1155
     // It does not matter that this function is inefficient:
     // It is called either from an external view or once per tokens tree change.
     function _balanceOf(address _owner, uint256 _id) internal view returns (uint256) {
-        uint256[] storage _childs = childTokens[_id];
-        uint _childsLength = _childs.length;
         uint256 _balance = 0;
-        for(uint i = 0; i < _childsLength; ++i) {
-            _balance += _balanceOf(_owner, _childs[i]); // recursion
+        for(bytes32 _iter = childTokens[_id]; _iter != 0; _iter = childTokenObjects[_iter].next) {
+            _balance += _balanceOf(_owner, childTokenObjects[_iter].token); // recursion
         }
         return _balance;
     }
 
     function _recalculateBalanceOf(address _owner, uint256 _id) internal returns (uint256) {
         if(!tokenBalancesUpdated[_id]) {
-            uint256[] storage _childs = childTokens[_id];
-            uint _childsLength = _childs.length;
             uint256 _balance = 0;
-            for(uint i = 0; i < _childsLength; ++i) {
-                _balance += _recalculateBalanceOf(_owner, _childs[i]); // recursion
+            for(bytes32 _iter = childTokens[_id]; _iter != 0; _iter = childTokenObjects[_iter].next) {
+                _balance += _recalculateBalanceOf(_owner, childTokenObjects[_iter].token); // recursion
             }
             balances[_id][_owner] = _balance;
             tokenBalancesUpdated[_id] = true;
