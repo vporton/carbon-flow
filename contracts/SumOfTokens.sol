@@ -138,7 +138,6 @@ contract SumOfToken is ERC1155
 
     // Must be called after _recalculateBalanceOf().
     function _doMintChilds(address _to, uint256 _id, uint256 _value) internal {
-        // FIXME
         for (uint256 _childId = _id; // FIXME: not including itself
              _childId != 0;
              _childId = userTokensObjects[userTokensObjects[userTokens[_to][_childId]].next].token)
