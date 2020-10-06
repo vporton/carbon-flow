@@ -16,7 +16,6 @@ contract SumOfToken is ERC1155
     // double linked list
     struct UserToken {
         uint256 token;
-        uint256 amount;
         bytes32 prev;
         bytes32 next;
     }
@@ -72,8 +71,10 @@ contract SumOfToken is ERC1155
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
         require(_recalculateBalanceOf(_from, _id) >= _value);
 
-        _doTransferFromChilds(_from, _to, _id, _value);
-        _doTransferFromParents(_from, _to, _id, _value);
+        if(_value != 0) {
+            _doTransferFromChilds(_from, _to, _id, _value);
+            _doTransferFromParents(_from, _to, _id, _value);
+        }
     }
 
     // Must be called after _recalculateBalanceOf().
@@ -118,13 +119,28 @@ contract SumOfToken is ERC1155
 
     // Must be called after _recalculateBalanceOf().
     function _doTransferFromParents(address _from, address _to, uint256 _id, uint256 _value) internal {
-        uint256 _parent = _id;
+        assert(_value != 0);
+
+        uint256 _next = _id;
         do {
-            if(tokenBalancesUpdated[_parent]) {
-                balances[_parent][_from] -= _value;
-                balances[_parent][_to] = _value.add(balances[_parent][_to]); 
+            uint256 _oldToBalance = balances[_next][_to];
+            if(tokenBalancesUpdated[_next]) {
+                balances[_next][_from] -= _value;
+                balances[_next][_to] = _value.add(_oldToBalance);
             }
-            _parent = parentToken[_parent];
-        } while(_parent != 0);
+
+            uint256 _parent = parentToken[_next];
+
+            // User received a new token:
+            if(_parent != 0 && _oldToBalance == 0) {
+                // Insert into the beginning of the double linked list:
+                UserToken memory _userToken = UserToken({token: _next, prev: 0, next: userTokens[_to][_parent]});
+                bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _next));
+                userTokensObjects[_userTokenAddr] = _userToken;
+                userTokens[_to][_parent] = _userTokenAddr;
+            }
+
+            _next = _parent;
+        } while(_next != 0);
     }
 }
