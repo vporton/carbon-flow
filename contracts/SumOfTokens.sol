@@ -3,7 +3,7 @@ pragma solidity ^0.7.1;
 
 import "./ERC1155.sol";
 
-contract SumOfToken is ERC1155
+contract SumOfTokens is ERC1155
 {
     using SafeMath for uint256;
     using Address for address;
