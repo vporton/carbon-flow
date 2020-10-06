@@ -141,6 +141,7 @@ contract SumOfToken is ERC1155
 
     function _doMint(address _to, uint256 _id, uint256 _value) internal {
         // FIXME: check owner
+        // TODO: limit the sum
 
         if(_value != 0) {
             _doMintParents(_to, _id, _value);
