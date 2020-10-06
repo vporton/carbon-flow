@@ -72,8 +72,8 @@ contract SumOfToken is ERC1155
 
     // FIXME
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
-        uint256 _parentToken = parentToken[_id];
         uint256 _oldBalance = _recalculateBalanceOf(_from, _id);
+        uint256 _parentToken = parentToken[_id];
         if(_parentToken == 0) {
             require(_oldBalance >= _value);
             _oldBalance -= _value;
@@ -91,12 +91,17 @@ contract SumOfToken is ERC1155
                 balances[_id][_from] = 0;
                 userTokens[_from][_parentToken][_id] = 0;
                 
-                // Remove from user's list
-                if(_userToken.prev != 0) userTokensObjects[_userToken.prev].next = _userToken.next;
-                if(_userToken.next != 0) userTokensObjects[_userToken.next].prev = _userToken.prev;
+                UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
 
-                uint256 _nextToken = userTokensObjects[_nextTokenAddr].token;
-                _doTransferFrom(_from, _to, _nextToken, _value - _oldBalance); // TODO: Use a loop instead.
+                // Remove from user's list
+                if(_nextTokenAddr != 0) {
+                    _nextToken.prev = _userToken.prev;
+                }
+                if(_userToken.prev != 0) {
+                    userTokensObjects[_userToken.prev].next = _nextTokenAddr;
+                }
+
+                _doTransferFrom(_from, _to, _nextToken.token, _value - _oldBalance); // TODO: Use a loop instead.
             }
         }
         balances[_id][_to] = _value.add(balances[_id][_to]);
