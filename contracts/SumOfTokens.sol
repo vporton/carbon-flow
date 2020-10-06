@@ -6,8 +6,19 @@ import "./ERC1155.sol";
 // A sample implementation of core ERC1155 function.
 contract SumOfToken is ERC1155
 {
+    using SafeMath for uint256;
+
+    // linked list
     struct ChildToken {
         uint256 token;
+        bytes32 next;
+    }
+
+    // double linked list
+    struct UserToken {
+        uint256 token;
+        uint256 amount;
+        bytes32 prev;
         bytes32 next;
     }
 
@@ -17,6 +28,11 @@ contract SumOfToken is ERC1155
 
     // token => updated
     mapping (uint256 => bool) tokenBalancesUpdated; // FIXME: negate?
+
+    // user => (parent => (child => obj))
+    mapping (address => mapping (uint256 => mapping (uint256 => bytes32))) userTokens;
+
+    mapping (bytes32 => UserToken) public userTokensObjects;
 
     function balanceOf(address _owner, uint256 _id) external view override returns (uint256) {
         return _balanceOf(_owner, _id);
@@ -52,5 +68,32 @@ contract SumOfToken is ERC1155
             return _balance;
         }
         return balances[_id][_owner];
+    }
+
+    // FIXME
+    function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
+        uint256 _oldBalance = _recalculateBalanceOf(_from, _id);
+        uint256 _parentToken = parentToken[_id];
+        bytes32 _userTokenAddr = userTokens[_from][_parentToken][_id];
+        require(_userTokenAddr != 0);
+        UserToken storage _userToken = userTokensObjects[_userTokenAddr];
+        if(_oldBalance <= _value) {
+            _oldBalance -= _value;
+        } else {
+            bytes32 _nextTokenAddr = _userToken.next;
+            require(_nextTokenAddr != 0);
+
+            // TODO: Join these two variables into one?
+            balances[_id][_from] = 0;
+            userTokens[_from][_parentToken][_id] = 0;
+            
+            // Remove from user's list
+            if(_userToken.prev != 0) userTokensObjects[_userToken.prev].next = _userToken.next;
+            if(_userToken.next != 0) userTokensObjects[_userToken.next].prev = _userToken.prev;
+
+            uint256 _nextToken = userTokensObjects[_nextTokenAddr].token;
+            _doTransferFrom(_from, _to, _nextToken, _value - _oldBalance); // TODO: Use a loop instead.
+        }
+        balances[_id][_to] = _value.add(balances[_id][_to]);
     }
 }
