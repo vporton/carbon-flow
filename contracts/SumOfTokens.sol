@@ -29,8 +29,8 @@ contract SumOfToken is ERC1155
     // token => updated
     mapping (uint256 => bool) tokenBalancesUpdated; // FIXME: negate?
 
-    // user => (parent => (child => obj))
-    mapping (address => mapping (uint256 => mapping (uint256 => bytes32))) userTokens;
+    // user => (parent => obj)
+    mapping (address => mapping (uint256 => bytes32)) userTokens;
 
     mapping (bytes32 => UserToken) public userTokensObjects;
 
@@ -70,38 +70,37 @@ contract SumOfToken is ERC1155
         return balances[_id][_owner];
     }
 
-    // FIXME
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
-        uint256 _oldBalance = _recalculateBalanceOf(_from, _id);
+        for (bytes32 _childAddr = userTokens[_from][_id];
+             _childAddr != 0;
+             _childAddr = userTokensObjects[_childAddr].next)
+        {
+            uint256 _childId = userTokensObjects[_childAddr].token;
 
-        if(_oldBalance >= _value) {
-            _oldBalance -= _value;
-        } else if(_value != 0) {
-            uint256 _parentToken = parentToken[_id];
-            require(_parentToken != 0);
+            uint256 _oldBalance = _recalculateBalanceOf(_from, _childId);
 
-            bytes32 _userTokenAddr = userTokens[_from][_parentToken][_id];
-            require(_userTokenAddr != 0); // if zero, then need _value == 0
-            UserToken storage _userToken = userTokensObjects[_userTokenAddr];
+            if(_oldBalance >= _value) {
+                _oldBalance -= _value;
+            } else if(_value != 0) {
+                UserToken storage _childToken = userTokensObjects[_childAddr];
 
-            bytes32 _nextTokenAddr = _userToken.next;
-            require(_nextTokenAddr != 0);
+                bytes32 _nextTokenAddr = _childToken.next;
+                require(_nextTokenAddr != 0);
 
-            // TODO: Join these two variables into one?
-            balances[_id][_from] = 0;
-            userTokens[_from][_parentToken][_id] = 0;
-            
-            UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
+                balances[_childId][_from] = 0;
+                
+                UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
 
-            // Remove from user's list
-            if(_nextTokenAddr != 0) {
-                _nextToken.prev = _userToken.prev;
+                // Remove from user's list
+                if(_nextTokenAddr != 0) {
+                    _nextToken.prev = _childToken.prev;
+                }
+                if(_childToken.prev != 0) {
+                    userTokensObjects[_childToken.prev].next = _nextTokenAddr;
+                }
+
+                _doTransferFrom(_from, _to, _childId, _value - _oldBalance); // recursion
             }
-            if(_userToken.prev != 0) {
-                userTokensObjects[_userToken.prev].next = _nextTokenAddr;
-            }
-
-            _doTransferFrom(_from, _to, _nextToken.token, _value - _oldBalance); // TODO: Use a loop instead.
         }
         balances[_id][_to] = _value.add(balances[_id][_to]);
     }
