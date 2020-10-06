@@ -127,6 +127,55 @@ contract SumOfToken is ERC1155
         return balances[_id][_owner];
     }
 
+    function _doMint(address _to, uint256 _id, uint256 _value) internal {
+        // FIXME: check owner
+
+        if(_value != 0) {
+            _doMintChilds(_to, _id, _value);
+            _doMintParents(_to, _id, _value);
+        }
+    }
+
+    // Must be called after _recalculateBalanceOf().
+    function _doMintChilds(address _to, uint256 _id, uint256 _value) internal {
+        // FIXME
+        for (uint256 _childId = _id; // FIXME: not including itself
+             _childId != 0;
+             _childId = userTokensObjects[userTokensObjects[userTokens[_to][_childId]].next].token)
+        {
+            balances[_childId][_to] = _value.add(balances[_childId][_to]);
+        }
+    }
+
+    // Must be called after _recalculateBalanceOf().
+    function _doMintParents(address _to, uint256 _id, uint256 _value) internal {
+        assert(_value != 0);
+
+        uint256 _next = _id;
+        for(;;) {
+            uint256 _oldToBalance = balances[_next][_to];
+            if(!tokenBalancesNotUpdated[_next]) {
+                balances[_next][_to] = _value.add(_oldToBalance);
+            }
+
+            uint256 _parent = parentToken[_next];
+
+            if(_parent == 0) break;
+
+            // FIXME: also for childs
+            // User received a new token:
+            if(_oldToBalance == 0) {
+                // Insert into the beginning of the double linked list:
+                UserToken memory _userToken = UserToken({token: _next, prev: 0, next: userTokens[_to][_parent]});
+                bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _next));
+                userTokensObjects[_userTokenAddr] = _userToken;
+                userTokens[_to][_parent] = _userTokenAddr;
+            }
+
+            _next = _parent;
+        }
+    }
+
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
         require(_recalculateBalanceOf(_from, _id) >= _value);
 
@@ -194,6 +243,7 @@ contract SumOfToken is ERC1155
 
             if(_parent == 0) break;
 
+            // FIXME: also for childs
             // User received a new token:
             if(_oldToBalance == 0) {
                 // Insert into the beginning of the double linked list:
