@@ -47,6 +47,7 @@ contract SumOfToken is ERC1155
     }
 
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external override {
+        require(_id != 0);
 
         require(_to != address(0x0), "_to must be non-zero.");
         require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
@@ -72,6 +73,7 @@ contract SumOfToken is ERC1155
 
         for (uint256 i = 0; i < _ids.length; ++i) {
             uint256 _id = _ids[i];
+            require(_id != 0);
             uint256 _value = _values[i];
 
             _doTransferFrom(_from, _to, _id, _value);
@@ -103,6 +105,8 @@ contract SumOfToken is ERC1155
     }
 
     function _recalculateBalanceOf(address _owner, uint256 _id) internal returns (uint256) {
+        require(_id != 0);
+
         if(!tokenBalancesUpdated[_id]) {
             uint256 _balance = 0;
             for(bytes32 _iter = childTokens[_id]; _iter != 0; _iter = childTokenObjects[_iter].next) {
