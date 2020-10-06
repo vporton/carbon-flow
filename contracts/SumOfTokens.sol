@@ -22,7 +22,6 @@ contract SumOfToken is ERC1155
     }
 
     mapping (uint256 => uint256) parentToken;
-    mapping (uint256 => bytes32) childTokens;
     mapping (bytes32 => ChildToken) public childTokenObjects;
 
     // token => updated
@@ -98,8 +97,12 @@ contract SumOfToken is ERC1155
     // It is called either from an external view or once per tokens tree change.
     function _balanceOf(address _owner, uint256 _id) internal view returns (uint256) {
         uint256 _balance = 0;
-        for(bytes32 _iter = childTokens[_id]; _iter != 0; _iter = childTokenObjects[_iter].next) {
-            _balance += _balanceOf(_owner, childTokenObjects[_iter].token); // recursion
+        for (bytes32 _childAddr = userTokens[_owner][_id];
+             _childAddr != 0;
+             _childAddr = userTokensObjects[_childAddr].next)
+        {
+            uint256 _childId = userTokensObjects[_childAddr].token;
+            _balance += _balanceOf(_owner, _childId); // recursion
         }
         return _balance;
     }
@@ -109,8 +112,12 @@ contract SumOfToken is ERC1155
 
         if(!tokenBalancesUpdated[_id]) {
             uint256 _balance = 0;
-            for(bytes32 _iter = childTokens[_id]; _iter != 0; _iter = childTokenObjects[_iter].next) {
-                _balance += _recalculateBalanceOf(_owner, childTokenObjects[_iter].token); // recursion
+            for (bytes32 _childAddr = userTokens[_owner][_id];
+                _childAddr != 0;
+                _childAddr = userTokensObjects[_childAddr].next)
+            {
+                uint256 _childId = userTokensObjects[_childAddr].token;
+                _balance += _recalculateBalanceOf(_owner, _childId); // recursion
             }
             balances[_id][_owner] = _balance;
             tokenBalancesUpdated[_id] = true;
