@@ -122,7 +122,7 @@ contract SumOfToken is ERC1155
         assert(_value != 0);
 
         uint256 _next = _id;
-        do {
+        for(;;) {
             uint256 _oldToBalance = balances[_next][_to];
             if(tokenBalancesUpdated[_next]) {
                 balances[_next][_from] -= _value;
@@ -131,8 +131,10 @@ contract SumOfToken is ERC1155
 
             uint256 _parent = parentToken[_next];
 
+            if(_parent == 0) break;
+
             // User received a new token:
-            if(_parent != 0 && _oldToBalance == 0) {
+            if(_oldToBalance == 0) {
                 // Insert into the beginning of the double linked list:
                 UserToken memory _userToken = UserToken({token: _next, prev: 0, next: userTokens[_to][_parent]});
                 bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _next));
@@ -141,6 +143,6 @@ contract SumOfToken is ERC1155
             }
 
             _next = _parent;
-        } while(_next != 0);
+        }
     }
 }
