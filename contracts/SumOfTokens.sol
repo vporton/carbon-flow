@@ -23,13 +23,15 @@ contract SumOfToken is ERC1155
 
     mapping (uint256 => uint256) parentToken;
 
-    // token => updated
-    mapping (uint256 => bool) tokenBalancesUpdated; // FIXME: negate?
+    // token => !updated
+    mapping (uint256 => bool) tokenBalancesNotUpdated;
 
     // user => (parent => obj)
     mapping (address => mapping (uint256 => bytes32)) userTokens;
 
     mapping (bytes32 => UserToken) public userTokensObjects;
+
+// ERC-1155
 
     function balanceOf(address _owner, uint256 _id) external view override returns (uint256) {
         return _balanceOf(_owner, _id);
@@ -109,7 +111,7 @@ contract SumOfToken is ERC1155
     function _recalculateBalanceOf(address _owner, uint256 _id) internal returns (uint256) {
         require(_id != 0);
 
-        if(!tokenBalancesUpdated[_id]) {
+        if(tokenBalancesNotUpdated[_id]) {
             uint256 _balance = 0;
             for (bytes32 _childAddr = userTokens[_owner][_id];
                 _childAddr != 0;
@@ -119,7 +121,7 @@ contract SumOfToken is ERC1155
                 _balance += _recalculateBalanceOf(_owner, _childId); // recursion
             }
             balances[_id][_owner] = _balance;
-            tokenBalancesUpdated[_id] = true;
+            tokenBalancesNotUpdated[_id] = false;
             return _balance;
         }
         return balances[_id][_owner];
@@ -181,7 +183,7 @@ contract SumOfToken is ERC1155
         uint256 _next = _id;
         for(;;) {
             uint256 _oldToBalance = balances[_next][_to];
-            if(tokenBalancesUpdated[_next]) {
+            if(!tokenBalancesNotUpdated[_next]) {
                 balances[_next][_from] -= _value;
                 balances[_next][_to] = _value.add(_oldToBalance);
             }
@@ -202,4 +204,6 @@ contract SumOfToken is ERC1155
             _next = _parent;
         }
     }
+
+// Administrativia
 }
