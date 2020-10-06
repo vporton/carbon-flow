@@ -111,6 +111,7 @@ contract SumOfToken is ERC1155
         }
     }
 
+    // Must be called after _recalculateBalanceOf().
     function _doTransferFromParents(address _from, address _to, uint256 _id, uint256 _value) internal {
         uint256 _parent = _id;
         do {
