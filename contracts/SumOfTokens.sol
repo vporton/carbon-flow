@@ -72,12 +72,12 @@ contract SumOfToken is ERC1155
 
     // FIXME
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
-        uint256 _oldBalance = _recalculateBalanceOf(_from, _id);
         uint256 _parentToken = parentToken[_id];
         bytes32 _userTokenAddr = userTokens[_from][_parentToken][_id];
         require(_userTokenAddr != 0);
         UserToken storage _userToken = userTokensObjects[_userTokenAddr];
-        if(_oldBalance <= _value) {
+        uint256 _oldBalance = parentToken[_id] != 0 ? _recalculateBalanceOf(_from, _id) : 0;
+        if(_oldBalance >= _value) {
             _oldBalance -= _value;
         } else {
             bytes32 _nextTokenAddr = _userToken.next;
