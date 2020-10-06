@@ -78,6 +78,8 @@ contract SumOfToken is ERC1155
 
     // Must be called after _recalculateBalanceOf().
     function _doTransferFromChilds(address _from, address _to, uint256 _id, uint256 _value) internal {
+        uint256 _remainingValue = _value;
+
         for (bytes32 _childAddr = userTokens[_from][_id];
              _childAddr != 0;
              _childAddr = userTokensObjects[_childAddr].next)
@@ -86,9 +88,9 @@ contract SumOfToken is ERC1155
 
             uint256 _oldBalance = balances[_childId][_from]; // balance was already recalculated.
 
-            if(_oldBalance >= _value) {
-                _oldBalance -= _value;
-            } else if(_value != 0) {
+            if(_oldBalance >= _remainingValue) {
+                _oldBalance -= _remainingValue;
+            } else if(_remainingValue != 0) {
                 UserToken storage _childToken = userTokensObjects[_childAddr];
 
                 bytes32 _nextTokenAddr = _childToken.next;
@@ -106,8 +108,10 @@ contract SumOfToken is ERC1155
                     userTokensObjects[_childToken.prev].next = _nextTokenAddr;
                 }
 
-                _doTransferFromChilds(_from, _to, _childId, _value - _oldBalance); // recursion
+                _doTransferFromChilds(_from, _to, _childId, _remainingValue); // recursion
             }
+        
+            _remainingValue -= _oldBalance;
         }
     }
 
