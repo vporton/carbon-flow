@@ -8,12 +8,6 @@ contract SumOfToken is ERC1155
     using SafeMath for uint256;
     using Address for address;
 
-    // linked list
-    struct ChildToken {
-        uint256 token;
-        bytes32 next;
-    }
-
     // double linked list
     struct UserToken {
         uint256 token;
