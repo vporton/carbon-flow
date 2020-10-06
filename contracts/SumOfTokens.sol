@@ -127,22 +127,42 @@ contract SumOfToken is ERC1155
         return balances[_id][_owner];
     }
 
+    function _updateUserTokens(address _to, uint256 _id, uint256 _value) internal {
+        uint256 _oldToBalance = balances[_id][_to];
+        if(!tokenBalancesNotUpdated[_id]) {
+            balances[_id][_to] = _value.add(_oldToBalance);
+        }
+
+        uint256 _parent = parentToken[_id];
+
+        // User received a new token:
+        if(_oldToBalance == 0) {
+            // Insert into the beginning of the double linked list:
+            UserToken memory _userToken = UserToken({token: _id, prev: 0, next: userTokens[_to][_parent]});
+            bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _id));
+            userTokensObjects[_userTokenAddr] = _userToken;
+            userTokens[_to][_parent] = _userTokenAddr;
+        }
+    }
+
     function _doMint(address _to, uint256 _id, uint256 _value) internal {
         // FIXME: check owner
 
         if(_value != 0) {
-            _doMintChilds(_to, _id, _value);
             _doMintParents(_to, _id, _value);
+            _doMintChilds(_to, _id, _value);
         }
     }
 
     // Must be called after _recalculateBalanceOf().
     function _doMintChilds(address _to, uint256 _id, uint256 _value) internal {
-        for (uint256 _childId = _id; // FIXME: not including itself
-             _childId != 0;
-             _childId = userTokensObjects[userTokensObjects[userTokens[_to][_childId]].next].token)
-        {
-            balances[_childId][_to] = _value.add(balances[_childId][_to]);
+        uint256 _childId = _id;
+        for(;;) {
+            bytes32 _tokenAddr = userTokens[_to][_childId]; // defined because parents were already processed
+            bytes32 _childAddr = userTokensObjects[_tokenAddr].next; // FIXME: does it exist?
+             if(_childAddr == 0) break;
+             _childId = userTokensObjects[_childAddr].token;
+            _updateUserTokens(_to, _childId, _value);
         }
     }
 
@@ -151,36 +171,18 @@ contract SumOfToken is ERC1155
         assert(_value != 0);
 
         uint256 _next = _id;
-        for(;;) {
-            uint256 _oldToBalance = balances[_next][_to];
-            if(!tokenBalancesNotUpdated[_next]) {
-                balances[_next][_to] = _value.add(_oldToBalance);
-            }
-
-            uint256 _parent = parentToken[_next];
-
-            if(_parent == 0) break;
-
-            // FIXME: also for childs
-            // User received a new token:
-            if(_oldToBalance == 0) {
-                // Insert into the beginning of the double linked list:
-                UserToken memory _userToken = UserToken({token: _next, prev: 0, next: userTokens[_to][_parent]});
-                bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _next));
-                userTokensObjects[_userTokenAddr] = _userToken;
-                userTokens[_to][_parent] = _userTokenAddr;
-            }
-
-            _next = _parent;
-        }
+        do {
+            _updateUserTokens(_to, _next, _value);
+            _next = parentToken[_next];
+        } while(_next != 0);
     }
 
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
         require(_recalculateBalanceOf(_from, _id) >= _value);
 
         if(_value != 0) {
-            _doTransferFromChilds(_from, _to, _id, _value);
             _doTransferFromParents(_from, _to, _id, _value);
+            _doTransferFromChilds(_from, _to, _id, _value);
         }
     }
 
@@ -192,13 +194,13 @@ contract SumOfToken is ERC1155
              _childAddr != 0;
              _childAddr = userTokensObjects[_childAddr].next)
         {
-            uint256 _childId = userTokensObjects[_childAddr].token;
+            uint256 _childId = userTokensObjects[_childAddr].token; // FIXME: defined?
 
             uint256 _oldBalance = balances[_childId][_from]; // balance was already recalculated.
 
             if(_oldBalance >= _remainingValue) {
                 balances[_childId][_from] -= _remainingValue;
-                balances[_childId][_to] = _remainingValue.add(balances[_childId][_to]);
+                _updateUserTokens(_to, _childId, _remainingValue);
                 break;
             } else if(_remainingValue != 0) {
                 UserToken storage _childToken = userTokensObjects[_childAddr];
@@ -207,7 +209,7 @@ contract SumOfToken is ERC1155
                 require(_nextTokenAddr != 0);
 
                 balances[_childId][_from] = 0;
-                balances[_childId][_to] = _remainingValue;
+                _updateUserTokens(_to, _childId, _remainingValue);
                 
                 UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
 
@@ -231,29 +233,11 @@ contract SumOfToken is ERC1155
         assert(_value != 0);
 
         uint256 _next = _id;
-        for(;;) {
-            uint256 _oldToBalance = balances[_next][_to];
-            if(!tokenBalancesNotUpdated[_next]) {
-                balances[_next][_from] -= _value;
-                balances[_next][_to] = _value.add(_oldToBalance);
-            }
-
-            uint256 _parent = parentToken[_next];
-
-            if(_parent == 0) break;
-
-            // FIXME: also for childs
-            // User received a new token:
-            if(_oldToBalance == 0) {
-                // Insert into the beginning of the double linked list:
-                UserToken memory _userToken = UserToken({token: _next, prev: 0, next: userTokens[_to][_parent]});
-                bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _next));
-                userTokensObjects[_userTokenAddr] = _userToken;
-                userTokens[_to][_parent] = _userTokenAddr;
-            }
-
-            _next = _parent;
-        }
+        do {
+            balances[_id][_from] -= _value;
+            _updateUserTokens(_to, _next, _value);
+            _next = parentToken[_next];
+        } while(_next != 0);
     }
 
     // TODO: metadata
