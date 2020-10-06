@@ -6,6 +6,7 @@ import "./ERC1155.sol";
 contract SumOfToken is ERC1155
 {
     using SafeMath for uint256;
+    using Address for address;
 
     // linked list
     struct ChildToken {
@@ -43,6 +44,52 @@ contract SumOfToken is ERC1155
             _balances[i] = _balanceOf(_owners[i], _ids[i]);
         }
         return _balances;
+    }
+
+    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external override {
+
+        require(_to != address(0x0), "_to must be non-zero.");
+        require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
+
+        _doTransferFrom(_from, _to, _id, _value);
+
+        // MUST emit event
+        emit TransferSingle(msg.sender, _from, _to, _id, _value);
+
+        // Now that the balance is updated and the event was emitted,
+        // call onERC1155Received if the destination is a contract.
+        if (_to.isContract()) {
+            _doSafeTransferAcceptanceCheck(msg.sender, _from, _to, _id, _value, _data);
+        }
+    }
+
+    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external override {
+
+        // MUST Throw on errors
+        require(_to != address(0x0), "destination address must be non-zero.");
+        require(_ids.length == _values.length, "_ids and _values array length must match.");
+        require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
+
+        for (uint256 i = 0; i < _ids.length; ++i) {
+            uint256 _id = _ids[i];
+            uint256 _value = _values[i];
+
+            _doTransferFrom(_from, _to, _id, _value);
+        }
+
+        // Note: instead of the below batch versions of event and acceptance check you MAY have emitted a TransferSingle
+        // event and a subsequent call to _doSafeTransferAcceptanceCheck in above loop for each balance change instead.
+        // Or emitted a TransferSingle event for each in the loop and then the single _doSafeBatchTransferAcceptanceCheck below.
+        // However it is implemented the balance changes and events MUST match when a check (i.e. calling an external contract) is done.
+
+        // MUST emit event
+        emit TransferBatch(msg.sender, _from, _to, _ids, _values);
+
+        // Now that the balances are updated and the events are emitted,
+        // call onERC1155BatchReceived if the destination is a contract.
+        if (_to.isContract()) {
+            _doSafeBatchTransferAcceptanceCheck(msg.sender, _from, _to, _ids, _values, _data);
+        }
     }
 
     // It does not matter that this function is inefficient:
