@@ -150,6 +150,7 @@ contract SumOfToken is ERC1155
 
             if(_oldBalance >= _remainingValue) {
                 balances[_childId][_from] -= _remainingValue;
+                balances[_childId][_to] = _remainingValue.add(balances[_childId][_to]);
                 break;
             } else if(_remainingValue != 0) {
                 UserToken storage _childToken = userTokensObjects[_childAddr];
@@ -158,6 +159,7 @@ contract SumOfToken is ERC1155
                 require(_nextTokenAddr != 0);
 
                 balances[_childId][_from] = 0;
+                balances[_childId][_to] = _remainingValue;
                 
                 UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
 
