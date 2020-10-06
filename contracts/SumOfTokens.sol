@@ -194,7 +194,7 @@ contract SumOfToken is ERC1155
              _childAddr != 0;
              _childAddr = userTokensObjects[_childAddr].next)
         {
-            uint256 _childId = userTokensObjects[_childAddr].token; // FIXME: defined?
+            uint256 _childId = userTokensObjects[_childAddr].token; // defined for the first loop iteration because parents were already processed
 
             uint256 _oldBalance = balances[_childId][_from]; // balance was already recalculated.
 
