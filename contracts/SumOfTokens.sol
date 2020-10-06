@@ -205,6 +205,8 @@ contract SumOfToken is ERC1155
         }
     }
 
+    // TODO: metadata
+
 // Administrativia
 
     function setTokenParent(uint256 _child, uint256 _parent) external {
