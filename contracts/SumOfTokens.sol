@@ -89,7 +89,7 @@ contract SumOfToken is ERC1155
             uint256 _oldBalance = balances[_childId][_from]; // balance was already recalculated.
 
             if(_oldBalance >= _remainingValue) {
-                _oldBalance -= _remainingValue;
+                balances[_childId][_from] -= _remainingValue;
                 break;
             } else if(_remainingValue != 0) {
                 UserToken storage _childToken = userTokensObjects[_childAddr];
