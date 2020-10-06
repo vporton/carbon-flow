@@ -71,13 +71,21 @@ contract SumOfToken is ERC1155
     }
 
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
+        require(_recalculateBalanceOf(_from, _id) >= _value);
+
+        _doTransferFromChilds(_from, _to, _id, _value);
+        _doTransferFromParents(_from, _to, _id, _value);
+    }
+
+    // Must be called after _recalculateBalanceOf().
+    function _doTransferFromChilds(address _from, address _to, uint256 _id, uint256 _value) internal {
         for (bytes32 _childAddr = userTokens[_from][_id];
              _childAddr != 0;
              _childAddr = userTokensObjects[_childAddr].next)
         {
             uint256 _childId = userTokensObjects[_childAddr].token;
 
-            uint256 _oldBalance = _recalculateBalanceOf(_from, _childId);
+            uint256 _oldBalance = _balanceOf(_from, _childId); // Balance was already recalculated.
 
             if(_oldBalance >= _value) {
                 _oldBalance -= _value;
@@ -99,9 +107,19 @@ contract SumOfToken is ERC1155
                     userTokensObjects[_childToken.prev].next = _nextTokenAddr;
                 }
 
-                _doTransferFrom(_from, _to, _childId, _value - _oldBalance); // recursion
+                _doTransferFromChilds(_from, _to, _childId, _value - _oldBalance); // recursion
             }
         }
-        balances[_id][_to] = _value.add(balances[_id][_to]);
+    }
+
+    function _doTransferFromParents(address _from, address _to, uint256 _id, uint256 _value) internal {
+        uint256 _parent = _id;
+        do {
+            if(tokenBalancesUpdated[_parent]) {
+                balances[_parent][_from] -= _value;
+                balances[_parent][_to] = _value.add(balances[_parent][_to]); 
+            }
+            _parent = parentToken[_parent];
+        } while(_parent != 0);
     }
 }
