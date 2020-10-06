@@ -22,7 +22,6 @@ contract SumOfToken is ERC1155
     }
 
     mapping (uint256 => uint256) parentToken;
-    mapping (bytes32 => ChildToken) public childTokenObjects;
 
     // token => updated
     mapping (uint256 => bool) tokenBalancesUpdated; // FIXME: negate?
