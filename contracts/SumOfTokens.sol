@@ -15,6 +15,10 @@ contract SumOfTokens is ERC1155
         bytes32 next;
     }
 
+    uint256 maxTokenId;
+
+    mapping (uint256 => address) tokenOwners;
+
     mapping (uint256 => uint256) parentToken;
 
     // token => !updated
@@ -140,8 +144,9 @@ contract SumOfTokens is ERC1155
     }
 
     function _doMint(address _to, uint256 _id, uint256 _value) internal {
-        // FIXME: check owner
-        // TODO: limit the sum
+        require(tokenOwners[_id] == msg.sender);
+
+        // TODO: Limit the _value from above.
 
         if(_value != 0) {
             _doMintParents(_to, _id, _value);
@@ -238,6 +243,11 @@ contract SumOfTokens is ERC1155
     // TODO: metadata
 
 // Administrativia
+
+    function newToken() external returns (uint256) {
+        tokenOwners[++maxTokenId] = msg.sender;
+        return maxTokenId;
+    }
 
     function setTokenParent(uint256 _child, uint256 _parent) external {
         uint256 _ancestor = _child;
