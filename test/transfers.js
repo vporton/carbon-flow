@@ -80,6 +80,11 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(result);
         }
+        let oldTotals = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.totalSupply(t);
+          oldTotals.push(result);
+        }
         // console.log("Mint");
         await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, [], {gasLimit: 1000000});
         const newToBalances = [];
@@ -87,8 +92,17 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           newToBalances.push(result);
         }
+        let newTotals = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.totalSupply(t);
+          newTotals.push(result);
+        }
         for(let i = 0; i < newToBalances.length; ++i) {
           const change = newToBalances[i].sub(oldToBalances[i]);
+          expect(change).to.equal(amount);
+        }
+        for(let i = 0; i < newTotals.length; ++i) {
+          const change = newTotals[i].sub(oldTotals[i]);
           expect(change).to.equal(amount);
         }
       } else {
@@ -106,6 +120,11 @@ describe("SumOfTokens", function() {
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(result);
+        }
+        let oldTotals = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.totalSupply(t);
+          oldTotals.push(result);
         }
         const amount = random.int(0, 10) == 0
           ? ethers.BigNumber.from('0')
@@ -127,13 +146,21 @@ describe("SumOfTokens", function() {
             const result = await sumOfTokens.balanceOf(to.address, t);
             newToBalances.push(result);
           }
-          for(let i = 0; i < newFromBalances.length; ++i) {
+          let newTotals = [];
+          for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+            const result = await sumOfTokens.totalSupply(t);
+            newTotals.push(result);
+          }
+            for(let i = 0; i < newFromBalances.length; ++i) {
             const change = oldFromBalances[i].sub(newFromBalances[i]);
             expect(change).to.equal(from.address != to.address ? amount : ethers.BigNumber.from(0));
           }
           for(let i = 0; i < newToBalances.length; ++i) {
             const change = newToBalances[i].sub(oldToBalances[i]);
             expect(change).to.equal(from.address != to.address ? amount : ethers.BigNumber.from(0));
+          }
+          for(let i = 0; i < newTotals.length; ++i) {
+            expect(newTotals[i]).to.equal(oldTotals[i]);
           }
         } else {
           async function mycall() {
@@ -145,6 +172,5 @@ describe("SumOfTokens", function() {
     }
 
     // TODO: Test batch mints and transfers.
-    // TODO: Test totalSupply.
   });
 });

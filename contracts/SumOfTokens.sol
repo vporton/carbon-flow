@@ -243,7 +243,10 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         if(_value != 0) {
             _updateUserTokens(_to, _id, _value);
-            totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
+            do {
+                totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
+                _id = parentToken[_id];
+            } while(_id != 0);
         }
     }
 
