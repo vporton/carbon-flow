@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: Apache-2.0	
 pragma solidity ^0.7.1;
 
+import '@nomiclabs/buidler/console.sol';
+
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
 
@@ -120,81 +122,6 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
     }
 
-    // It does not matter that this function is inefficient:
-    // It is called either from an external view or once per tokens tree change.
-    function _balanceOf(address _owner, uint256 _id) internal view returns (uint256 _balance) {
-        _balance = balances[_id][_owner];
-        for (bytes32 _childAddr = userTokens[_owner][_id];
-             _childAddr != 0;
-             _childAddr = userTokensObjects[_childAddr].next)
-        {
-            uint256 _childId = userTokensObjects[_childAddr].token;
-            _balance += _balanceOf(_owner, _childId); // recursion
-        }
-    }
-
-    function _updateUserTokens(address _to, uint256 _id, uint256 _value) internal {
-        uint256 _oldToBalance = balances[_id][_to];
-        balances[_id][_to] = _value.add(_oldToBalance);
-
-        uint256 _parent = parentToken[_id];
-
-        // User received a new token:
-        if(_oldToBalance == 0) {
-            // Insert into the beginning of the double linked list:
-            UserToken memory _userToken = UserToken({token: _id, prev: 0, next: userTokens[_to][_parent]});
-            bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _id));
-            userTokensObjects[_userTokenAddr] = _userToken;
-            userTokens[_to][_parent] = _userTokenAddr;
-        }
-    }
-
-    function _doMint(address _to, uint256 _id, uint256 _value) internal {
-        // TODO: Limit the _value from above.
-
-        _updateUserTokens(_to, _id, _value);
-        totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
-    }
-
-    // Returns how much have been transferred
-    function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal returns (uint256) {
-        uint256 _oldBalance = balances[_id][_from];
-
-        if(_oldBalance >= _value) {
-            balances[_id][_from] -= _value;
-            _updateUserTokens(_to, _id, _value);
-            return _value;
-        }
-
-        balances[_id][_from] = 0;
-        _updateUserTokens(_to, _id, _oldBalance);
-
-        uint256 _remainingValue = _value - _oldBalance;
-        bytes32 _childAddr = userTokens[_from][_id];
-        while(_remainingValue != 0) {
-            _childAddr = userTokensObjects[_childAddr].next;
-            uint256 _childId = userTokensObjects[_childAddr].token;
-
-            UserToken storage _childToken = userTokensObjects[_childAddr];
-
-            bytes32 _nextTokenAddr = _childToken.next;
-            if(_nextTokenAddr == 0) break;
-
-            UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
-
-            // Remove from user's list
-            if(_nextTokenAddr != 0) {
-                _nextToken.prev = _childToken.prev;
-            }
-            if(_childToken.prev != 0) {
-                userTokensObjects[_childToken.prev].next = _nextTokenAddr;
-            }
-
-            _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
-        }
-        return _remainingValue;
-    }
-
 // IERC1155Views
 
     mapping (uint256 => uint256) public totalSupplyImpl;
@@ -248,6 +175,85 @@ contract SumOfTokens is ERC1155, IERC1155Views
         require(owner == msg.sender);
 
         parentToken[_child] = _parent;
+    }
+
+// Internal
+
+    // It does not matter that this function is inefficient:
+    // It is called either from an external view or once per tokens tree change.
+    function _balanceOf(address _owner, uint256 _id) internal view returns (uint256 _balance) {
+        _balance = balances[_id][_owner];
+        for (bytes32 _childAddr = userTokens[_owner][_id];
+             _childAddr != 0;
+             _childAddr = userTokensObjects[_childAddr].next)
+        {
+            uint256 _childId = userTokensObjects[_childAddr].token;
+            _balance += _balanceOf(_owner, _childId); // recursion
+        }
+    }
+
+    function _updateUserTokens(address _to, uint256 _id, uint256 _value) internal {
+        uint256 _oldToBalance = balances[_id][_to];
+        balances[_id][_to] = _value.add(_oldToBalance);
+        // console.log("Solidity:", _to, balances[_id][_to]);
+
+        uint256 _parent = parentToken[_id];
+
+        // User received a new token:
+        if(_oldToBalance == 0) {
+            // Insert into the beginning of the double linked list:
+            UserToken memory _userToken = UserToken({token: _id, prev: 0, next: userTokens[_to][_parent]});
+            bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _id));
+            userTokensObjects[_userTokenAddr] = _userToken;
+            userTokens[_to][_parent] = _userTokenAddr;
+        }
+    }
+
+    function _doMint(address _to, uint256 _id, uint256 _value) internal {
+        // TODO: Limit the _value from above.
+
+        _updateUserTokens(_to, _id, _value);
+        totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
+    }
+
+    // Returns how much have been transferred
+    function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal returns (uint256) {
+        uint256 _oldBalance = balances[_id][_from];
+
+        if(_oldBalance >= _value) {
+            balances[_id][_from] -= _value;
+            _updateUserTokens(_to, _id, _value);
+            return _value;
+        }
+
+        balances[_id][_from] = 0;
+        _updateUserTokens(_to, _id, _oldBalance);
+
+        uint256 _remainingValue = _value - _oldBalance;
+        bytes32 _childAddr = userTokens[_from][_id];
+        while(_remainingValue != 0) {
+            // FIXME: something wrong here
+            _childAddr = userTokensObjects[_childAddr].next;
+            uint256 _childId = userTokensObjects[_childAddr].token;
+
+            UserToken storage _childToken = userTokensObjects[_childAddr];
+
+            bytes32 _nextTokenAddr = _childToken.next;
+            if(_nextTokenAddr == 0) break;
+
+            UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
+
+            // Remove from user's list
+            if(_nextTokenAddr != 0) {
+                _nextToken.prev = _childToken.prev;
+            }
+            if(_childToken.prev != 0) {
+                userTokensObjects[_childToken.prev].next = _nextTokenAddr;
+            }
+
+            _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
+        }
+        return _remainingValue;
     }
 
 // Events
