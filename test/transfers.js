@@ -62,7 +62,7 @@ describe("SumOfTokens", function() {
     for(let iteration = 0; iteration < 1000; ++iteration) {
       console.log('iteration', iteration);
       const token = tokens[random.int(0, tokens.length - 1)];
-      const amount = ethers.utils.parseEther(String(random.float(0, 1000.0)));
+      const amount = ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
       if(random.bool() >= 0.5) {
         // Mint
         const to = wallets[random.int(0, wallets.length -1)];
