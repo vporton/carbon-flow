@@ -70,7 +70,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
     }
 
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external override {
-        require(_id != 0, "destination address must be non-zero.");
+        require(_id != 0, "non-existing token.");
 
         require(_to != address(0), "_to must be non-zero.");
         require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value, "Not appoved to transfer");
@@ -107,7 +107,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         for (uint256 i = 0; i < _ids.length; ++i) {
             uint256 _id = _ids[i];
-            require(_id != 0);
+            require(_id != 0, "non-existing token.");
             uint256 _value = _values[i];
 
             if(_value != 0) {
