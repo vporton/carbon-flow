@@ -135,10 +135,12 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
-            return 0;
+            balances[_id][_to] += _value;
+            return _value;
         }
 
         balances[_id][_from] = 0;
+        balances[_id][_to] += _oldBalance;
 
         uint256 _remainingValue = _value - _oldBalance;
         bytes32 _childAddr = userTokens[_from][_id];
