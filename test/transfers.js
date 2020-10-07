@@ -4,7 +4,7 @@ const { expect } = require("chai");
 const random = require('random');
 const seedrandom = require('seedrandom');
 
-random.use(seedrandom('rftg'));
+// random.use(seedrandom('rftg'));
 
 // const bre = require("@nomiclabs/buidler");
 function range(size, startAt = 0) {
