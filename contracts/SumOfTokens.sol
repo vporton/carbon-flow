@@ -202,7 +202,9 @@ contract SumOfTokens is ERC1155, IERC1155Views
              _childAddr = userTokensObjects[_childAddr].next)
         {
             uint256 _childId = userTokensObjects[_childAddr].token;
-            _balance += _balanceOf(_owner, _childId); // recursion
+            uint256 _childBalance = _balanceOf(_owner, _childId); // recursion
+            assert(_childBalance != 0); // We don't keep zero-value tokens in the linked list.
+            _balance += _childBalance;
         }
     }
 
