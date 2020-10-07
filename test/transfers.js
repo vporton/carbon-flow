@@ -88,7 +88,7 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(ethers.BigNumber.from(result));
         }
-        if(oldFromBalances[0] >= amount) {
+        if(oldFromBalances[0].gte(amount)) {
           await execAndWait(sumOfTokens.connect(from), sumOfTokens.safeTransferFrom, from.address, to.address, token, amount, []);
 
           let newFromBalances = [];
