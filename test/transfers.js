@@ -69,9 +69,11 @@ describe("SumOfTokens", function() {
     for(let iteration = 0; iteration < 1000; ++iteration) {
       // console.log('iteration', iteration);
       const token = tokens[random.int(0, tokens.length - 1)];
-      const amount = ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
       if(random.bool()) {
         // Mint
+        const amount = random.int(0, 10) == 0
+          ? ethers.BigNumber.from('0')
+          : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
         const to = wallets[random.int(0, wallets.length -1)];
         let oldToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
@@ -105,6 +107,11 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(result);
         }
+        const amount = random.int(0, 10) == 0
+          ? ethers.BigNumber.from('0')
+          : random.bool()
+          ? oldFromBalances[0]
+          : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
         if(oldFromBalances[0].gte(amount)) {
           // console.log("Transfer");
           const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
@@ -137,7 +144,6 @@ describe("SumOfTokens", function() {
       }
     }
 
-    // TODO: Test transfer of zero tokens, test transfer entire account balance.
     // TODO: Test batch mints and transfers.
     // TODO: Test totalSupply.
   });
