@@ -52,8 +52,8 @@ describe("SumOfTokens", function() {
       const token = tokens[Math.floor(Math.random() * tokens.length)];
       const amount = utils.parseEther(Math.random() * 1000.0);
       if(Math.random() >= 0.5) {
-        const to = wallets[Math.floor(Math.random() * wallets.length)];
         const oldBalance = await sumOfTokens.balanceOf(to.address);
+        const to = wallets[Math.floor(Math.random() * wallets.length)];
         await sumOfTokens.mint(to.address, token, amount, []);
         const newBalance = await sumOfTokens.balanceOf(to.address);
         expect(newBalance - oldBalance).to.equal(amount);

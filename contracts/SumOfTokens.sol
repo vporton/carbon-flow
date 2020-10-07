@@ -2,8 +2,9 @@
 pragma solidity ^0.7.1;
 
 import "./ERC1155.sol";
+import "./IERC1155Views.sol";
 
-contract SumOfTokens is ERC1155
+contract SumOfTokens is ERC1155, IERC1155Views
 {
     using SafeMath for uint256;
     using Address for address;
@@ -125,6 +126,7 @@ contract SumOfTokens is ERC1155
         // TODO: Limit the _value from above.
 
         balances[_id][_to] = _value.add(balances[_id][_to]);
+        totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
     }
 
     // Returns how much have been transferred
@@ -166,11 +168,46 @@ contract SumOfTokens is ERC1155
 
     // TODO: metadata
 
+// IERC1155Views
+
+    mapping (uint256 => uint256) public totalSupplyImpl;
+    mapping (uint256 => string) public nameImpl;
+    mapping (uint256 => string) public symbolImpl;
+    mapping (uint256 => string) public uriImpl;
+
+    function totalSupply(uint256 _id) external override view returns (uint256) {
+        return totalSupplyImpl[_id];
+    }
+
+    function name(uint256 _id) external override view returns (string memory) {
+        return nameImpl[_id];
+    }
+
+    function symbol(uint256 _id) external override view returns (string memory) {
+        return symbolImpl[_id];
+    }
+
+    function decimals(uint256) external override pure returns (uint8) {
+        return 18;
+    }
+
+    function uri(uint256 _id) external override view returns (string memory) {
+        return uriImpl[_id];
+    }
+
 // Administrativia
 
-    function newToken() external returns (uint256) {
+    function newToken(string calldata _name, string calldata _symbol, string calldata _uri) external returns (uint256) {
         tokenOwners[++maxTokenId] = msg.sender;
+        nameImpl[maxTokenId] = _name;
+        symbolImpl[maxTokenId] = _symbol;
+        uriImpl[maxTokenId] = _uri;
         return maxTokenId;
+    }
+
+    // Intentially no setTokenName() and setTokenSymbol()
+    function setTokenUri(uint256 _id, string calldata _uri) external {
+        uriImpl[_id] = _uri;
     }
 
     function setTokenParent(uint256 _child, uint256 _parent) external {
