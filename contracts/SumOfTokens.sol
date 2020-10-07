@@ -251,8 +251,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         uint256 _oldBalance = balances[_id][_from];
 
-        bytes32 _ourAddr = userTokens[_from][_id];
-        bytes32 _childAddr = _ourAddr;
+        bytes32 _childAddr = userTokens[_from][_id];
 
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
@@ -282,22 +281,24 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
         if(!_remained) {
             // Remove from user's list
-            UserToken storage _token = userTokensObjects[_ourAddr];
-            _prevAddr = _token.prev;
-            if(_prevAddr != 0) {
-                userTokensObjects[_prevAddr].next = _token.next;
-            } else {
-                userTokens[_from][_id] = _token.next;
-            }
-            bytes32 _nextAddr = _token.next;
-            if(_nextAddr != 0) {
-                userTokensObjects[_nextAddr].prev = _prevAddr;
+            uint256 _parent = parentToken[_id];
+            if(_parent != 0) {
+                bytes32 _ourAddr = userTokens[_from][_parent];
+                UserToken storage _token = userTokensObjects[_ourAddr];
+                if(_token.prev != 0) {
+                    userTokensObjects[_prevAddr].next = _token.next;
+                } else {
+                    userTokens[_from][_parent] = _token.next;
+                }
+                if(_token.next != 0) {
+                    userTokensObjects[_token.next].prev = _token.prev;
+                }
             }
         } else {
             assert(_balanceOf(_from, _id) != 0);
         }
 
-        return (_value - _remainingValue, _remained);
+        _transferred = _value - _remainingValue;
     }
 
 // Events
