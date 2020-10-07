@@ -128,8 +128,8 @@ describe("SumOfTokens", function() {
         }
         // TODO: The probability of interesting events may be too low.
         async function randomThreshold() { // to test all "special" values (works only for two-levels tree!)
-          let threshold = ethers.BigNumber.from(0);
-          let totalChildsBalance = ethers.BigNumber.from(0);
+          let threshold = ethers.BigNumber.from('0');
+          let totalChildsBalance = ethers.BigNumber.from('0');
           for(let i = 0; i < tokens.length; ++i) {
             if(tree[tokens[i]] === oldFromBalances[0]) {
               const childBalance = await sumOfTokens.balanceOf(to.address, tokens[i]); // inefficent
@@ -140,7 +140,7 @@ describe("SumOfTokens", function() {
             }
           }
           if(random.bool()) {
-            threshold += oldFromBalances[0] - totalChildsBalance; // add "our own" balance
+            threshold = threshold.add(oldFromBalances[0].sub(totalChildsBalance)); // add "our own" balance
           }
           return threshold;
         }
