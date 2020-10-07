@@ -231,7 +231,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         uint256 _remainingValue = _value - _oldBalance;
         bytes32 _childAddr = userTokens[_from][_id];
         bytes32 _prevAddr = 0;
-        while(_remainingValue != 0) {
+        while(_childAddr != 0 && _remainingValue != 0) {
             UserToken storage _childToken = userTokensObjects[_childAddr];
             uint256 _childId = _childToken.token;
             bytes32 _nextTokenAddr = _childToken.next;
