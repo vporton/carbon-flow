@@ -124,11 +124,10 @@ describe("SumOfTokens", function() {
             const result = await sumOfTokens.balanceOf(to.address, t);
             newToBalances.push(result);
           }
-          // TODO
-          // for(let i = 0; i < newFromBalances.length; ++i) {
-          //   const change = oldFromBalances[i].sub(newFromBalances[i]);
-          //   expect(change).to.equal(amount);
-          // }
+          for(let i = 0; i < newFromBalances.length; ++i) {
+            const change = oldFromBalances[i].sub(newFromBalances[i]);
+            expect(change).to.equal(amount);
+          }
           for(let i = 0; i < newToBalances.length; ++i) {
             const change = newToBalances[i].sub(oldToBalances[i]);
             expect(change).to.equal(amount);
