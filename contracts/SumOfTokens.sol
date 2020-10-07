@@ -234,10 +234,9 @@ contract SumOfTokens is ERC1155, IERC1155Views
         while(_remainingValue != 0) {
             UserToken storage _childToken = userTokensObjects[_childAddr];
             uint256 _childId = _childToken.token;
+            bytes32 _nextTokenAddr = _childToken.next;
 
             _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
-
-            bytes32 _nextTokenAddr = _childToken.next;
 
             // Remove from user's list
             if(_prevAddr != 0) {
