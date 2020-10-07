@@ -51,7 +51,7 @@ describe("SumOfTokens", function() {
     for(let i = 0; i < 10; ++i) {
       const wallet0 = ethers.Wallet.createRandom();
       const wallet = wallet0.connect(ethers.provider);
-      const tx = await owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('100')}); // provide gas
+      const tx = await owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('1')}); // provide gas
       await ethers.provider.getTransactionReceipt(tx.hash);
       wallets.push(wallet);
     }
@@ -71,7 +71,13 @@ describe("SumOfTokens", function() {
           oldToBalances.push(result);
         }
         console.log("Mint");
-        await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, [], {gasLimit: 1000000});
+        try {
+          await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, [], {gasLimit: 1000000});
+        }
+        catch(e) {
+          console.log(e);
+          return;
+        }
         const newToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
@@ -99,8 +105,14 @@ describe("SumOfTokens", function() {
         }
         if(oldFromBalances[0].gte(amount) && from.address != to.address) { // FIXME: remove inequality
           console.log("Transfer");
-          const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
-          await ethers.provider.getTransactionReceipt(tx.hash);
+          try {
+            const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
+            await ethers.provider.getTransactionReceipt(tx.hash);
+          }
+          catch(e) {
+            console.log(e);
+            return;
+          }  
     
           let newFromBalances = [];
           for(let t = token; typeof t != 'undefined'; t = tree[t]) {
