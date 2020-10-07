@@ -21,9 +21,6 @@ contract SumOfTokens is ERC1155
 
     mapping (uint256 => uint256) public parentToken;
 
-    // token => !updated
-    mapping (uint256 => bool) public tokenBalancesNotUpdated;
-
     // user => (parent => obj)
     mapping (address => mapping (uint256 => bytes32)) userTokens;
 
@@ -68,7 +65,7 @@ contract SumOfTokens is ERC1155
         require(_to != address(address(0)), "_to must be non-zero.");
         require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
 
-        _doTransferFrom(_from, _to, _id, _value);
+        require(_doTransferFrom(_from, _to, _id, _value) == _value);
 
         // MUST emit event
         emit TransferSingle(msg.sender, _from, _to, _id, _value);
@@ -92,7 +89,7 @@ contract SumOfTokens is ERC1155
             require(_id != 0);
             uint256 _value = _values[i];
 
-            _doTransferFrom(_from, _to, _id, _value);
+            require(_doTransferFrom(_from, _to, _id, _value) == _value);
         }
 
         // Note: instead of the below batch versions of event and acceptance check you MAY have emitted a TransferSingle
@@ -124,138 +121,47 @@ contract SumOfTokens is ERC1155
         return _balance;
     }
 
-    function _recalculateBalanceOf(address _owner, uint256 _id) internal returns (uint256) {
-        require(_id != 0);
-
-        if(tokenBalancesNotUpdated[_id]) {
-            uint256 _balance = 0;
-            for (bytes32 _childAddr = userTokens[_owner][_id];
-                _childAddr != 0;
-                _childAddr = userTokensObjects[_childAddr].next)
-            {
-                uint256 _childId = userTokensObjects[_childAddr].token;
-                _balance += _recalculateBalanceOf(_owner, _childId); // recursion
-            }
-            balances[_id][_owner] = _balance;
-            tokenBalancesNotUpdated[_id] = false;
-            return _balance;
-        }
-        return balances[_id][_owner];
-    }
-
-    function _updateUserTokens(address _to, uint256 _id, uint256 _value) internal {
-        uint256 _oldToBalance = balances[_id][_to];
-        if(!tokenBalancesNotUpdated[_id]) {
-            balances[_id][_to] = _value.add(_oldToBalance);
-        }
-
-        uint256 _parent = parentToken[_id];
-
-        // User received a new token:
-        if(_oldToBalance == 0) {
-            // Insert into the beginning of the double linked list:
-            UserToken memory _userToken = UserToken({token: _id, prev: 0, next: userTokens[_to][_parent]});
-            bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _id));
-            userTokensObjects[_userTokenAddr] = _userToken;
-            userTokens[_to][_parent] = _userTokenAddr;
-        }
-    }
-
     function _doMint(address _to, uint256 _id, uint256 _value) internal {
-        require(tokenOwners[_id] == msg.sender);
-
         // TODO: Limit the _value from above.
 
-        if(_value != 0) {
-            _doMintParents(_to, _id, _value);
-            _doMintChilds(_to, _id, _value);
-        }
+        balances[_id][_to] = _value.add(balances[_id][_to]);
     }
 
-    // Must be called after _recalculateBalanceOf().
-    function _doMintChilds(address _to, uint256 _id, uint256 _value) internal {
-        uint256 _childId = _id;
-        for(;;) {
-            bytes32 _tokenAddr = userTokens[_to][_childId]; // defined for the first loop iteration because parents were already processed
-            bytes32 _childAddr = userTokensObjects[_tokenAddr].next; // FIXME: does it exist?
-             if(_childAddr == 0) break;
-             _childId = userTokensObjects[_childAddr].token;
-            _updateUserTokens(_to, _childId, _value);
-        }
-    }
+    // Returns how much have been transferred
+    function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal returns (uint256) {
+        uint256 _oldBalance = balances[_id][_from];
 
-    // Must be called after _recalculateBalanceOf().
-    function _doMintParents(address _to, uint256 _id, uint256 _value) internal {
-        assert(_value != 0);
-
-        uint256 _next = _id;
-        do {
-            _updateUserTokens(_to, _next, _value);
-            _next = parentToken[_next];
-        } while(_next != 0);
-    }
-
-    function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal {
-        require(_recalculateBalanceOf(_from, _id) >= _value);
-
-        if(_value != 0) {
-            _doTransferFromParents(_from, _to, _id, _value);
-            _doTransferFromChilds(_from, _to, _id, _value);
-        }
-    }
-
-    // Must be called after _recalculateBalanceOf().
-    function _doTransferFromChilds(address _from, address _to, uint256 _id, uint256 _value) internal {
-        uint256 _remainingValue = _value;
-
-        for (bytes32 _childAddr = userTokens[_from][_id];
-             _childAddr != 0;
-             _childAddr = userTokensObjects[_childAddr].next)
-        {
-            uint256 _childId = userTokensObjects[_childAddr].token; // defined for the first loop iteration because parents were already processed
-
-            uint256 _oldBalance = balances[_childId][_from]; // balance was already recalculated.
-
-            if(_oldBalance >= _remainingValue) {
-                balances[_childId][_from] -= _remainingValue;
-                _updateUserTokens(_to, _childId, _remainingValue);
-                break;
-            } else if(_remainingValue != 0) {
-                UserToken storage _childToken = userTokensObjects[_childAddr];
-
-                bytes32 _nextTokenAddr = _childToken.next;
-                require(_nextTokenAddr != 0);
-
-                balances[_childId][_from] = 0;
-                _updateUserTokens(_to, _childId, _remainingValue);
-                
-                UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
-
-                // Remove from user's list
-                if(_nextTokenAddr != 0) {
-                    _nextToken.prev = _childToken.prev;
-                }
-                if(_childToken.prev != 0) {
-                    userTokensObjects[_childToken.prev].next = _nextTokenAddr;
-                }
-
-                _doTransferFromChilds(_from, _to, _childId, _remainingValue); // recursion
-            }
-        
-            _remainingValue -= _oldBalance;
-        }
-    }
-
-    // Must be called after _recalculateBalanceOf().
-    function _doTransferFromParents(address _from, address _to, uint256 _id, uint256 _value) internal {
-        assert(_value != 0);
-
-        uint256 _next = _id;
-        do {
+        if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
-            _updateUserTokens(_to, _next, _value);
-            _next = parentToken[_next];
-        } while(_next != 0);
+            return 0;
+        }
+
+        balances[_id][_from] = 0;
+
+        uint256 _remainingValue = _value - _oldBalance;
+        bytes32 _childAddr = userTokens[_from][_id];
+        while(_remainingValue != 0) {
+            _childAddr = userTokensObjects[_childAddr].next;
+            uint256 _childId = userTokensObjects[_childAddr].token;
+
+            UserToken storage _childToken = userTokensObjects[_childAddr];
+
+            bytes32 _nextTokenAddr = _childToken.next;
+            if(_nextTokenAddr == 0) break;
+
+            UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
+
+            // Remove from user's list
+            if(_nextTokenAddr != 0) {
+                _nextToken.prev = _childToken.prev;
+            }
+            if(_childToken.prev != 0) {
+                userTokensObjects[_childToken.prev].next = _nextTokenAddr;
+            }
+
+            _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
+        }
+        return _remainingValue;
     }
 
     // TODO: metadata
@@ -270,21 +176,6 @@ contract SumOfTokens is ERC1155
     function setTokenParent(uint256 _child, uint256 _parent) external {
         require(tokenOwners[_parent] == msg.sender);
 
-        uint256 _ancestor = _child;
-        // if(_ancestor == parent) return; // TODO
-        for(;;) {
-            _ancestor = parentToken[_child];
-            if(_ancestor == 0) break;
-            tokenBalancesNotUpdated[_ancestor] = true;
-        }
-        
         parentToken[_child] = _parent;
-        _ancestor = _parent;
-        for(;;) {
-            require(_ancestor != _child); // no loops
-            tokenBalancesNotUpdated[_ancestor] = true;
-            _ancestor = parentToken[_child];
-            if(_ancestor == 0) break;
-        }
     }
 }
