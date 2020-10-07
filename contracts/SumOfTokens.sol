@@ -207,6 +207,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
     }
 
     function _updateUserTokens(address _to, uint256 _id, uint256 _value) internal {
+        assert(_value != 0);
+
         uint256 _oldToBalance = balances[_id][_to];
 
         balances[_id][_to] = _value.add(_oldToBalance);
@@ -228,8 +230,10 @@ contract SumOfTokens is ERC1155, IERC1155Views
     function _doMint(address _to, uint256 _id, uint256 _value) internal {
         // TODO: Limit the _value from above.
 
-        _updateUserTokens(_to, _id, _value);
-        totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
+        if(_value != 0) {
+            _updateUserTokens(_to, _id, _value);
+            totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
+        }
     }
 
     // Returns how much have been transferred
@@ -249,7 +253,9 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
 
         balances[_id][_from] = 0;
-        _updateUserTokens(_to, _id, _oldBalance);
+        if(_oldBalance != 0) {
+            _updateUserTokens(_to, _id, _oldBalance);
+        }
 
         uint256 _remainingValue = _value - _oldBalance;
         bytes32 _prevAddr = 0;
