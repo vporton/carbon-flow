@@ -209,6 +209,10 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
     }
 
+    function _userTokenAddress(address _user, uint256 _parent, uint256 _id) internal pure returns(bytes32) {
+        return keccak256(abi.encodePacked(_user, _parent, _id));
+    }
+
     function _updateUserTokens(address _to, uint256 _id, uint256 _value) internal {
         assert(_value != 0);
 
@@ -225,7 +229,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
             // Insert into the beginning of the double linked list:
             bytes32 _nextAddr = userTokens[_to][_parent];
             UserToken memory _userToken = UserToken({token: _id, next: _nextAddr, prev: 0});
-            bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _parent, _id));
+            bytes32 _userTokenAddr = _userTokenAddress(_to, _parent, _id);
             userTokensObjects[_userTokenAddr] = _userToken;
             if(_nextAddr != 0) {
                 userTokensObjects[_nextAddr].prev = _userTokenAddr;
@@ -253,40 +257,43 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         bytes32 _childAddr = userTokens[_from][_id];
 
+        uint256 _remainingValue; // how much not succeeded to transfer (TODO: better explanation)
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
             _updateUserTokens(_to, _id, _value);
-            return (_value, _oldBalance != _value);
-        }
-
-        balances[_id][_from] = 0;
-        if(_oldBalance != 0) {
-            _updateUserTokens(_to, _id, _oldBalance);
-        }
-
-        uint256 _remainingValue = _value - _oldBalance;
-        bytes32 _prevAddr = 0;
-        _remained = false;
-        while(_childAddr != 0 && _remainingValue != 0) {
-            UserToken storage _childToken = userTokensObjects[_childAddr];
-
-            (uint256 _childTransferred, bool _childRemained) = _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
-            if(_childRemained) {
-                _remained = true;
+            _transferred = _value;
+            _remainingValue = 0;
+            _remained = _oldBalance != _value;
+        } else {
+            balances[_id][_from] = 0;
+            if(_oldBalance != 0) {
+                _updateUserTokens(_to, _id, _oldBalance);
             }
-            _remainingValue -= _childTransferred;
 
-            _prevAddr = _childAddr;
-            _childAddr = _childToken.next;
+            _remainingValue = _value - _oldBalance;
+            bytes32 _prevAddr = 0;
+            _remained = false;
+            while(_childAddr != 0 && _remainingValue != 0) {
+                UserToken storage _childToken = userTokensObjects[_childAddr];
+
+                (uint256 _childTransferred, bool _childRemained) = _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
+                if(_childRemained) {
+                    _remained = true;
+                }
+                _remainingValue -= _childTransferred;
+
+                _prevAddr = _childAddr;
+                _childAddr = _childToken.next;
+            }
         }
         if(!_remained) {
             // Remove from user's list
             uint256 _parent = parentToken[_id];
             if(_parent != 0) {
-                bytes32 _ourAddr = userTokens[_from][_parent];
+                bytes32 _ourAddr = _userTokenAddress(_from, _parent, _id);
                 UserToken storage _token = userTokensObjects[_ourAddr];
                 if(_token.prev != 0) {
-                    userTokensObjects[_prevAddr].next = _token.next;
+                    userTokensObjects[_token.prev].next = _token.next;
                 } else {
                     userTokens[_from][_parent] = _token.next;
                 }
@@ -295,7 +302,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
                 }
             }
         } else {
-            assert(_balanceOf(_from, _id) != 0);
+            assert(_balanceOf(_from, _id) != 0); // FIXME: slow
         }
 
         _transferred = _value - _remainingValue;

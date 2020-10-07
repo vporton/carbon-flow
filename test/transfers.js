@@ -110,7 +110,7 @@ describe("SumOfTokens", function() {
         const amount = random.int(0, 10) == 0
           ? ethers.BigNumber.from('0')
           : random.bool()
-          ? oldFromBalances[0]
+          ? oldFromBalances[0] // TODO: other thresholds!
           : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
         if(oldFromBalances[0].gte(amount)) {
           // console.log("Transfer");
