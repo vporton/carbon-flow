@@ -57,7 +57,7 @@ describe("SumOfTokens", function() {
         await sumOfTokens.mint(to.address, token, amount, []);
         const newBalance = await sumOfTokens.balanceOf(to.address);
         expect(newBalance - oldBalance).to.equal(amount);
-          await verifyBalances(to.address);
+        await verifyBalances(to.address);
       }
     }
 
