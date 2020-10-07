@@ -126,10 +126,28 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.totalSupply(t);
           oldTotals.push(result);
         }
+        // TODO: The probability of interesting events may be too low.
+        async function randomThreshold() { // to test all "special" values (works only for two-levels tree!)
+          let threshold = 0;
+          let totalChildsBalance = 0;
+          for(let i = 0; i < tokens.length; ++i) {
+            if(tree[tokens[i]] === oldFromBalances[0]) {
+              const childBalance = await sumOfTokens.balanceOf(to.address, tokens[i]); // inefficent
+              totalChildsBalance += childBalance;
+              if(random.bool()) {
+                threshold += childBalance;
+              }
+            }
+          }
+          if(random.bool()) {
+            threshold += oldFromBalances[0] - totalChildsBalance; // add "our own" balance
+          }
+          return threshold;
+        }
         const amount = random.int(0, 10) == 0
           ? ethers.BigNumber.from('0')
           : random.bool()
-          ? oldFromBalances[0] // TODO: other thresholds!
+          ? await randomThreshold()
           : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
         if(oldFromBalances[0].gte(amount)) {
           // console.log("Transfer");
