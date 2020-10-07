@@ -59,12 +59,12 @@ describe("SumOfTokens", function() {
 
     for(let iteration = 0; iteration < 1000; ++iteration) {
       const token = tokens[Math.floor(Math.random() * tokens.length)];
-      const amount = ethers.utils.parseEther(Math.random() * 1000.0);
+      const amount = ethers.utils.parseEther(String(Math.random() * 1000.0));
       if(Math.random() >= 0.5) {
-        const oldBalance = await sumOfTokens.balanceOf(to.address);
         const to = wallets[Math.floor(Math.random() * wallets.length)];
+        const oldBalance = await sumOfTokens.balanceOf(to.address, token);
         await sumOfTokens.mint(to.address, token, amount, []);
-        const newBalance = await sumOfTokens.balanceOf(to.address);
+        const newBalance = await sumOfTokens.balanceOf(to.address, token);
         expect(newBalance - oldBalance).to.equal(amount);
         await verifyBalances(to.address);
       }
