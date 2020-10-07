@@ -56,19 +56,19 @@ describe("SumOfTokens", function() {
       const amount = ethers.utils.parseEther(String(Math.random() * 1000.0));
       if(Math.random() >= 0.5) {
         const to = wallets[Math.floor(Math.random() * wallets.length)];
-        let oldBalances = [];
+        let oldToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
-          oldBalances.push(ethers.BigNumber.from(result));
+          oldToBalances.push(ethers.BigNumber.from(result));
         }
         await execAndWait(sumOfTokens, sumOfTokens.mint, to.address, token, amount, []);
-        const newBalances = [];
+        const newToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
-          newBalances.push(ethers.BigNumber.from(result));
+          newToBalances.push(ethers.BigNumber.from(result));
         }
-        for(let i = 0; i < newBalances.length; ++i) {
-          const change = newBalances[i].sub(oldBalances[i]);
+        for(let i = 0; i < newToBalances.length; ++i) {
+          const change = newToBalances[i].sub(oldToBalances[i]);
           expect(change).to.equal(amount);
         }
       }
