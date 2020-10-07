@@ -193,13 +193,15 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
     function _updateUserTokens(address _to, uint256 _id, uint256 _value) internal {
         uint256 _oldToBalance = balances[_id][_to];
+
         balances[_id][_to] = _value.add(_oldToBalance);
-        // console.log("Solidity:", _to, balances[_id][_to]);
+
+        if(_oldToBalance != 0) return;
 
         uint256 _parent = parentToken[_id];
 
         // User received a new token:
-        if(_oldToBalance == 0) {
+        if(_parent != 0) {
             // Insert into the beginning of the double linked list:
             UserToken memory _userToken = UserToken({token: _id, next: userTokens[_to][_parent]});
             bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _parent, _id));
@@ -235,8 +237,9 @@ contract SumOfTokens is ERC1155, IERC1155Views
             UserToken storage _childToken = userTokensObjects[_childAddr];
             uint256 _childId = _childToken.token;
             bytes32 _nextTokenAddr = _childToken.next;
+            // console.log(_id, _childId, userTokensObjects[_nextTokenAddr].token);
 
-            _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
+            // _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
 
             // Remove from user's list
             if(_prevAddr != 0) {
