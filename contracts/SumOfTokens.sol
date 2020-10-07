@@ -234,7 +234,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
             _updateUserTokens(_to, _id, _value);
-            return (_value, _oldBalance > _value || _childAddr != 0);
+            return (_value, _oldBalance != _value || _childAddr != 0);
         }
 
         balances[_id][_from] = 0;
