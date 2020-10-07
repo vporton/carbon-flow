@@ -215,7 +215,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         balances[_id][_to] = _value.add(_oldToBalance);
 
-        if(_oldToBalance != 0) return;
+        if(_oldToBalance != 0) return; // Token already present in the list.
 
         uint256 _parent = parentToken[_id];
 
@@ -275,7 +275,9 @@ contract SumOfTokens is ERC1155, IERC1155Views
                 } else {
                     userTokens[_from][_id] = _childToken.next;
                 }
-            }
+            }/* else {
+                assert(_balanceOf(_from, _id) != 0);
+            }*/
 
             _prevAddr = _childAddr;
             _childAddr = _childToken.next;
