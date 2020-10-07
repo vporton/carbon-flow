@@ -62,7 +62,7 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(ethers.BigNumber.from(result));
         }
-        await execAndWait(sumOfTokens, sumOfTokens.mint, to.address, token, amount, []);
+        await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, []);
         const newToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
@@ -86,7 +86,7 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(ethers.BigNumber.from(result));
         }
-        await execAndWait(sumOfTokens, sumOfTokens.safeTransferFrom, from.address, to.address, token, amount, []);
+        await execAndWait(sumOfTokens.connect(from), sumOfTokens.safeTransferFrom, from.address, to.address, token, amount, []);
         let newFromBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(from.address, t);
