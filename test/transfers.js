@@ -51,26 +51,27 @@ describe("SumOfTokens", function() {
     for(let i = 0; i < 10; ++i) {
       const wallet0 = ethers.Wallet.createRandom();
       const wallet = wallet0.connect(ethers.provider);
-      owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('0.2')}); // provide gas
+      const tx = await owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('100')}); // provide gas
+      await ethers.provider.getTransactionReceipt(tx.hash);
       wallets.push(wallet);
     }
 
     console.log(`Checking minting and transferring...`); 
 
     for(let iteration = 0; iteration < 1000; ++iteration) {
+      console.log('iteration', iteration);
       const token = tokens[Math.floor(Math.random() * tokens.length)];
       const amount = ethers.utils.parseEther(String(Math.random() * 1000.0));
       if(Math.random() >= 0.5) {
         // Mint
-        console.log("Mint");
-
         const to = wallets[Math.floor(Math.random() * wallets.length)];
         let oldToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(result);
         }
-        await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, []);
+        console.log("Mint");
+        await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, [], {gasLimit: 1000000});
         const newToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
@@ -78,13 +79,10 @@ describe("SumOfTokens", function() {
         }
         for(let i = 0; i < newToBalances.length; ++i) {
           const change = newToBalances[i].sub(oldToBalances[i]);
-          console.log("to change after mint");
           expect(change).to.equal(amount);
         }
       } else {
         // Transfer
-        console.log("Transfer");
-
         const fromIndex = Math.floor(Math.random() * wallets.length);
         const toIndex = Math.floor(Math.random() * wallets.length);
         const from = wallets[fromIndex];
@@ -100,7 +98,8 @@ describe("SumOfTokens", function() {
           oldToBalances.push(result);
         }
         if(oldFromBalances[0].gte(amount) && from.address != to.address) { // FIXME: remove inequality
-          const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, []);
+          console.log("Transfer");
+          const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
           await ethers.provider.getTransactionReceipt(tx.hash);
     
           let newFromBalances = [];
@@ -119,7 +118,6 @@ describe("SumOfTokens", function() {
           //   expect(change).to.equal(amount);
           // }
           for(let i = 0; i < newToBalances.length; ++i) {
-            console.log("to change after transfer");
             const change = newToBalances[i].sub(oldToBalances[i]);
             expect(change).to.equal(amount);
           }
