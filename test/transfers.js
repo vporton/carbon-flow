@@ -105,7 +105,7 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(result);
         }
-        if(oldFromBalances[0].gte(amount) && from.address != to.address) { // FIXME: remove inequality
+        if(oldFromBalances[0].gte(amount)) {
           // console.log("Transfer");
           const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
           await ethers.provider.getTransactionReceipt(tx.hash);
@@ -122,16 +122,15 @@ describe("SumOfTokens", function() {
           }
           for(let i = 0; i < newFromBalances.length; ++i) {
             const change = oldFromBalances[i].sub(newFromBalances[i]);
-            expect(change).to.equal(amount);
+            expect(change).to.equal(from.address != to.address ? amount : ethers.BigNumber.from(0));
           }
           for(let i = 0; i < newToBalances.length; ++i) {
             const change = newToBalances[i].sub(oldToBalances[i]);
-            expect(change).to.equal(amount);
+            expect(change).to.equal(from.address != to.address ? amount : ethers.BigNumber.from(0));
           }
         } else {
           async function mycall() {
-            const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
-            await ethers.provider.getTransactionReceipt(tx.hash);
+            await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
           }
           expect(mycall()).to.eventually.be.rejected; 
         }
