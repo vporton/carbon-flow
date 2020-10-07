@@ -166,7 +166,9 @@ contract SumOfTokens is ERC1155, IERC1155Views
         return _remainingValue;
     }
 
-    // TODO: metadata
+    // TODO:
+    // function setApproval(address _operator, uint256[] _ids, bool _approved) external;
+    // function isApproved(address _owner, address _operator, uint256 _id)  external view returns (bool);
 
 // IERC1155Views
 
