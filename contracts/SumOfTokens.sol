@@ -232,14 +232,14 @@ contract SumOfTokens is ERC1155, IERC1155Views
         uint256 _remainingValue = _value - _oldBalance;
         bytes32 _childAddr = userTokens[_from][_id];
         while(_remainingValue != 0) {
-            // FIXME: something wrong here
+            // FIXME: use single linked list
             UserToken storage _childToken = userTokensObjects[_childAddr];
             uint256 _childId = _childToken.token;
 
             _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
 
             bytes32 _nextTokenAddr = _childToken.next;
-            if(_nextTokenAddr == 0) break;
+            if(_nextTokenAddr == 0) break; // FIXME: Wrong at the end of the list
 
             UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
 
