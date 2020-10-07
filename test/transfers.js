@@ -1,6 +1,7 @@
 "strict";
 
 const { expect } = require("chai");
+const random = require('random');
 
 // const bre = require("@nomiclabs/buidler");
 function range(size, startAt = 0) {
@@ -60,11 +61,11 @@ describe("SumOfTokens", function() {
 
     for(let iteration = 0; iteration < 1000; ++iteration) {
       console.log('iteration', iteration);
-      const token = tokens[Math.floor(Math.random() * tokens.length)];
-      const amount = ethers.utils.parseEther(String(Math.random() * 1000.0));
-      if(Math.random() >= 0.5) {
+      const token = tokens[random.int(0, tokens.length - 1)];
+      const amount = ethers.utils.parseEther(String(random.float(0, 1000.0)));
+      if(random.bool() >= 0.5) {
         // Mint
-        const to = wallets[Math.floor(Math.random() * wallets.length)];
+        const to = wallets[random.int(0, wallets.length -1)];
         let oldToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
@@ -89,8 +90,8 @@ describe("SumOfTokens", function() {
         }
       } else {
         // Transfer
-        const fromIndex = Math.floor(Math.random() * wallets.length);
-        const toIndex = Math.floor(Math.random() * wallets.length);
+        const fromIndex = random.int(0, wallets.length -1);
+        const toIndex = random.int(0, wallets.length -1);
         const from = wallets[fromIndex];
         const to = wallets[toIndex];
         let oldFromBalances = [];

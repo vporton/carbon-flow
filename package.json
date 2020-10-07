@@ -2,7 +2,8 @@
   "dependencies": {
     "@nomiclabs/buidler": "^1.4.7",
     "buidler-deploy": "^0.6.0-beta.16",
-    "ganache-cli": "^6.11.0"
+    "ganache-cli": "^6.11.0",
+    "random": "^2.2.0"
   },
   "devDependencies": {
     "@nomiclabs/buidler-ethers": "^2.0.0",
