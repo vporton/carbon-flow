@@ -16,7 +16,6 @@ contract SumOfTokens is ERC1155, IERC1155Views
     // double linked list
     struct UserToken {
         uint256 token;
-        bytes32 prev;
         bytes32 next;
     }
 
@@ -202,7 +201,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         // User received a new token:
         if(_oldToBalance == 0) {
             // Insert into the beginning of the double linked list:
-            UserToken memory _userToken = UserToken({token: _id, prev: 0, next: userTokens[_to][_parent]});
+            UserToken memory _userToken = UserToken({token: _id, next: userTokens[_to][_parent]});
             bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _id));
             userTokensObjects[_userTokenAddr] = _userToken;
             userTokens[_to][_parent] = _userTokenAddr;
@@ -231,8 +230,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         uint256 _remainingValue = _value - _oldBalance;
         bytes32 _childAddr = userTokens[_from][_id];
+        bytes32 _prevAddr = 0;
         while(_remainingValue != 0) {
-            // FIXME: use single linked list
             UserToken storage _childToken = userTokensObjects[_childAddr];
             uint256 _childId = _childToken.token;
 
@@ -243,16 +242,14 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
             UserToken storage _nextToken = userTokensObjects[_nextTokenAddr];
 
-            bytes32 _nextNextTokenAddr = _nextToken.next;
-
             // Remove from user's list
-            if(_nextNextTokenAddr != 0) {
-                userTokensObjects[_nextNextTokenAddr].prev = _childToken.prev;
+            if(_prevAddr != 0) {
+                userTokensObjects[_prevAddr].next = _nextToken.next;
+            } else {
+                userTokens[_from][_id] = _nextToken.next;
             }
-            if(_childToken.prev != 0) {
-                userTokensObjects[_childToken.prev].next = _nextNextTokenAddr;
-            }
-
+            
+            _prevAddr = _childAddr;
             _childAddr = _childToken.next; // FIXME
         }
         return _remainingValue;
