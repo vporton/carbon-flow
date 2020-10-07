@@ -75,6 +75,7 @@ describe("SumOfTokens", function() {
     }
 
     // TODO: Test transfer of zero tokens.
+    // TODO: Test totalSupply.
 
     // expect(await greeter.greet()).to.equal("Hello, world!");
   });
