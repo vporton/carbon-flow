@@ -40,13 +40,15 @@ describe("SumOfTokens", function() {
     for(let i = 0; i < 4; ++i) {
       const token = await createToken(`SubToken${i}`, `S${i}`, `https://example.com/${i}`);
       tokens.push(token);
-      await sumOfTokens.connect(owner).setTokenParent(token, rootToken);
+      const tx = await sumOfTokens.connect(owner).setTokenParent(token, rootToken);
+      await ethers.provider.getTransactionReceipt(tx.hash);
       tree[token] = rootToken;
     }
 
     let wallets = [];
     for(let i = 0; i < 10; ++i) {
-      wallets.push(ethers.Wallet.createRandom());
+      const wallet = ethers.Wallet.createRandom();
+      wallets.push(wallet.connect(ethers.provider));
     }
 
     console.log(`Checking minting and transferring...`); 
@@ -89,8 +91,9 @@ describe("SumOfTokens", function() {
           oldToBalances.push(ethers.BigNumber.from(result));
         }
         if(oldFromBalances[0].gte(amount)) {
-          await execAndWait(sumOfTokens.connect(from), sumOfTokens.safeTransferFrom, from.address, to.address, token, amount, []);
-
+          const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, []);
+          await ethers.provider.getTransactionReceipt(tx.hash);
+    
           let newFromBalances = [];
           for(let t = token; typeof t != 'undefined'; t = tree[t]) {
             const result = await sumOfTokens.balanceOf(from.address, t);
