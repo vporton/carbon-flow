@@ -29,6 +29,24 @@ contract SumOfTokens is ERC1155
 
     mapping (bytes32 => UserToken) public userTokensObjects;
 
+    function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
+        require(tokenOwners[_id] == msg.sender);
+        // require(_id != 0);
+
+        require(_to != address(address(0)), "_to must be non-zero.");
+
+        _doMint(_to, _id, _value);
+
+        // MUST emit event
+        emit TransferSingle(msg.sender, address(0), _to, _id, _value);
+
+        // Now that the balance is updated and the event was emitted,
+        // call onERC1155Received if the destination is a contract.
+        if (_to.isContract()) {
+            _doSafeTransferAcceptanceCheck(msg.sender, address(0), _to, _id, _value, _data);
+        }
+    }
+
 // ERC-1155
 
     function balanceOf(address _owner, uint256 _id) external view override returns (uint256) {
@@ -47,7 +65,7 @@ contract SumOfTokens is ERC1155
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external override {
         require(_id != 0);
 
-        require(_to != address(0x0), "_to must be non-zero.");
+        require(_to != address(address(0)), "_to must be non-zero.");
         require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
 
         _doTransferFrom(_from, _to, _id, _value);
@@ -65,7 +83,7 @@ contract SumOfTokens is ERC1155
     function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external override {
 
         // MUST Throw on errors
-        require(_to != address(0x0), "destination address must be non-zero.");
+        require(_to != address(address(0)), "destination address must be non-zero.");
         require(_ids.length == _values.length, "_ids and _values array length must match.");
         require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
 
@@ -252,21 +270,21 @@ contract SumOfTokens is ERC1155
     function setTokenParent(uint256 _child, uint256 _parent) external {
         require(tokenOwners[_parent] == msg.sender);
 
-        // uint256 _ancestor = _child;
-        // // if(_ancestor == parent) return; // TODO
-        // for(;;) {
-        //     _ancestor = parentToken[_child];
-        //     if(_ancestor == 0) break;
-        //     tokenBalancesNotUpdated[_ancestor] = true;
-        // }
+        uint256 _ancestor = _child;
+        // if(_ancestor == parent) return; // TODO
+        for(;;) {
+            _ancestor = parentToken[_child];
+            if(_ancestor == 0) break;
+            tokenBalancesNotUpdated[_ancestor] = true;
+        }
         
-        // parentToken[_child] = _parent;
-        // _ancestor = _parent;
-        // for(;;) {
-        //     require(_ancestor != _child); // no loops
-        //     tokenBalancesNotUpdated[_ancestor] = true;
-        //     _ancestor = parentToken[_child];
-        //     if(_ancestor == 0) break;
-        // }
+        parentToken[_child] = _parent;
+        _ancestor = _parent;
+        for(;;) {
+            require(_ancestor != _child); // no loops
+            tokenBalancesNotUpdated[_ancestor] = true;
+            _ancestor = parentToken[_child];
+            if(_ancestor == 0) break;
+        }
     }
 }
