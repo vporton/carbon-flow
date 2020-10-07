@@ -13,10 +13,13 @@ describe("SumOfTokens", function() {
     const createTokenEventAbi = [ "event NewToken(uint256 id, string name, string symbol, string uri)" ];
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
+    async function execAndWait(contract, method, ...args) {
+      const tx = await method.bind(contract)(...args);
+      return await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+
     async function createToken(...args) {
-      const tx = await sumOfTokens.newToken(...args);
-      const coder = new ethers.utils.AbiCoder();
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+      const receipt = await execAndWait(sumOfTokens, sumOfTokens.newToken, ...args);
       const id = createTokenEventIface.parseLog(receipt.logs[0]).args.id
       return id;
     }
@@ -63,7 +66,7 @@ describe("SumOfTokens", function() {
       if(Math.random() >= 0.5) {
         const to = wallets[Math.floor(Math.random() * wallets.length)];
         const oldBalance = await sumOfTokens.balanceOf(to.address, token);
-        await sumOfTokens.mint(to.address, token, amount, []);
+        await execAndWait(sumOfTokens, sumOfTokens.mint, to.address, token, amount, []);
         const newBalance = await sumOfTokens.balanceOf(to.address, token);
         expect(newBalance - oldBalance).to.equal(amount);
         await verifyBalances(to.address);
