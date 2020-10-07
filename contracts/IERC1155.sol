@@ -34,11 +34,6 @@ interface IERC1155 /* is ERC165 */ {
     event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
 
     /**
-        @dev MUST emit when approval for a second party/operator address to manage all tokens for an owner address is enabled or disabled (absense of an event assumes disabled).
-    */
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
-
-    /**
         @dev MUST emit when the URI is updated for a token ID.
         URIs are defined in RFC 3986.
         The URI MUST point a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
@@ -94,20 +89,4 @@ interface IERC1155 /* is ERC165 */ {
         @return        The _owner's balance of the Token types requested (i.e. balance for each (owner, id) pair)
      */
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory);
-
-    /**
-        @notice Enable or disable approval for a third party ("operator") to manage all of the caller's tokens.
-        @dev MUST emit the ApprovalForAll event on success.
-        @param _operator  Address to add to the set of authorized operators
-        @param _approved  True if the operator is approved, false to revoke approval
-    */
-    function setApprovalForAll(address _operator, bool _approved) external;
-
-    /**
-        @notice Queries the approval status of an operator for a given owner.
-        @param _owner     The owner of the Tokens
-        @param _operator  Address of authorized operator
-        @return           True if the operator is approved, false if not
-    */
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 }

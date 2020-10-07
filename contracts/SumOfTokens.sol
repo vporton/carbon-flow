@@ -64,7 +64,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         require(_id != 0);
 
         require(_to != address(address(0)), "_to must be non-zero.");
-        require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
+        require(_from == msg.sender || _isApproved(_from, msg.sender, _id), "Need operator approval for 3rd party transfers.");
 
         require(_doTransferFrom(_from, _to, _id, _value) == _value);
 
@@ -83,7 +83,11 @@ contract SumOfTokens is ERC1155, IERC1155Views
         // MUST Throw on errors
         require(_to != address(address(0)), "destination address must be non-zero.");
         require(_ids.length == _values.length, "_ids and _values array length must match.");
-        require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
+        if(_from != msg.sender) {
+            for (uint256 i = 0; i < _ids.length; ++i) {
+                require(_isApproved(_from, msg.sender, _ids[i]), "Need operator approval for 3rd party transfers.");
+            }
+        }
 
         for (uint256 i = 0; i < _ids.length; ++i) {
             uint256 _id = _ids[i];
@@ -167,10 +171,6 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
         return _remainingValue;
     }
-
-    // TODO:
-    // function setApproval(address _operator, uint256[] _ids, bool _approved) external;
-    // function isApproved(address _owner, address _operator, uint256 _id)  external view returns (bool);
 
 // IERC1155Views
 

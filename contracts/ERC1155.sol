@@ -5,10 +5,11 @@ import "./SafeMath.sol";
 import "./Address.sol";
 import "./Common.sol";
 import "./IERC1155TokenReceiver.sol";
+import "./IERC1155Operators.sol";
 import "./IERC1155.sol";
 
 // A sample implementation of core ERC1155 function.
-contract ERC1155 is IERC1155, ERC165, CommonConstants
+contract ERC1155 is IERC1155, IERC1155Operators, ERC165, CommonConstants
 {
     using SafeMath for uint256;
     using Address for address;
@@ -16,8 +17,8 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
     // id => (owner => balance)
     mapping (uint256 => mapping(address => uint256)) internal balances;
 
-    // owner => (operator => approved)
-    mapping (address => mapping(address => bool)) internal operatorApproval;
+    // owner => (operator => (token => approved))
+    mapping (address => mapping(address => mapping(uint256 => bool))) internal operatorApproval;
 
 /////////////////////////////////////////// ERC165 //////////////////////////////////////////////
 
@@ -68,7 +69,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external virtual override {
 
         require(_to != address(0x0), "_to must be non-zero.");
-        require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
+        require(_from == msg.sender || _isApproved(_from, msg.sender, _id), "Need operator approval for 3rd party transfers.");
 
         // SafeMath will throw with insuficient funds _from
         // or if _id is not valid (balance will be 0)
@@ -106,7 +107,11 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         // MUST Throw on errors
         require(_to != address(0x0), "destination address must be non-zero.");
         require(_ids.length == _values.length, "_ids and _values array length must match.");
-        require(_from == msg.sender || operatorApproval[_from][msg.sender] == true, "Need operator approval for 3rd party transfers.");
+        if(_from != msg.sender) {
+            for (uint256 i = 0; i < _ids.length; ++i) {
+                require(_isApproved(_from, msg.sender, _ids[i]), "Need operator approval for 3rd party transfers.");
+            }
+        }
 
         for (uint256 i = 0; i < _ids.length; ++i) {
             uint256 id = _ids[i];
@@ -166,28 +171,39 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         return balances_;
     }
 
+    function setApproval(address _operator, uint256[] calldata _ids, bool _approved) override external {
+        for(uint i = 0; i < _ids.length; ++i) {
+            uint256 _id = _ids[i];
+            operatorApproval[msg.sender][_operator][_id] = _approved;
+            emit OperatorApproval(msg.sender, _operator, _id, _approved);
+        }
+    }
+
+    function isApproved(address _owner, address _operator, uint256 _id) external override view returns (bool) {
+        return operatorApproval[_owner][_operator][_id];
+    }
+
     /**
         @notice Enable or disable approval for a third party ("operator") to manage all of the caller's tokens.
         @dev MUST emit the ApprovalForAll event on success.
-        @param _operator  Address to add to the set of authorized operators
-        @param _approved  True if the operator is approved, false to revoke approval
     */
-    function setApprovalForAll(address _operator, bool _approved) external override {
-        operatorApproval[msg.sender][_operator] = _approved;
-        emit ApprovalForAll(msg.sender, _operator, _approved);
+    function setApprovalForAll(address, bool) external pure override {
+        require(false);
     }
 
     /**
         @notice Queries the approval status of an operator for a given owner.
-        @param _owner     The owner of the Tokens
-        @param _operator  Address of authorized operator
         @return           True if the operator is approved, false if not
     */
-    function isApprovedForAll(address _owner, address _operator) external view override returns (bool) {
-        return operatorApproval[_owner][_operator];
+    function isApprovedForAll(address, address) external pure override returns (bool) {
+        return false;
     }
 
 /////////////////////////////////////////// Internal //////////////////////////////////////////////
+
+    function _isApproved(address _owner, address _operator, uint256 _id) public view returns (bool) {
+        return operatorApproval[_owner][_operator][_id];
+    }
 
     function _doSafeTransferAcceptanceCheck(address _operator, address _from, address _to, uint256 _id, uint256 _value, bytes memory _data) internal {
 
