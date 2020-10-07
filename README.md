@@ -13,7 +13,7 @@ The discrepancy is easily solvable by creating a ERC-1155/ERC-20 bridge.
 So, I create a child/parent tree of ERC-1155 tokens. To each parent balance the
 sum of all its child balances is added.
 
-* When a parent token is transferred and its own balance is not enough, the
+When a parent token is transferred and its own balance is not enough, the
 contract chooses its first child (among the tokens that the given user holds in
 a non-zero amount) and transfers it (recursively). If its amount at a particular
 user is not enough for the transfer, then the next token (among the tokens that
