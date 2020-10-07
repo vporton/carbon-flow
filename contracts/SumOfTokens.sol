@@ -215,6 +215,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         uriImpl[_id] = _uri;
     }
 
+    // FIXME: Malicious user may add many levels below his token to make out-of-gas errors.
     function setTokenParent(uint256 _child, uint256 _parent) external {
         require(tokenOwners[_parent] == msg.sender);
 
