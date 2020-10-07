@@ -74,8 +74,10 @@ describe("SumOfTokens", function() {
         }
       } else {
         // Transfer
-        const from = wallets[Math.floor(Math.random() * wallets.length)];
-        const to = wallets[Math.floor(Math.random() * wallets.length)];
+        const fromIndex = Math.floor(Math.random() * wallets.length);
+        const toIndex = Math.floor(Math.random() * wallets.length);
+        const from = wallets[fromIndex];
+        const to = wallets[toIndex];
         let oldFromBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(from.address, t);
@@ -86,20 +88,25 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(ethers.BigNumber.from(result));
         }
-        await execAndWait(sumOfTokens.connect(from), sumOfTokens.safeTransferFrom, from.address, to.address, token, amount, []);
-        let newFromBalances = [];
-        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
-          const result = await sumOfTokens.balanceOf(from.address, t);
-          newFromBalances.push(ethers.BigNumber.from(result));
-        }
-        const newToBalances = [];
-        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
-          const result = await sumOfTokens.balanceOf(to.address, t);
-          newToBalances.push(ethers.BigNumber.from(result));
-        }
-        for(let i = 0; i < newToBalances.length; ++i) {
-          const change = newToBalances[i].sub(oldToBalances[i]);
-          expect(change).to.equal(amount);
+        if(oldFromBalances[0] >= amount) {
+          await execAndWait(sumOfTokens.connect(from), sumOfTokens.safeTransferFrom, from.address, to.address, token, amount, []);
+
+          let newFromBalances = [];
+          for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+            const result = await sumOfTokens.balanceOf(from.address, t);
+            newFromBalances.push(ethers.BigNumber.from(result));
+          }
+          const newToBalances = [];
+          for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+            const result = await sumOfTokens.balanceOf(to.address, t);
+            newToBalances.push(ethers.BigNumber.from(result));
+          }
+          for(let i = 0; i < newToBalances.length; ++i) {
+            const change = newToBalances[i].sub(oldToBalances[i]); // TODO: Check from balances, too
+            expect(change).to.equal(amount);
+          }
+        } else {
+          // TODO: test throw
         }
       }
     }
