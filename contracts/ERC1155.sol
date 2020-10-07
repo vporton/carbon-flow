@@ -173,7 +173,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
     function approve(address _spender, uint256 _id, uint256 _currentValue, uint256 _value) external override {
         require(allowanceImpl[_id][msg.sender][_spender] == _currentValue);
         allowanceImpl[_id][msg.sender][_spender] = _value;
-        // FIXME: emit
+        // TODO: emit (which event)?
     }
 
     function batchApprove(address _spender, uint256[] calldata _ids, uint256[] calldata _currentValues, uint256[] calldata _values) external override {
@@ -187,7 +187,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
             require(allowanceImpl[_id][msg.sender][_spender] == _currentValue);
             allowanceImpl[_id][msg.sender][_spender] = _value;
         }
-        // FIXME: emit
+        // TODO: emit (which event)?
     }
 
 
