@@ -75,6 +75,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         require(_to != address(0), "_to must be non-zero.");
         require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value, "Not appoved to transfer");
 
+        // FIXME
         require(_doTransferFrom(_from, _to, _id, _value) == _value);
 
         // MUST emit event
@@ -181,6 +182,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
     // It does not matter that this function is inefficient:
     // It is called either from an external view or once per tokens tree change.
     function _balanceOf(address _owner, uint256 _id) internal view returns (uint256 _balance) {
+        // TODO: userTokensObjects[_childAddr] accessed twice.
         _balance = balances[_id][_owner];
         for (bytes32 _childAddr = userTokens[_owner][_id];
              _childAddr != 0;
@@ -237,9 +239,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
             UserToken storage _childToken = userTokensObjects[_childAddr];
             uint256 _childId = _childToken.token;
             bytes32 _nextTokenAddr = _childToken.next;
-            // console.log(_id, _childId, userTokensObjects[_nextTokenAddr].token);
 
-            // _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
+            _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
 
             // Remove from user's list
             if(_prevAddr != 0) {
@@ -247,11 +248,11 @@ contract SumOfTokens is ERC1155, IERC1155Views
             } else {
                 userTokens[_from][_id] = _nextTokenAddr;
             }
-            
+
             _prevAddr = _childAddr;
             _childAddr = _nextTokenAddr;
         }
-        return _remainingValue;
+        return _value - _remainingValue;
     }
 
 // Events

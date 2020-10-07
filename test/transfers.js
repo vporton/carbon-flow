@@ -106,9 +106,9 @@ describe("SumOfTokens", function() {
           const newToBalances = [];
           for(let t = token; typeof t != 'undefined'; t = tree[t]) {
             const result = await sumOfTokens.balanceOf(to.address, t);
-            console.log("Test:", to.address, result.toString());
             newToBalances.push(result);
           }
+          // TODO
           // for(let i = 0; i < newFromBalances.length; ++i) {
           //   const change = oldFromBalances[i].sub(newFromBalances[i]);
           //   expect(change).to.equal(amount);
