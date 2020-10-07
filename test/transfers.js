@@ -68,7 +68,8 @@ describe("SumOfTokens", function() {
         const oldBalance = await sumOfTokens.balanceOf(to.address, token);
         await execAndWait(sumOfTokens, sumOfTokens.mint, to.address, token, amount, []);
         const newBalance = await sumOfTokens.balanceOf(to.address, token);
-        expect(newBalance - oldBalance).to.equal(amount);
+        const change = ethers.BigNumber.from(newBalance).sub(ethers.BigNumber.from(oldBalance))
+        expect(change).to.equal(amount);
         await verifyBalances(to.address);
       }
     }
