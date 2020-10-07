@@ -221,6 +221,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
     // Returns how much have been transferred
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal returns (uint256) {
+        if(_value == 0) return 0;
+
         uint256 _oldBalance = balances[_id][_from];
 
         if(_oldBalance >= _value) {
@@ -252,6 +254,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
             _prevAddr = _childAddr;
             _childAddr = _nextTokenAddr;
         }
+        assert(_balanceOf(_to, _id) >= _value - _remainingValue); // TODO: remove
         return _value - _remainingValue;
     }
 

@@ -62,17 +62,19 @@ describe("SumOfTokens", function() {
       const amount = ethers.utils.parseEther(String(Math.random() * 1000.0));
       if(Math.random() >= 0.5) {
         // Mint
+        console.log("Mint");
+
         const to = wallets[Math.floor(Math.random() * wallets.length)];
         let oldToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
-          oldToBalances.push(ethers.BigNumber.from(result));
+          oldToBalances.push(result);
         }
         await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, []);
         const newToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
-          newToBalances.push(ethers.BigNumber.from(result));
+          newToBalances.push(result);
         }
         for(let i = 0; i < newToBalances.length; ++i) {
           const change = newToBalances[i].sub(oldToBalances[i]);
@@ -80,6 +82,8 @@ describe("SumOfTokens", function() {
         }
       } else {
         // Transfer
+        console.log("Transfer");
+
         const fromIndex = Math.floor(Math.random() * wallets.length);
         const toIndex = Math.floor(Math.random() * wallets.length);
         const from = wallets[fromIndex];
@@ -92,7 +96,7 @@ describe("SumOfTokens", function() {
         let oldToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
-          oldToBalances.push(ethers.BigNumber.from(result));
+          oldToBalances.push(result);
         }
         if(oldFromBalances[0].gte(amount) && from.address != to.address) { // FIXME: remove inequality
           const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, []);
