@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Apache-2.0	
 pragma solidity ^0.7.1;
 
-import '@nomiclabs/buidler/console.sol';
+// import '@nomiclabs/buidler/console.sol';
 
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
@@ -190,7 +190,6 @@ contract SumOfTokens is ERC1155, IERC1155Views
              _childAddr = userTokensObjects[_childAddr].next)
         {
             uint256 _childId = userTokensObjects[_childAddr].token;
-            console.log(_childId); // FIXME
             _balance += _balanceOf(_owner, _childId); // recursion
         }
     }
