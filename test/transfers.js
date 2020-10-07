@@ -11,7 +11,9 @@ describe("SumOfTokens", function() {
   it("Checks correct transfers", async function() {
     this.timeout(60*1000);
 
-    const [ owner ] = await ethers.getSigners();
+    console.log("Initializing...");
+
+    const [ deployer, owner ] = await ethers.getSigners();
 
     const SumOfTokens = await ethers.getContractFactory("SumOfTokens");
     const sumOfTokens = await SumOfTokens.deploy(await owner.getAddress());
@@ -47,8 +49,10 @@ describe("SumOfTokens", function() {
 
     let wallets = [];
     for(let i = 0; i < 10; ++i) {
-      const wallet = ethers.Wallet.createRandom();
-      wallets.push(wallet.connect(ethers.provider));
+      const wallet0 = ethers.Wallet.createRandom();
+      const wallet = wallet0.connect(ethers.provider);
+      owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('0.2')}); // provide gas
+      wallets.push(wallet);
     }
 
     console.log(`Checking minting and transferring...`); 
