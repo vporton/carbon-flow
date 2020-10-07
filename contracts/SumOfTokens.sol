@@ -278,8 +278,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
             _prevAddr = _childAddr;
             _childAddr = _childToken.next;
         }
-        // return (_value - _remainingValue, _remainingValue != 0);
-        return (_value - _remainingValue, _childAddr != 0);
+        return (_value - _remainingValue, _remainingValue != 0);
+        // return (_value - _remainingValue, _childAddr != 0);
     }
 
 // Events
