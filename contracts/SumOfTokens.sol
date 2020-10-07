@@ -69,10 +69,10 @@ contract SumOfTokens is ERC1155, IERC1155Views
     }
 
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external override {
-        require(_id != 0);
+        require(_id != 0, "destination address must be non-zero.");
 
         require(_to != address(0), "_to must be non-zero.");
-        require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value);
+        require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value, "Not appoved to transfer");
 
         require(_doTransferFrom(_from, _to, _id, _value) == _value);
 
@@ -93,7 +93,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         require(_ids.length == _values.length, "_ids and _values array length must match.");
         if(_from != msg.sender) {
             for (uint256 i = 0; i < _ids.length; ++i) {
-                require(_allowance(_ids[i], _from, msg.sender) >= _values[i]);
+                require(_allowance(_ids[i], _from, msg.sender) >= _values[i], "Not appoved to transfer");
             }
         }
 
