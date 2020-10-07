@@ -123,7 +123,7 @@ describe("SumOfTokens", function() {
       }
     }
 
-    // TODO: Test transfer of zero tokens.
+    // TODO: Test transfer of zero tokens, test transfer entire account balance.
     // TODO: Test batch mints and transfers.
     // TODO: Test totalSupply.
   });
