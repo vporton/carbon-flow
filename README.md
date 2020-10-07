@@ -23,3 +23,10 @@ the given user holds in a non-zero amount) is transferred (recursively), etc.
 The tokens that a given user holds in non-zero amounts are kept in a double linked
 list. This avoids considering zero-amount tokens when doing a transfer (to improve
 performance).
+
+The above solves the cheating by one of the lower parties trouble, as allows removal
+of a child token. However, if the hijacker or anyone else sells fake tokens at an
+exchange, this security measure does not work. So it is recommended to trader to limit
+their allocated funds at exchanges that they provide to exchange for my tokens to limit
+the damage. When a hijacking is found, the hijacking token should be removed from the
+list of children tokens ASAP to limit the damage.
