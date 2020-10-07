@@ -30,3 +30,7 @@ exchange, this security measure does not work. So it is recommended to trader to
 their allocated funds at exchanges that they provide to exchange for my tokens to limit
 the damage. When a hijacking is found, the hijacking token should be removed from the
 list of children tokens ASAP to limit the damage.
+
+The structure of the tree can be set only by the owner, because otherwise a malicious
+issuer could make the tree big, so producing high gas consumption or even out-of-gas
+errors.

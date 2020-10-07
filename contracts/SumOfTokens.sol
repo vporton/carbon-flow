@@ -9,6 +9,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
     using SafeMath for uint256;
     using Address for address;
 
+    address public owner;
+
     // double linked list
     struct UserToken {
         uint256 token;
@@ -26,6 +28,10 @@ contract SumOfTokens is ERC1155, IERC1155Views
     mapping (address => mapping (uint256 => bytes32)) userTokens;
 
     mapping (bytes32 => UserToken) public userTokensObjects;
+
+    constructor(address _owner) {
+        owner = _owner;
+    }
 
     function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
         require(tokenOwners[_id] == msg.sender);
@@ -215,9 +221,11 @@ contract SumOfTokens is ERC1155, IERC1155Views
         uriImpl[_id] = _uri;
     }
 
-    // FIXME: Malicious user may add many levels below his token to make out-of-gas errors.
+    // We don't check for circularities, it is a responsibility of the contract owner.
+    // At worst, this produces out-of-gas errors.
+    // See also README.
     function setTokenParent(uint256 _child, uint256 _parent) external {
-        require(tokenOwners[_parent] == msg.sender);
+        require(owner == msg.sender);
 
         parentToken[_child] = _parent;
     }
