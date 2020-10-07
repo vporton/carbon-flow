@@ -131,10 +131,26 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
     }
 
+    function _updateUserTokens(address _to, uint256 _id, uint256 _value) internal {
+        uint256 _oldToBalance = balances[_id][_to];
+        balances[_id][_to] = _value.add(_oldToBalance);
+
+        uint256 _parent = parentToken[_id];
+
+        // User received a new token:
+        if(_oldToBalance == 0) {
+            // Insert into the beginning of the double linked list:
+            UserToken memory _userToken = UserToken({token: _id, prev: 0, next: userTokens[_to][_parent]});
+            bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _id));
+            userTokensObjects[_userTokenAddr] = _userToken;
+            userTokens[_to][_parent] = _userTokenAddr;
+        }
+    }
+
     function _doMint(address _to, uint256 _id, uint256 _value) internal {
         // TODO: Limit the _value from above.
 
-        balances[_id][_to] = _value.add(balances[_id][_to]);
+        _updateUserTokens(_to, _id, _value);
         totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
     }
 
@@ -144,12 +160,12 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
-            balances[_id][_to] += _value;
+            _updateUserTokens(_to, _id, _value);
             return _value;
         }
 
         balances[_id][_from] = 0;
-        balances[_id][_to] += _oldBalance;
+        _updateUserTokens(_to, _id, _oldBalance);
 
         uint256 _remainingValue = _value - _oldBalance;
         bytes32 _childAddr = userTokens[_from][_id];

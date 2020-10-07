@@ -1,10 +1,16 @@
 "strict";
 
 const { expect } = require("chai");
+
 // const bre = require("@nomiclabs/buidler");
+function range(size, startAt = 0) {
+  return [...Array(size).keys()].map(i => i + startAt);
+}
 
 describe("SumOfTokens", function() {
   it("Checks correct transfers", async function() {
+    this.timeout(60*1000);
+
     const [ owner ] = await ethers.getSigners();
 
     const SumOfTokens = await ethers.getContractFactory("SumOfTokens");
@@ -50,12 +56,21 @@ describe("SumOfTokens", function() {
       const amount = ethers.utils.parseEther(String(Math.random() * 1000.0));
       if(Math.random() >= 0.5) {
         const to = wallets[Math.floor(Math.random() * wallets.length)];
-        // TODO: Check that also parent balances increased.
-        const oldBalance = await sumOfTokens.balanceOf(to.address, token);
+        let oldBalances = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.balanceOf(to.address, t);
+          oldBalances.push(ethers.BigNumber.from(result));
+        }
         await execAndWait(sumOfTokens, sumOfTokens.mint, to.address, token, amount, []);
-        const newBalance = await sumOfTokens.balanceOf(to.address, token);
-        const change = ethers.BigNumber.from(newBalance).sub(ethers.BigNumber.from(oldBalance))
-        expect(change).to.equal(amount);
+        const newBalances = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.balanceOf(to.address, t);
+          newBalances.push(ethers.BigNumber.from(result));
+        }
+        for(let i = 0; i < newBalances.length; ++i) {
+          const change = newBalances[i].sub(oldBalances[i]);
+          expect(change).to.equal(amount);
+        }
       }
     }
 
