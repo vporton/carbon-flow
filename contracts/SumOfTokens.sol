@@ -75,8 +75,14 @@ contract SumOfTokens is ERC1155, IERC1155Views
         require(_to != address(0), "_to must be non-zero.");
         require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value, "Not appoved to transfer");
 
-        (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
-        require(_transferred == _value);
+        if(_value != 0) {
+            if(_from == _to) {
+                require(_balanceOf(_from, _id) >= _value);
+            } else {
+                (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
+                require(_transferred == _value);
+            }
+        }
 
         // MUST emit event
         emit TransferSingle(msg.sender, _from, _to, _id, _value);
@@ -104,8 +110,14 @@ contract SumOfTokens is ERC1155, IERC1155Views
             require(_id != 0);
             uint256 _value = _values[i];
 
-            (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
-            require(_transferred == _value);
+            if(_value != 0) {
+                if(_from == _to) {
+                    require(_balanceOf(_from, _id) >= _value);
+                } else {
+                    (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
+                    require(_transferred == _value);
+                }
+            }
         }
 
         // Note: instead of the below batch versions of event and acceptance check you MAY have emitted a TransferSingle
@@ -224,7 +236,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal
         returns (uint256 _transferred, bool _remained)
     {
-        // if(_value == 0) return 0; // TODO: inefficient without this
+        assert(_value != 0 && _from != _to);
 
         uint256 _oldBalance = balances[_id][_from];
 

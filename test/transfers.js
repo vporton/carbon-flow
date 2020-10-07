@@ -9,7 +9,7 @@ function range(size, startAt = 0) {
 
 describe("SumOfTokens", function() {
   it("Checks correct transfers", async function() {
-    this.timeout(60*1000);
+    this.timeout(60*1000*100);
 
     console.log("Initializing...");
 
