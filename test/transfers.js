@@ -1,3 +1,5 @@
+"strict";
+
 const { expect } = require("chai");
 // const bre = require("@nomiclabs/buidler");
 
@@ -36,41 +38,24 @@ describe("SumOfTokens", function() {
       tree[token] = rootToken;
     }
 
-    async function verifyBalances(address) {
-      let balances = [];
-      for(let i = 0; i < tokens.length; ++i) {
-        balances[i] = await sumOfTokens.balanceOf(address);
-      }
-      let balances2 = [];
-      for(let i = 0; i < tokens.length; ++i)
-        balances2.push(0);
-      for(let i = 0; i < tokens.length; ++i) {
-        if(tokens[i] in tree) {
-          if(tree[tokens[i]] in balances2)
-            balances2[tree[tokens[i]]] += balances[i];
-          else
-            balances2[tree[tokens[i]]] = balances[i];
-        }
-      }
-      expect(balances2).to.deep.equal(balances);
-    }
-
     let wallets = [];
     for(let i = 0; i < 10; ++i) {
       wallets.push(ethers.Wallet.createRandom());
     }
+
+    console.log(`Checking minting...`); 
 
     for(let iteration = 0; iteration < 1000; ++iteration) {
       const token = tokens[Math.floor(Math.random() * tokens.length)];
       const amount = ethers.utils.parseEther(String(Math.random() * 1000.0));
       if(Math.random() >= 0.5) {
         const to = wallets[Math.floor(Math.random() * wallets.length)];
+        // TODO: Check that also parent balances increased.
         const oldBalance = await sumOfTokens.balanceOf(to.address, token);
         await execAndWait(sumOfTokens, sumOfTokens.mint, to.address, token, amount, []);
         const newBalance = await sumOfTokens.balanceOf(to.address, token);
         const change = ethers.BigNumber.from(newBalance).sub(ethers.BigNumber.from(oldBalance))
         expect(change).to.equal(amount);
-        await verifyBalances(to.address);
       }
     }
 
