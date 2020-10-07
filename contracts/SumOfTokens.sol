@@ -202,7 +202,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         if(_oldToBalance == 0) {
             // Insert into the beginning of the double linked list:
             UserToken memory _userToken = UserToken({token: _id, next: userTokens[_to][_parent]});
-            bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _id));
+            bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _parent, _id));
             userTokensObjects[_userTokenAddr] = _userToken;
             userTokens[_to][_parent] = _userTokenAddr;
         }
