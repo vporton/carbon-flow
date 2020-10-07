@@ -78,6 +78,7 @@ describe("SumOfTokens", function() {
         }
         for(let i = 0; i < newToBalances.length; ++i) {
           const change = newToBalances[i].sub(oldToBalances[i]);
+          console.log("to change after mint");
           expect(change).to.equal(amount);
         }
       } else {
@@ -118,6 +119,7 @@ describe("SumOfTokens", function() {
           //   expect(change).to.equal(amount);
           // }
           for(let i = 0; i < newToBalances.length; ++i) {
+            console.log("to change after transfer");
             const change = newToBalances[i].sub(oldToBalances[i]);
             expect(change).to.equal(amount);
           }

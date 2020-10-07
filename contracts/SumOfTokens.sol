@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Apache-2.0	
 pragma solidity ^0.7.1;
 
-import '@nomiclabs/buidler/console.sol';
+// import '@nomiclabs/buidler/console.sol';
 
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
@@ -75,8 +75,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
         require(_to != address(0), "_to must be non-zero.");
         require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value, "Not appoved to transfer");
 
-        // FIXME
-        require(_doTransferFrom(_from, _to, _id, _value) == _value);
+        (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
+        require(_transferred == _value);
 
         // MUST emit event
         emit TransferSingle(msg.sender, _from, _to, _id, _value);
@@ -104,7 +104,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
             require(_id != 0);
             uint256 _value = _values[i];
 
-            require(_doTransferFrom(_from, _to, _id, _value) == _value);
+            (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
+            require(_transferred == _value);
         }
 
         // Note: instead of the below batch versions of event and acceptance check you MAY have emitted a TransferSingle
@@ -220,42 +221,46 @@ contract SumOfTokens is ERC1155, IERC1155Views
     }
 
     // Returns how much have been transferred
-    function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal returns (uint256) {
-        if(_value == 0) return 0;
+    function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal
+        returns (uint256 _transferred, bool _remained)
+    {
+        // if(_value == 0) return 0; // TODO: inefficient without this
 
         uint256 _oldBalance = balances[_id][_from];
+
+        bytes32 _childAddr = userTokens[_from][_id];
 
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
             _updateUserTokens(_to, _id, _value);
-            return _value;
+            return (_value, _oldBalance >= _value || _childAddr != 0);
         }
 
         balances[_id][_from] = 0;
         _updateUserTokens(_to, _id, _oldBalance);
 
         uint256 _remainingValue = _value - _oldBalance;
-        bytes32 _childAddr = userTokens[_from][_id];
         bytes32 _prevAddr = 0;
         while(_childAddr != 0 && _remainingValue != 0) {
             UserToken storage _childToken = userTokensObjects[_childAddr];
-            uint256 _childId = _childToken.token;
-            bytes32 _nextTokenAddr = _childToken.next;
 
-            _remainingValue -= _doTransferFrom(_from, _to, _childId, _remainingValue); // recursion
+            (uint256 _childTransferred, bool _childRemained) =
+                _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
+            _remainingValue -= _childTransferred;
 
-            // Remove from user's list
-            if(_prevAddr != 0) {
-                userTokensObjects[_prevAddr].next = _nextTokenAddr;
-            } else {
-                userTokens[_from][_id] = _nextTokenAddr;
+            if(!_childRemained) {
+                // Remove from user's list
+                if(_prevAddr != 0) {
+                    userTokensObjects[_prevAddr].next = _childToken.next;
+                } else {
+                    userTokens[_from][_id] = _childToken.next;
+                }
             }
 
             _prevAddr = _childAddr;
-            _childAddr = _nextTokenAddr;
+            _childAddr = _childToken.next;
         }
-        assert(_balanceOf(_to, _id) >= _value - _remainingValue); // TODO: remove
-        return _value - _remainingValue;
+        return (_value - _remainingValue, _remainingValue != 0);
     }
 
 // Events
