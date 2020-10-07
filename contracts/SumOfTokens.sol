@@ -16,6 +16,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
     // double linked list
     struct UserToken {
         uint256 token;
+        bytes32 prev;
         bytes32 next;
     }
 
@@ -79,7 +80,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
             if(_from == _to) {
                 require(_balanceOf(_from, _id) >= _value);
             } else {
-                (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
+                uint256 _transferred = _doTransferFrom(_from, _to, _id, _value);
                 require(_transferred == _value);
             }
         }
@@ -114,7 +115,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
                 if(_from == _to) {
                     require(_balanceOf(_from, _id) >= _value);
                 } else {
-                    (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
+                    uint256 _transferred = _doTransferFrom(_from, _to, _id, _value);
                     require(_transferred == _value);
                 }
             }
@@ -222,9 +223,13 @@ contract SumOfTokens is ERC1155, IERC1155Views
         // User received a new token:
         if(_parent != 0) {
             // Insert into the beginning of the double linked list:
-            UserToken memory _userToken = UserToken({token: _id, next: userTokens[_to][_parent]});
+            bytes32 _nextAddr = userTokens[_to][_parent];
+            UserToken memory _userToken = UserToken({token: _id, next: _nextAddr, prev: 0});
             bytes32 _userTokenAddr = keccak256(abi.encodePacked(_to, _parent, _id));
             userTokensObjects[_userTokenAddr] = _userToken;
+            if(_nextAddr != 0) {
+                userTokensObjects[_nextAddr].prev = _userTokenAddr;
+            }
             userTokens[_to][_parent] = _userTokenAddr;
         }
     }
@@ -240,18 +245,19 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
     // Returns how much have been transferred
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal
-        returns (uint256 _transferred, bool _remained)
+        returns (uint256 _transferred)
     {
         assert(_value != 0 && _from != _to);
 
         uint256 _oldBalance = balances[_id][_from];
 
-        bytes32 _childAddr = userTokens[_from][_id];
+        bytes32 _ourAddr = userTokens[_from][_id];
+        bytes32 _childAddr = _ourAddr;
 
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
             _updateUserTokens(_to, _id, _value);
-            return (_value, _oldBalance != _value || _childAddr != 0);
+            return _value;
         }
 
         balances[_id][_from] = 0;
@@ -264,25 +270,30 @@ contract SumOfTokens is ERC1155, IERC1155Views
         while(_childAddr != 0 && _remainingValue != 0) {
             UserToken storage _childToken = userTokensObjects[_childAddr];
 
-            (uint256 _childTransferred, bool _childRemained) =
-                _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
+            uint256 _childTransferred = _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
             _remainingValue -= _childTransferred;
-
-            if(!_childRemained) {
-                // Remove from user's list
-                if(_prevAddr != 0) {
-                    userTokensObjects[_prevAddr].next = _childToken.next;
-                } else {
-                    userTokens[_from][_id] = _childToken.next;
-                }
-            }/* else {
-                assert(_balanceOf(_from, _id) != 0);
-            }*/
 
             _prevAddr = _childAddr;
             _childAddr = _childToken.next;
         }
-        return (_value - _remainingValue, _remainingValue != 0);
+        if(_remainingValue == 0) {
+            // Remove from user's list
+            UserToken storage _token = userTokensObjects[_ourAddr];
+            _prevAddr = _token.prev;
+            if(_prevAddr != 0) {
+                userTokensObjects[_prevAddr].next = _token.next;
+            } else {
+                userTokens[_from][_id] = _token.next;
+            }
+            bytes32 _nextAddr = _token.next;
+            if(_nextAddr != 0) {
+                userTokensObjects[_nextAddr].prev = _prevAddr;
+            }
+        }/* else {
+            assert(_balanceOf(_from, _id) != 0);
+        }*/
+
+        return _value - _remainingValue;
     }
 
 // Events
