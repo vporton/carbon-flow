@@ -1,28 +1,38 @@
 const { expect } = require("chai");
+// const bre = require("@nomiclabs/buidler");
 
 describe("SumOfTokens", function() {
   it("Checks correct transfers", async function() {
+    const [ owner ] = await ethers.getSigners();
+
     const SumOfTokens = await ethers.getContractFactory("SumOfTokens");
-    const sumOfTokens = await SumOfTokens.deploy();
+    const sumOfTokens = await SumOfTokens.deploy(await owner.getAddress());
 
     await sumOfTokens.deployed();
 
-    // console.log(await sumOfTokens.newToken());
-    // return;
+    const createTokenEventAbi = [ "event NewToken(uint256 id, string name, string symbol, string uri)" ];
+    const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
+    async function createToken(...args) {
+      const tx = await sumOfTokens.newToken(...args);
+      const coder = new ethers.utils.AbiCoder();
+      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+      const id = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      return id;
+    }
+    
     // TODO: More complex tokens tree.
     let tokens = [];
     let tree = {};
-    const rootToken = await sumOfTokens.newToken()  //.value;
-    console.log(rootToken)
+    const rootToken = await createToken("M+C Token", "M+C", "https://example.com");
     tokens.push(rootToken);
-    console.log((await sumOfTokens.tokenOwners(rootToken)));
     for(let i = 0; i < 4; ++i) {
-      const token = (await sumOfTokens.newToken()).value;
+      const token = await createToken(`SubToken${i}`, `S${i}`, `https://example.com/${i}`);
       tokens.push(token);
-      await sumOfTokens.setTokenParent(token, rootToken);
+      await sumOfTokens.connect(owner).setTokenParent(token, rootToken);
       tree[token] = rootToken;
     }
+    return;
 
     async function verifyBalances(address) {
       let balances = [];

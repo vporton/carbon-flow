@@ -209,10 +209,13 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
     function newToken(string calldata _name, string calldata _symbol, string calldata _uri) external returns (uint256) {
         tokenOwners[++maxTokenId] = msg.sender;
+
         nameImpl[maxTokenId] = _name;
         symbolImpl[maxTokenId] = _symbol;
         uriImpl[maxTokenId] = _uri;
-        // TODO: emit an event
+
+        emit NewToken(maxTokenId, _name, _symbol, _uri);
+
         return maxTokenId;
     }
 
@@ -229,4 +232,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         parentToken[_child] = _parent;
     }
+
+// Events
+
+    event NewToken(uint256 id, string name, string symbol, string uri);
 }
