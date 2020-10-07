@@ -1,8 +1,12 @@
 "strict";
 
-const { expect } = require("chai");
+const chai = require("chai");
+const { expect, assert } = chai;
+const chaiAsPromised = require('chai-as-promised');
 const random = require('random');
 const seedrandom = require('seedrandom');
+
+chai.use(chaiAsPromised);
 
 // random.use(seedrandom('rftg'));
 
@@ -63,7 +67,7 @@ describe("SumOfTokens", function() {
     console.log(`Checking minting and transferring...`); 
 
     for(let iteration = 0; iteration < 1000; ++iteration) {
-      console.log('iteration', iteration);
+      // console.log('iteration', iteration);
       const token = tokens[random.int(0, tokens.length - 1)];
       const amount = ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
       if(random.bool() >= 0.5) {
@@ -74,14 +78,8 @@ describe("SumOfTokens", function() {
           const result = await sumOfTokens.balanceOf(to.address, t);
           oldToBalances.push(result);
         }
-        console.log("Mint");
-        try {
-          await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, [], {gasLimit: 1000000});
-        }
-        catch(e) {
-          console.log(e);
-          return;
-        }
+        // console.log("Mint");
+        await execAndWait(sumOfTokens.connect(owner), sumOfTokens.mint, to.address, token, amount, [], {gasLimit: 1000000});
         const newToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
           const result = await sumOfTokens.balanceOf(to.address, t);
@@ -108,15 +106,9 @@ describe("SumOfTokens", function() {
           oldToBalances.push(result);
         }
         if(oldFromBalances[0].gte(amount) && from.address != to.address) { // FIXME: remove inequality
-          console.log("Transfer");
-          try {
-            const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
-            await ethers.provider.getTransactionReceipt(tx.hash);
-          }
-          catch(e) {
-            console.log(e);
-            return;
-          }  
+          // console.log("Transfer");
+          const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
+          await ethers.provider.getTransactionReceipt(tx.hash);
     
           let newFromBalances = [];
           for(let t = token; typeof t != 'undefined'; t = tree[t]) {
@@ -137,7 +129,11 @@ describe("SumOfTokens", function() {
             expect(change).to.equal(amount);
           }
         } else {
-          // TODO: test throw
+          async function mycall() {
+            const tx = await sumOfTokens.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
+            await ethers.provider.getTransactionReceipt(tx.hash);
+          }
+          expect(mycall()).to.eventually.be.rejected; 
         }
       }
     }
