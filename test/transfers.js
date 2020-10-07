@@ -49,12 +49,13 @@ describe("SumOfTokens", function() {
       wallets.push(ethers.Wallet.createRandom());
     }
 
-    console.log(`Checking minting...`); 
+    console.log(`Checking minting and transferring...`); 
 
     for(let iteration = 0; iteration < 1000; ++iteration) {
       const token = tokens[Math.floor(Math.random() * tokens.length)];
       const amount = ethers.utils.parseEther(String(Math.random() * 1000.0));
       if(Math.random() >= 0.5) {
+        // Mint
         const to = wallets[Math.floor(Math.random() * wallets.length)];
         let oldToBalances = [];
         for(let t = token; typeof t != 'undefined'; t = tree[t]) {
@@ -71,10 +72,40 @@ describe("SumOfTokens", function() {
           const change = newToBalances[i].sub(oldToBalances[i]);
           expect(change).to.equal(amount);
         }
+      } else {
+        // Transfer
+        const from = wallets[Math.floor(Math.random() * wallets.length)];
+        const to = wallets[Math.floor(Math.random() * wallets.length)];
+        let oldFromBalances = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.balanceOf(from.address, t);
+          oldFromBalances.push(ethers.BigNumber.from(result));
+        }
+        let oldToBalances = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.balanceOf(to.address, t);
+          oldToBalances.push(ethers.BigNumber.from(result));
+        }
+        await execAndWait(sumOfTokens, sumOfTokens.safeTransferFrom, from.address, to.address, token, amount, []);
+        let newFromBalances = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.balanceOf(from.address, t);
+          newFromBalances.push(ethers.BigNumber.from(result));
+        }
+        const newToBalances = [];
+        for(let t = token; typeof t != 'undefined'; t = tree[t]) {
+          const result = await sumOfTokens.balanceOf(to.address, t);
+          newToBalances.push(ethers.BigNumber.from(result));
+        }
+        for(let i = 0; i < newToBalances.length; ++i) {
+          const change = newToBalances[i].sub(oldToBalances[i]);
+          expect(change).to.equal(amount);
+        }
       }
     }
 
     // TODO: Test transfer of zero tokens.
+    // TODO: Test batch mints and transfers.
     // TODO: Test totalSupply.
   });
 });

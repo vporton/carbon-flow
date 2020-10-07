@@ -51,6 +51,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
     }
 
+    // TODO: mintBatch
+
 // ERC-1155
 
     function balanceOf(address _owner, uint256 _id) external view override returns (uint256) {
