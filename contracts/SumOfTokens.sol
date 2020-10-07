@@ -206,6 +206,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         nameImpl[maxTokenId] = _name;
         symbolImpl[maxTokenId] = _symbol;
         uriImpl[maxTokenId] = _uri;
+        // TODO: emit an event
         return maxTokenId;
     }
 
