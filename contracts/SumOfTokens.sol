@@ -80,7 +80,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
             if(_from == _to) {
                 require(_balanceOf(_from, _id) >= _value);
             } else {
-                uint256 _transferred = _doTransferFrom(_from, _to, _id, _value);
+                (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
                 require(_transferred == _value);
             }
         }
@@ -115,7 +115,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
                 if(_from == _to) {
                     require(_balanceOf(_from, _id) >= _value);
                 } else {
-                    uint256 _transferred = _doTransferFrom(_from, _to, _id, _value);
+                    (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
                     require(_transferred == _value);
                 }
             }
@@ -245,7 +245,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
     // Returns how much have been transferred
     function _doTransferFrom(address _from, address _to, uint256 _id, uint256 _value) internal
-        returns (uint256 _transferred)
+        returns (uint256 _transferred, bool _remained)
     {
         assert(_value != 0 && _from != _to);
 
@@ -257,7 +257,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
             _updateUserTokens(_to, _id, _value);
-            return _value;
+            return (_value, _oldBalance != _value);
         }
 
         balances[_id][_from] = 0;
@@ -267,16 +267,20 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         uint256 _remainingValue = _value - _oldBalance;
         bytes32 _prevAddr = 0;
+        _remained = false;
         while(_childAddr != 0 && _remainingValue != 0) {
             UserToken storage _childToken = userTokensObjects[_childAddr];
 
-            uint256 _childTransferred = _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
+            (uint256 _childTransferred, bool _childRemained) = _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
+            if(_childRemained) {
+                _remained = true;
+            }
             _remainingValue -= _childTransferred;
 
             _prevAddr = _childAddr;
             _childAddr = _childToken.next;
         }
-        if(_remainingValue == 0) {
+        if(!_remained) {
             // Remove from user's list
             UserToken storage _token = userTokensObjects[_ourAddr];
             _prevAddr = _token.prev;
@@ -289,11 +293,11 @@ contract SumOfTokens is ERC1155, IERC1155Views
             if(_nextAddr != 0) {
                 userTokensObjects[_nextAddr].prev = _prevAddr;
             }
-        }/* else {
+        } else {
             assert(_balanceOf(_from, _id) != 0);
-        }*/
+        }
 
-        return _value - _remainingValue;
+        return (_value - _remainingValue, _remained);
     }
 
 // Events
