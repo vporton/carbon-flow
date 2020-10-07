@@ -245,8 +245,6 @@ contract SumOfTokens is ERC1155, IERC1155Views
                 userTokens[_from][_id] = _nextTokenAddr;
             }
             
-            if(_nextTokenAddr == 0) break; // FIXME: Wrong at the end of the list
-
             _prevAddr = _childAddr;
             _childAddr = _nextTokenAddr;
         }
