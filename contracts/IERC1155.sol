@@ -89,4 +89,19 @@ interface IERC1155 /* is ERC165 */ {
         @return        The _owner's balance of the Token types requested (i.e. balance for each (owner, id) pair)
      */
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory);
+
+    function approve(address _spender, uint256 _id, uint256 _currentValue, uint256 _value) external;
+
+    function allowance(uint256 _id, address _owner, address _spender) external view returns (uint256);
+
+    /**
+        @dev Allow other accounts/contracts to spend tokens on behalf of msg.sender
+        Also, to minimize the risk of the approve/transferFrom attack vector
+        (see https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM/), this function will throw if the current approved allowance does not equal the expected _currentValue, unless _value is 0
+        @param _spender        Address to approve
+        @param _ids            IDs of the CryptoItems
+        @param _currentValues  Expected current values of allowances per item type
+        @param _values         Allowance amounts per item type
+    */
+    function batchApprove(address _spender, uint256[] calldata _ids, uint256[] calldata _currentValues, uint256[] calldata _values) external;
 }
