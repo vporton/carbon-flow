@@ -32,7 +32,6 @@ describe("SumOfTokens", function() {
       await sumOfTokens.connect(owner).setTokenParent(token, rootToken);
       tree[token] = rootToken;
     }
-    return;
 
     async function verifyBalances(address) {
       let balances = [];
@@ -43,7 +42,7 @@ describe("SumOfTokens", function() {
       for(let i = 0; i < tokens.length; ++i)
         balances2.push(0);
       for(let i = 0; i < tokens.length; ++i) {
-          if(tokens[i] in tree) {
+        if(tokens[i] in tree) {
           if(tree[tokens[i]] in balances2)
             balances2[tree[tokens[i]]] += balances[i];
           else
@@ -55,12 +54,12 @@ describe("SumOfTokens", function() {
 
     let wallets = [];
     for(let i = 0; i < 10; ++i) {
-      wallets.push(Wallet.createRandom());
+      wallets.push(ethers.Wallet.createRandom());
     }
 
     for(let iteration = 0; iteration < 1000; ++iteration) {
       const token = tokens[Math.floor(Math.random() * tokens.length)];
-      const amount = utils.parseEther(Math.random() * 1000.0);
+      const amount = ethers.utils.parseEther(Math.random() * 1000.0);
       if(Math.random() >= 0.5) {
         const oldBalance = await sumOfTokens.balanceOf(to.address);
         const to = wallets[Math.floor(Math.random() * wallets.length)];
