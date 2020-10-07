@@ -1,7 +1,8 @@
 # Sum of Several Tokens
 
 It is a solution of
-https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty.
+https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty
+(work in progress!)
 
 It tackles the problem if once of the token issuing entities would be hijacked
 by each of them having its own token. The M+C token is formed as a sum of values
