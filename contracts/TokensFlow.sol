@@ -83,23 +83,17 @@ contract SumOfTokens is ERC1155, IERC1155Views
     // TODO: Several exchanges in one call.
     function exchangeToParent(uint256 _id) external {
         // Intentionally no check for `msg.sender`.
-        TokenFlow storage _flow = tokenFlow[_id];
-        uint256 _maxAllowedFlow = (block.timestamp - _flow.lastExchangeTime) * _flow.maxExchangePerSecond;
-        uint256 _balance = balances[_id][msg.sender];
-        uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
-        _doBurn(msg.sender, _id, _value, "");
-        _flow.lastExchangeTime = block.timestamp;
+        // TokenFlow storage _flow = tokenFlow[_id];
+        // uint256 _maxAllowedFlow = (block.timestamp - _flow.lastExchangeTime) * _flow.maxExchangePerSecond;
+        // uint256 _balance = balances[_id][msg.sender];
+        // uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
+        _doBurn(msg.sender, _id, 0, "");
+        // _flow.lastExchangeTime = block.timestamp;
     }
 
 // Internal
 
     function _doBurn(address _from, uint256 _id, uint256 _value, bytes calldata _data) public {
-        // require(_from != address(0), "_from must be non-zero.");
-
-        totalSupplyImpl[_id] = totalSupplyImpl[_id].sub(_value); // TODO: Should increase on transfer to 0x0?
-
-        // MUST emit event
-        emit TransferSingle(msg.sender, _from, address(0), _id, _value);
     }
 
 // Events
