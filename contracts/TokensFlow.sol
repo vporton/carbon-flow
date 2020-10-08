@@ -6,7 +6,7 @@ pragma solidity ^0.7.1;
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
 
-contract SumOfTokens is ERC1155, IERC1155Views
+contract TokensFlow is ERC1155, IERC1155Views
 {
     using SafeMath for uint256;
     using Address for address;
@@ -81,14 +81,15 @@ contract SumOfTokens is ERC1155, IERC1155Views
 // Flow
 
     // TODO: Several exchanges in one call.
-    function exchangeToParent(uint256 _id) external {
+    // TODO: Solidity 0.7.1 bug https://github.com/ethereum/solidity/issues/9988
+    function exchangeToParent(uint256 _id, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
         TokenFlow storage _flow = tokenFlow[_id];
         uint256 _maxAllowedFlow = (block.timestamp - _flow.lastExchangeTime) * _flow.maxExchangePerSecond;
         uint256 _balance = balances[_id][msg.sender];
         uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
-        _doBurn(msg.sender, _id, _value, "");
-        _doMint(msg.sender, _flow.parentToken, _value, "");
+        _doBurn(msg.sender, _id, _value);
+        _doMint(msg.sender, _flow.parentToken, _value, _data);
         _flow.lastExchangeTime = block.timestamp;
     }
 
@@ -110,7 +111,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
     }
 
-    function _doBurn(address _from, uint256 _id, uint256 _value, bytes calldata _data) public {
+    function _doBurn(address _from, uint256 _id, uint256 _value) public {
         // require(_from != address(0), "_from must be non-zero.");
 
         totalSupplyImpl[_id] = totalSupplyImpl[_id].sub(_value); // TODO: Should increase on transfer to 0x0?
