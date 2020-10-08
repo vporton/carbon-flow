@@ -57,7 +57,7 @@ abstract contract Carbon is SumOfTokens
         // TODO
     }
 
-    function _checkCanRetire() {
+    function _checkCanRetire() internal {
         // TODO
     }
 }
