@@ -10,13 +10,6 @@ abstract contract Carbon is SumOfTokens
     }
 
     struct RetirementIssuer {
-        uint timePeriod; // in seconds
-        uint timePeriodStart; // in seconds from epoch
-        uint256 maxCreditsToRetirePerPeriod;
-        uint256 maxAmountToRetirePerPeriod;
-        uint lastCountedPeriod;
-        uint256 creditsRetiredInLastCountedPeriod;
-        uint256 amountRetiredInLastCountedPeriod;
     }
     
     struct CarbonCredit {

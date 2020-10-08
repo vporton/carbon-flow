@@ -14,7 +14,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     struct TokenFlow {
         uint256 parentToken;
         uint lastExchangeTime;
-        uint256 maxExchangePerSecond;
+        uint256 maxExchangePerSecond; // TODO: Allow more instant transfers of some amounts.
         // uint256 maxCreditsPerSecond; // TODO
     }
 
