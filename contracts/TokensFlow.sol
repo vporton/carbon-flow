@@ -22,7 +22,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     mapping (uint256 => address) public tokenOwners;
 
-    mapping (uint256 => TokenFlow) tokenFlow;
+    mapping (uint256 => TokenFlow) public tokenFlow;
 
 // IERC1155Views
 
@@ -53,7 +53,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Administrativia
 
-    function newToken(string calldata _name, uint256 _parent, string calldata _symbol, string calldata _uri)
+    function newToken(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)
         external returns (uint256)
     {
         tokenOwners[++maxTokenId] = msg.sender;
@@ -64,7 +64,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
         _setTokenParent(maxTokenId, _parent);
 
-        emit NewToken(maxTokenId, _name, _symbol, _uri);
+        emit NewToken(maxTokenId, _name, _symbol, _uri); // TODO: Here and in other places token owner
 
         return maxTokenId;
     }
@@ -84,11 +84,32 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     function setTokenFlow(uint256 _child, uint _lastExchangeTime, uint256 _maxExchangePerSecond) external {
         TokenFlow storage _flow = tokenFlow[_child];
-        
+
         require(msg.sender == tokenOwners[_flow.parentToken]);
 
         _flow.lastExchangeTime = _lastExchangeTime;
         _flow.maxExchangePerSecond = _maxExchangePerSecond;
+    }
+
+    function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
+        require(tokenOwners[_id] == msg.sender);
+        // require(_id != 0);
+
+        require(_to != address(0), "_to must be non-zero.");
+
+        if(_value != 0) {
+            totalSupplyImpl[_id] = _value.add(totalSupplyImpl[_id]); // TODO: Should decrease on transfer to 0x0?
+            balances[_id][_to] += _value; // no need to check for overflow due to the previous line
+        }
+
+        // MUST emit event
+        emit TransferSingle(msg.sender, address(0), _to, _id, _value);
+
+        // Now that the balance is updated and the event was emitted,
+        // call onERC1155Received if the destination is a contract.
+        if (_to.isContract()) {
+            _doSafeTransferAcceptanceCheck(msg.sender, address(0), _to, _id, _value, _data);
+        }
     }
 
 // Flow
