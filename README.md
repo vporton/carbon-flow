@@ -42,3 +42,5 @@ errors.
 ## TODO
 
 `TokensFlow` - If overflowed then transfer nothing?
+
+Test `TokensFlow` transfer limits.
