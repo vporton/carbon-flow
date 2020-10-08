@@ -7,9 +7,10 @@ abstract contract Carbon is SumOfTokens
 {
     struct CarbonCreditAuthority {
         uint256 token;
-    }
+   }
 
     struct RetirementIssuer {
+        uint256 token;
     }
     
     struct CarbonCredit {
