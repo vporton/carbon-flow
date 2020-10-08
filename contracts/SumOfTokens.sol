@@ -35,26 +35,6 @@ contract SumOfTokens is ERC1155, IERC1155Views
         owner = _owner;
     }
 
-    function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
-        require(tokenOwners[_id] == msg.sender);
-        // require(_id != 0);
-
-        require(_to != address(0), "_to must be non-zero.");
-
-        _doMint(_to, _id, _value);
-
-        // MUST emit event
-        emit TransferSingle(msg.sender, address(0), _to, _id, _value);
-
-        // Now that the balance is updated and the event was emitted,
-        // call onERC1155Received if the destination is a contract.
-        if (_to.isContract()) {
-            _doSafeTransferAcceptanceCheck(msg.sender, address(0), _to, _id, _value, _data);
-        }
-    }
-
-    // TODO: mintBatch
-
 // ERC-1155
 
     function balanceOf(address _owner, uint256 _id) external view override returns (uint256) {
@@ -238,8 +218,10 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
     }
 
-    function _doMint(address _to, uint256 _id, uint256 _value) internal {
+    function _doMint(address _to, uint256 _id, uint256 _value, bytes calldata _data) public {
         // TODO: Limit the _value from above.
+
+        require(_to != address(0), "_to must be non-zero.");
 
         if(_value != 0) {
             _updateUserTokens(_to, _id, _value);
@@ -247,6 +229,15 @@ contract SumOfTokens is ERC1155, IERC1155Views
                 totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0?
                 _id = parentToken[_id];
             } while(_id != 0);
+        }
+
+        // MUST emit event
+        emit TransferSingle(msg.sender, address(0), _to, _id, _value);
+
+        // Now that the balance is updated and the event was emitted,
+        // call onERC1155Received if the destination is a contract.
+        if (_to.isContract()) {
+            _doSafeTransferAcceptanceCheck(msg.sender, address(0), _to, _id, _value, _data);
         }
     }
 

@@ -23,7 +23,7 @@ describe("SumOfTokens", function() {
 
     const [ deployer, owner ] = await ethers.getSigners();
 
-    const SumOfTokens = await ethers.getContractFactory("SumOfTokens");
+    const SumOfTokens = await ethers.getContractFactory("SumOfTokensTest");
     const sumOfTokens = await SumOfTokens.deploy(await owner.getAddress());
 
     await sumOfTokens.deployed();
