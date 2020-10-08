@@ -75,7 +75,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         require(msg.sender == tokenOwners[_child]);
 
         tokenFlow[_child] = TokenFlow({parentToken: _parent,
-                                       lastExchangeTime: block.timestamp,
+                                       lastExchangeTime: currentTime(),
                                        maxExchangePerSecond: 0});
     }
 
@@ -95,12 +95,12 @@ contract TokensFlow is ERC1155, IERC1155Views
     function exchangeToParent(uint256 _id, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
         TokenFlow storage _flow = tokenFlow[_id];
-        uint256 _maxAllowedFlow = (block.timestamp - _flow.lastExchangeTime) * _flow.maxExchangePerSecond;
+        uint256 _maxAllowedFlow = (currentTime() - _flow.lastExchangeTime) * _flow.maxExchangePerSecond;
         uint256 _balance = balances[_id][msg.sender];
         uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
         _doBurn(msg.sender, _id, _value);
         _doMint(msg.sender, _flow.parentToken, _value, _data);
-        _flow.lastExchangeTime = block.timestamp;
+        _flow.lastExchangeTime = currentTime();
     }
 
 // Internal
@@ -127,6 +127,10 @@ contract TokensFlow is ERC1155, IERC1155Views
 
         // MUST emit event
         emit TransferSingle(msg.sender, _from, address(0), _id, _value);
+    }
+
+    function currentTime() public virtual view returns(uint256) {
+        return block.timestamp;
     }
 
 // Events
