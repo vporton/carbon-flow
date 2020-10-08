@@ -98,12 +98,12 @@ contract TokensFlow is ERC1155, IERC1155Views
     function exchangeToParent(uint256 _id, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
         TokenFlow storage _flow = tokenFlow[_id];
-        uint256 _maxAllowedFlow = (currentTime() - _flow.lastExchangeTime) * _flow.maxExchangePerSecond;
+        uint256 _maxAllowedFlow = (_currentTime() - _flow.lastExchangeTime) * _flow.maxExchangePerSecond;
         uint256 _balance = balances[_id][msg.sender];
         uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
         _doBurn(msg.sender, _id, _value);
         _doMint(msg.sender, _flow.parentToken, _value, _data);
-        _flow.lastExchangeTime = currentTime();
+        _flow.lastExchangeTime = _currentTime();
     }
 
 // Internal
@@ -136,11 +136,11 @@ contract TokensFlow is ERC1155, IERC1155Views
         // require(_parent <= maxTokenId); // against an unwise child
 
         tokenFlow[_child] = TokenFlow({parentToken: _parent,
-                                       lastExchangeTime: currentTime(),
+                                       lastExchangeTime: _currentTime(),
                                        maxExchangePerSecond: 0});
     }
 
-    function currentTime() public virtual view returns(uint256) {
+    function _currentTime() internal virtual view returns(uint256) {
         return block.timestamp;
     }
 
