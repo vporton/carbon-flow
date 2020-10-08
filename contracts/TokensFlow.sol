@@ -95,6 +95,27 @@ contract TokensFlow is ERC1155, IERC1155Views
         require(tokenOwners[_id] == msg.sender);
         // require(_id != 0);
 
+        _doMint(_to, _id, _value, _data);
+    }
+
+// Flow
+
+    // TODO: Several exchanges in one call.
+    // TODO: Solidity 0.7.1 bug https://github.com/ethereum/solidity/issues/9988
+    function exchangeToParent(uint256 _id, bytes calldata _data) external {
+        // Intentionally no check for `msg.sender`.
+        TokenFlow storage _flow = tokenFlow[_id];
+        uint256 _maxAllowedFlow = (_currentTime() - _flow.lastExchangeTime) * _flow.maxExchangePerSecond; // FIXME: overflow checking
+        uint256 _balance = balances[_id][msg.sender];
+        uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
+        _doBurn(msg.sender, _id, _value);
+        _doMint(msg.sender, _flow.parentToken, _value, _data);
+        _flow.lastExchangeTime = _currentTime();
+    }
+
+// Internal
+
+    function _doMint(address _to, uint256 _id, uint256 _value, bytes calldata _data) public {
         require(_to != address(0), "_to must be non-zero.");
 
         if(_value != 0) {
@@ -112,42 +133,11 @@ contract TokensFlow is ERC1155, IERC1155Views
         }
     }
 
-// Flow
-
-    // TODO: Several exchanges in one call.
-    // TODO: Solidity 0.7.1 bug https://github.com/ethereum/solidity/issues/9988
-    function exchangeToParent(uint256 _id, bytes calldata _data) external {
-        // Intentionally no check for `msg.sender`.
-        TokenFlow storage _flow = tokenFlow[_id];
-        uint256 _maxAllowedFlow = (_currentTime() - _flow.lastExchangeTime) * _flow.maxExchangePerSecond;
-        uint256 _balance = balances[_id][msg.sender];
-        uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
-        _doBurn(msg.sender, _id, _value);
-        _doMint(msg.sender, _flow.parentToken, _value, _data);
-        _flow.lastExchangeTime = _currentTime();
-    }
-
-// Internal
-
-    function _doMint(address _to, uint256 _id, uint256 _value, bytes calldata _data) public {
-        require(_to != address(0), "_to must be non-zero.");
-
-        totalSupplyImpl[_id] = _value.add(totalSupplyImpl[_id]); // TODO: Should increase on transfer to 0x0?
-
-        // MUST emit event
-        emit TransferSingle(msg.sender, address(0), _to, _id, _value);
-
-        // Now that the balance is updated and the event was emitted,
-        // call onERC1155Received if the destination is a contract.
-        if (_to.isContract()) {
-            _doSafeTransferAcceptanceCheck(msg.sender, address(0), _to, _id, _value, _data);
-        }
-    }
-
     function _doBurn(address _from, uint256 _id, uint256 _value) public {
         // require(_from != address(0), "_from must be non-zero.");
 
-        totalSupplyImpl[_id] = totalSupplyImpl[_id].sub(_value); // TODO: Should increase on transfer to 0x0?
+        balances[_id][_from] = balances[_id][_from].sub(_value);
+        totalSupplyImpl[_id] -= _value; // no need to check for overflow due to the previous line // TODO: Should increase on transfer to 0x0?
 
         // MUST emit event
         emit TransferSingle(msg.sender, _from, address(0), _id, _value);
