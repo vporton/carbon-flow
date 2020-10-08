@@ -4,6 +4,10 @@ It is a solution of
 https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty
 (work in progress!)
 
+_It seems I overengineered: My system of summing several tokens in fact protects
+only as much as the capacities of exchanges would allow. So instead just issue
+several independent tokens and allow to exchange at a limited rate the main token._
+
 It tackles the problem if once of the token issuing entities would be hijacked
 by each of them having its own token. The M+C token is formed as a sum of values
 of several tokens.
