@@ -53,12 +53,16 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Administrativia
 
-    function newToken(string calldata _name, string calldata _symbol, string calldata _uri) external returns (uint256) {
+    function newToken(string calldata _name, uint256 _parent, string calldata _symbol, string calldata _uri)
+        external returns (uint256)
+    {
         tokenOwners[++maxTokenId] = msg.sender;
 
         nameImpl[maxTokenId] = _name;
         symbolImpl[maxTokenId] = _symbol;
         uriImpl[maxTokenId] = _uri;
+
+        _setTokenParent(maxTokenId, _parent);
 
         emit NewToken(maxTokenId, _name, _symbol, _uri);
 
@@ -72,11 +76,10 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     // We don't check for circularities.
     function setTokenParent(uint256 _child, uint256 _parent) external {
+        // require(_child <= maxTokenId); // not needed
         require(msg.sender == tokenOwners[_child]);
 
-        tokenFlow[_child] = TokenFlow({parentToken: _parent,
-                                       lastExchangeTime: currentTime(),
-                                       maxExchangePerSecond: 0});
+        _setTokenParent(_child, _parent);
     }
 
     function setTokenFlow(uint256 _child, uint _lastExchangeTime, uint256 _maxExchangePerSecond) external {
@@ -127,6 +130,14 @@ contract TokensFlow is ERC1155, IERC1155Views
 
         // MUST emit event
         emit TransferSingle(msg.sender, _from, address(0), _id, _value);
+    }
+
+    function _setTokenParent(uint256 _child, uint256 _parent) internal {
+        // require(_parent <= maxTokenId); // against an unwise child
+
+        tokenFlow[_child] = TokenFlow({parentToken: _parent,
+                                       lastExchangeTime: currentTime(),
+                                       maxExchangePerSecond: 0});
     }
 
     function currentTime() public virtual view returns(uint256) {
