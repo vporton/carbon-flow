@@ -71,12 +71,22 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // We don't check for circularities.
-    // FIXME: Does it break flow info?
-    // function setTokenParent(uint256 _child, uint256 _parent) external {
-    //     require(msg.sender == tokenOwners[_parent]);
+    function setTokenParent(uint256 _child, uint256 _parent) external {
+        require(msg.sender == tokenOwners[_child]);
 
-    //     parentToken[_child] = _parent;
-    // }
+        tokenFlow[_child] = TokenFlow({parentToken: _parent,
+                                       lastExchangeTime: block.timestamp,
+                                       maxExchangePerSecond: 0});
+    }
+
+    function setTokenFlow(uint256 _child, uint _lastExchangeTime, uint256 _maxExchangePerSecond) external {
+        TokenFlow storage _flow = tokenFlow[_child];
+        
+        require(msg.sender == tokenOwners[_flow.parentToken]);
+
+        _flow.lastExchangeTime = _lastExchangeTime;
+        _flow.maxExchangePerSecond = _maxExchangePerSecond;
+    }
 
 // Flow
 
@@ -98,8 +108,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     function _doMint(address _to, uint256 _id, uint256 _value, bytes calldata _data) public {
         require(_to != address(0), "_to must be non-zero.");
 
-        // FIXME: Check overflow.
-        totalSupplyImpl[_id] += _value; // TODO: Should increase on transfer to 0x0?
+        totalSupplyImpl[_id] = _value.add(totalSupplyImpl[_id]); // TODO: Should increase on transfer to 0x0?
 
         // MUST emit event
         emit TransferSingle(msg.sender, address(0), _to, _id, _value);
