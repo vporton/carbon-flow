@@ -88,27 +88,10 @@ contract SumOfTokens is ERC1155, IERC1155Views
         uint256 _balance = balances[_id][msg.sender];
         uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
         _doBurn(msg.sender, _id, _value, "");
-        _doMint(msg.sender, _flow.parentToken, _value, "");
         _flow.lastExchangeTime = block.timestamp;
     }
 
 // Internal
-
-    function _doMint(address _to, uint256 _id, uint256 _value, bytes calldata _data) public {
-        require(_to != address(0), "_to must be non-zero.");
-
-        // FIXME: Check overflow.
-        totalSupplyImpl[_id] += _value; // TODO: Should increase on transfer to 0x0?
-
-        // MUST emit event
-        emit TransferSingle(msg.sender, address(0), _to, _id, _value);
-
-        // Now that the balance is updated and the event was emitted,
-        // call onERC1155Received if the destination is a contract.
-        if (_to.isContract()) {
-            _doSafeTransferAcceptanceCheck(msg.sender, address(0), _to, _id, _value, _data);
-        }
-    }
 
     function _doBurn(address _from, uint256 _id, uint256 _value, bytes calldata _data) public {
         // require(_from != address(0), "_from must be non-zero.");
