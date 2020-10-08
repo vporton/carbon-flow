@@ -38,3 +38,7 @@ list of children tokens ASAP to limit the damage.
 The structure of the tree can be set only by the owner, because otherwise a malicious
 issuer could make the tree big, so producing high gas consumption or even out-of-gas
 errors.
+
+## TODO
+
+`TokensFlow` - If overflowed then transfer nothing?
