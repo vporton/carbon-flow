@@ -23,7 +23,7 @@ abstract contract Carbon is SumOfTokens
         address authority;
         uint serial;
         uint256 amount;
-        address issuer;
+        address issuer; // FIXME
         bool retired;
         uint256 arweaveHash; // TODO: big or little endian?
     }
@@ -52,6 +52,12 @@ abstract contract Carbon is SumOfTokens
     function retireCredit(uint creditId) external {
         CarbonCredit storage credit = credits[creditId];
         require(!credit.retired, "Credit is already retired");
+        _checkCanRetire();
+        credit.retired = true;
+        // TODO
+    }
+
+    function _checkCanRetire() {
         // TODO
     }
 }
