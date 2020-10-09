@@ -67,8 +67,11 @@ module.exports = {
     deployer: {
       default: 0,
     },
-    owner: {
+    globalCommunityFund: {
       default: 1,
+    },
+    owner: {
+      default: 2,
     },
   },
 };
