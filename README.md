@@ -7,6 +7,24 @@ https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty
 The task was formulated to produce an ERC-20 token, but I do a ERC-1155 token.
 The discrepancy is easily solvable by creating a ERC-1155/ERC-20 bridge.
 
+## Installation
+
+Prerequisites: Node.js, yarn.
+
+To install:
+```sh
+yarn install
+npx buidler deploy --network NETWORK
+```
+(replace `NETWORK` by `mainnet` when doing the real deployment, for testing you can
+use `--network buidlerevm`).
+
+To test:
+```sh
+yarn install
+npx buidler test
+```
+
 ## Kinds of tokens
 
 There are basically two kinds of tokens:
