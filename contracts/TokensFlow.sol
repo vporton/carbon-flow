@@ -24,6 +24,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     uint256 public maxTokenId;
 
     mapping (uint256 => address) public tokenOwners;
+    mapping (uint256 => bool) public mintingAllowed; // TODO: setter for this?
 
     mapping (uint256 => TokenFlow) public tokenFlow;
 
@@ -56,10 +57,11 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Administrativia
 
-    function newToken(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)
+    function newToken(uint256 _parent, bool _mintingAllowed,
+                      string calldata _name, string calldata _symbol, string calldata _uri)
         external returns (uint256)
     {
-        return _newToken(_parent, _name, _symbol, _uri);
+        return _newToken(_parent, _mintingAllowed, _name, _symbol, _uri);
     }
 
     // Intentially no setTokenName() and setTokenSymbol()
@@ -87,10 +89,10 @@ contract TokensFlow is ERC1155, IERC1155Views
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
-    // FIXME: Superfluous in Carbon.sol
     function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
         require(tokenOwners[_id] == msg.sender);
         // require(_id != 0);
+        require(mintingAllowed[_id]);
 
         _doMint(_to, _id, _value, _data);
     }
@@ -117,10 +119,12 @@ contract TokensFlow is ERC1155, IERC1155Views
 // Internal
 
     // Keep in sync with _newToken2
-    function _newToken(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)
+    function _newToken(uint256 _parent, bool _mintingAllowed,
+                       string calldata _name, string calldata _symbol, string calldata _uri)
         internal returns (uint256)
     {
         tokenOwners[++maxTokenId] = msg.sender;
+        mintingAllowed[maxTokenId] = _mintingAllowed;
 
         nameImpl[maxTokenId] = _name;
         symbolImpl[maxTokenId] = _symbol;
@@ -134,10 +138,12 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // Keep in sync with _newToken
-    function _newToken2(uint256 _parent, string memory _name, string memory _symbol, string memory _uri)
+    function _newToken2(uint256 _parent, bool _mintingAllowed,
+                       string memory _name, string memory _symbol, string memory _uri)
         internal returns (uint256)
     {
         tokenOwners[++maxTokenId] = msg.sender;
+        mintingAllowed[maxTokenId] = _mintingAllowed;
 
         nameImpl[maxTokenId] = _name;
         symbolImpl[maxTokenId] = _symbol;

@@ -37,7 +37,8 @@ contract Carbon is BaseCarbon
     // Anybody can create an authority, but its parent decides if its tokens can be swapped.
     function createAuthority(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri) external {
         // require(msg.sender == globalCommunityFund;
-        uint256 _token = _newToken(_parent, _name, _symbol, _uri);
+        // Minting restricted because minting can happen only through createCredit().
+        uint256 _token = _newToken(_parent, false, _name, _symbol, _uri);
         Authority memory _authority = Authority({enabled: true, maxSerial: 0, token: _token});
         authorities[msg.sender] = _authority;
         // TODO: event
