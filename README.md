@@ -26,16 +26,39 @@ these child tokens he has. (TODO: Should be able to swap a part.)
 ### Limiting token flow
 
 The amount of child tokens that can be swapped for a parent token is limited
-by a certain number of tokens per second (as determined by the time since).
+by an algorithm parametrized with the following numbers:
+
+- R - a certain number of tokens per second (as determined by the time since
+  the very last swap);
+
+- C - max swap credit amount (a number of tokens);
+
+- P - swap credit period.
 
 This is to avoid some entity maliciously or erroneously minting producing a
 giant number of tokens and then swapping them for valuable parent token.
 
-Morevover there is swap credit, a certain number of tokens that can be swapped
-in addition to the above defined amount. The swap credit is allocated as soon
-as the last allocated (by overusing the ?? limit) swap credit expires (it expires
-when the time equal to swap credit divided to the limit of token per second
-passes).
+The idea is that one can swap R tokens per seconds _plus_ up to C tokens per
+swap credit period P.
+
+The algorithm is as follows:
+
+- At any moment of time we are either in a swap credit or no (intially we are
+  not in a swap credit).
+
+- At any moment of time anyone can swap up to (R*t)+c where t is the time passed
+  from the very last swap for this child token, c is the remaining swap credit.
+
+- c = C if we were not in a swap credit.
+
+- c is set to C when we enter into a swap credit.
+
+- c is decreased by s-(R*t) where s is the swap amount at every swap if
+  s-(R*t) > 0.
+
+- We enter swap credit if more than R*t tokens are swapped.
+
+- We exit from swap credit as soon as P seconds passes since last entering swap credit.
 
 Swap credit is intended for the situation when somebody swapped a token very
 recently and the allocated number of tokens is too small, as otherwise anyone
