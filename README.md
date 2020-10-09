@@ -15,7 +15,7 @@ There are basically two kinds of tokens:
 
 - retired carbon tokens.
 
-Each token has a token owner. Each token has either a parent token or no parent tokens.
+Each token has a token owner. Each token has either a parent token or no parent token.
 
 There are two "main tokens":
 
