@@ -60,6 +60,16 @@ contract Carbon is TokensFlow
         return maxCreditId;
     }
 
+    // TODO: It would be useful to be able to transfer a PART of a carbon credit to another owner before it is retired.
+    // TODO: Why at all we retire whole carbon credits not arbitrary amounts of tokens?!
+    function transferCarbonCredit(uint256 _creditId, address _newOwner) external {
+        CarbonCredit storage credit = credits[_creditId];
+        require(credit.owner == msg.sender);
+        require(_newOwner != address(0)); // TODO: needed?
+        credit.owner = _newOwner;
+        // TODO: emit event
+    }
+
     // TODO: list of signers
     function retireCredit(uint creditId) external {
         require(issuers[msg.sender]);
