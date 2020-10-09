@@ -19,7 +19,6 @@ contract TokensFlow is ERC1155, IERC1155Views
         uint swapCreditPeriod;
         uint timeEnteredSwapCredit; // zero means not in a swap credit
         uint256 remainingSwapCredit;
-        // uint256 maxCarbonCredits; // TODO
     }
 
     uint256 public maxTokenId;
@@ -68,7 +67,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
         _setTokenParent(maxTokenId, _parent);
 
-        emit NewToken(maxTokenId, _name, _symbol, _uri); // TODO: Here and in other places token owner
+        emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
 
         return maxTokenId;
     }
@@ -86,12 +85,16 @@ contract TokensFlow is ERC1155, IERC1155Views
         _setTokenParent(_child, _parent);
     }
 
-    function setTokenFlow(uint256 _child/* TODO:, ??*/) external {
+    function setTokenFlow(uint256 _child, uint256 _maxSwapCredit, uint256 _remainingSwapCredit, uint _swapCreditPeriod) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
+        require(_remainingSwapCredit <= _maxSwapCredit); // TODO: We could do well enough without this check...
 
-        // _flow.?? = ; // TODO
+        _flow.maxSwapCredit = _maxSwapCredit;
+        _flow.swapCreditPeriod = _swapCreditPeriod;
+        _flow.timeEnteredSwapCredit = block.timestamp;
+        _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
     function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
@@ -104,7 +107,6 @@ contract TokensFlow is ERC1155, IERC1155Views
 // Flow
 
     // TODO: Several exchanges in one call.
-    // TODO: Solidity 0.7.1 bug https://github.com/ethereum/solidity/issues/9988
     function exchangeToParent(uint256 _id, uint256 _amount, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
         TokenFlow storage _flow = tokenFlow[_id];
@@ -151,6 +153,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         emit TransferSingle(msg.sender, _from, address(0), _id, _value);
     }
 
+    // Also resets swap credits, so use with caution.
     function _setTokenParent(uint256 _child, uint256 _parent) internal {
         // require(_parent <= maxTokenId); // against an unwise child
 
@@ -167,16 +170,16 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     // TODO: additional arguments to the below functions to optimize them
 
-    function _inSwapCredit(TokenFlow memory _flow) public returns(bool) {
+    function _inSwapCredit(TokenFlow memory _flow) public view returns(bool) {
         return _flow.timeEnteredSwapCredit != 0 &&
                _currentTime() - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
     }
 
-    function _maxSwapAmount(TokenFlow memory _flow) public returns(uint256) {
+    function _maxSwapAmount(TokenFlow memory _flow) public view returns(uint256) {
         return _inSwapCredit(_flow) ? _flow.remainingSwapCredit : _flow.maxSwapCredit;
     }
 
 // Events
 
-    event NewToken(uint256 id, string name, string symbol, string uri);
+    event NewToken(uint256 id, address owner, string name, string symbol, string uri);
 }
