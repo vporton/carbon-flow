@@ -13,9 +13,8 @@ abstract contract Carbon is TokensFlow
         address authority;
         uint serial;
         uint256 amount;
-        uint256 token; // initially zero
         address owner;
-        bool retired; // TODO: can check token != 0 instead
+        bool retired;
         uint256 arweaveHash; // TODO: big or little endian?
     }
 
@@ -52,7 +51,6 @@ abstract contract Carbon is TokensFlow
         CarbonCredit memory credit = CarbonCredit({authority: msg.sender,
                                                    serial: _serial,
                                                    amount: _amount,
-                                                   token: 0,
                                                    owner: _owner,
                                                    retired: false,
                                                    arweaveHash: _arweaveHash});
