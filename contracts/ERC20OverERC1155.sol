@@ -26,8 +26,12 @@ contract ERC20OverERC1155 is IERC20
     }
 
     function transfer(address recipient, uint256 amount) external override returns (bool) {
-        erc1155.safeTransferFrom(msg.sender, recipient, tokenId, amount, "");
-        return true;
+        try erc1155.safeTransferFrom(msg.sender, recipient, tokenId, amount, "") {
+            return true;
+        }
+        catch Error(string memory /*reason*/) {
+            return false;
+        }
     }
 
     function allowance(address owner, address spender) external override view returns (uint256) {
@@ -40,7 +44,11 @@ contract ERC20OverERC1155 is IERC20
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) external override returns (bool) {
-        erc1155.safeTransferFrom(sender, recipient, tokenId, amount, "");
-        return true;
+        try erc1155.safeTransferFrom(sender, recipient, tokenId, amount, "") {
+            return true;
+        }
+        catch Error(string memory /*reason*/) {
+            return false;
+        }
     }
 }
