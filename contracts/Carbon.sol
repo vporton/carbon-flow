@@ -10,16 +10,6 @@ contract Carbon is TokensFlow
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
 
-    // TODO: Only as an event? TODO: rename
-    // struct CarbonCredit {
-    //     address authority;
-    //     uint serial; // FIXME: individual for each authority
-    //     uint256 amount;
-    //     address owner;
-    //     bool retired;
-    //     uint256 arweaveHash; // TODO: big or little endian?
-    // }
-
     address public globalCommunityFund;
     uint256 public retiredCreditsToken; // M+ token
     uint256 public nonRetiredCreditsToken;
