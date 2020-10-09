@@ -10,8 +10,6 @@ contract Carbon is TokensFlow
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
 
-    // TODO: Limit the amount of credits authorities issue
-
     // TODO: Only as an event? TODO: rename
     // struct CarbonCredit {
     //     address authority;
