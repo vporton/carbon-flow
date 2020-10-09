@@ -28,7 +28,7 @@ describe("TokensFlow", function() {
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = [ "event NewToken(uint256 id, string name, string symbol, string uri)" ];
+    const createTokenEventAbi = [ "event NewToken(uint256 id, address owner, string name, string symbol, string uri)" ];
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     let wallets = [];
@@ -54,7 +54,7 @@ describe("TokensFlow", function() {
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
       tokens.push(token);
-      const tx2 = await tokensFlow.connect(wallets[0]).setTokenFlow(token, await tokensFlow.currentTime(), ethers.utils.parseEther('10000'));
+      const tx2 = await tokensFlow.connect(wallets[0]).setTokenFlow(token, ethers.utils.parseEther('10000'), ethers.utils.parseEther('10000'), 10);
       await ethers.provider.getTransactionReceipt(tx2.hash);
       tree[token] = rootToken;
     }
@@ -151,26 +151,34 @@ describe("TokensFlow", function() {
             ? oldFromBalance
             : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
           await skipTime();
-          await tokensFlow.connect(wallet).exchangeToParent(fromToken, [], {gasLimit: 1000000});
-          await ethers.provider.getTransactionReceipt(tx.hash);
-          const newFromBalance = await tokensFlow.balanceOf(wallet.address, fromToken);
-          const newFromTotal = await tokensFlow.totalSupply(fromToken);
-          const newToBalance = await tokensFlow.balanceOf(wallet.address, toToken);
-          const newToTotal = await tokensFlow.totalSupply(toToken);
-          {
-            const change = newToBalance.sub(oldToBalance);
-            expect(change).to.equal(oldFromBalance);
-          }
-          {
-            const change = newToTotal.sub(oldToTotal);
-            expect(change).to.equal(oldFromBalance);
-          }
-          {
-            expect(newFromBalance).to.equal(ethers.BigNumber.from(0));
-          }
-          {
-            const change = oldFromTotal.sub(newFromTotal);
-            expect(change).to.equal(oldFromBalance);
+          if(oldFromBalance.gte(amount)) {
+            await tokensFlow.connect(wallet).exchangeToParent(fromToken, amount, [], {gasLimit: 1000000});
+            await ethers.provider.getTransactionReceipt(tx.hash);
+            const newFromBalance = await tokensFlow.balanceOf(wallet.address, fromToken);
+            const newFromTotal = await tokensFlow.totalSupply(fromToken);
+            const newToBalance = await tokensFlow.balanceOf(wallet.address, toToken);
+            const newToTotal = await tokensFlow.totalSupply(toToken);
+            {
+              const change = newToBalance.sub(oldToBalance);
+              expect(change).to.equal(amount);
+            }
+            {
+              const change = newToTotal.sub(oldToTotal);
+              expect(change).to.equal(amount);
+            }
+            {
+              const change = oldFromBalance.sub(newFromBalance);
+              expect(change).to.equal(amount);
+            }
+            {
+              const change = oldFromTotal.sub(newFromTotal);
+              expect(change).to.equal(amount);
+            }
+          } else {
+            async function mycall() {
+              await tokensFlow.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
+            }
+            expect(mycall()).to.eventually.be.rejected; 
           }
           break;
         }
