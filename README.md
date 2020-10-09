@@ -119,8 +119,6 @@ This bug probably could be fixed, but:
 
 See also `TODO` and `FIXME` comments in the source.
 
-`TokensFlow` - If overflowed then transfer nothing?
-
 Test `TokensFlow` transfer limits.
 
 `buidler-deploy`.
