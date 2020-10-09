@@ -26,6 +26,10 @@ The token owner whose ultimate ancestor is the owner of M+ is called an _issuer_
 
 The token owner whose ultimate ancestor is the owner of M- is called an _carbon credit authority_.
 
+So, we have two trees (there may be more, see the next paragraph): the tree of child/parent
+relationships between issuers and the tree of child/parent relationships between carbon credit
+authorities.
+
 There may be token owners who are neither issuers not authorities (either tokens
 unrelated with our carbon counting project (That's fine, there is no reason to use my project only
 for carbon counting, it may be useful also for something other,) or token owners temporarily having
