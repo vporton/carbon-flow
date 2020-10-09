@@ -22,6 +22,7 @@ abstract contract Carbon is TokensFlow
     int128 tax = int128(10).div(100); // 10%
 
     mapping (address => bool) carbonCreditAuthorities;
+    mapping (address => bool) issuers; // who can retire
 
     mapping (uint => CarbonCredit) credits;
     uint maxCreditId;
@@ -60,6 +61,7 @@ abstract contract Carbon is TokensFlow
     }
 
     function retireCredit(uint creditId) external {
+        require(issuers[msg.sender]);
         uint256 _token = ownerTokens[msg.sender];
         require(_token != 0); // We are an issuer.
         CarbonCredit storage credit = credits[creditId];
@@ -73,19 +75,33 @@ abstract contract Carbon is TokensFlow
         emit CreditRetired(creditId); // TODO: More arguments?
     }
 
-// Events
-
 // Admin
 
     function createCarbonCreditAuthority(address _authority) external {
         require(msg.sender == globalCommunityFund);
         carbonCreditAuthorities[_authority] = true;
+        // TODO: event
     }
 
     function deleteCarbonCreditAuthority(address _authority) external {
         require(msg.sender == globalCommunityFund);
         carbonCreditAuthorities[_authority] = false;
+        // TODO: event
     }
+
+    function createIssuer(address _issuer) external {
+        require(msg.sender == globalCommunityFund);
+        issuers[_issuer] = true;
+        // TODO: event
+    }
+
+    function deleteIssuer(address _issuer) external {
+        require(msg.sender == globalCommunityFund);
+        issuers[_issuer] = false;
+        // TODO: event
+    }
+
+// Events
 
     event CreditCreated(uint creditId);
     event CreditRetired(uint creditId);
