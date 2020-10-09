@@ -24,7 +24,6 @@ contract TokensFlow is ERC1155, IERC1155Views
     uint256 public maxTokenId;
 
     mapping (uint256 => address) public tokenOwners;
-    mapping (address => uint256) public ownerTokens;
 
     mapping (uint256 => TokenFlow) public tokenFlow;
 
@@ -61,7 +60,6 @@ contract TokensFlow is ERC1155, IERC1155Views
         external returns (uint256)
     {
         tokenOwners[++maxTokenId] = msg.sender;
-        ownerTokens[msg.sender] = maxTokenId;
 
         nameImpl[maxTokenId] = _name;
         symbolImpl[maxTokenId] = _symbol;
