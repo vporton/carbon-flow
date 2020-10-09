@@ -7,25 +7,32 @@ import './ABDKMath64x64.sol';
 
 contract Carbon is TokensFlow
 {
+    using SafeMath for uint256;
     using ABDKMath64x64 for int128;
 
+    // TODO: Limit the amount of credits authorities issue
+
+    // TODO: Only as an event? TODO: rename
     struct CarbonCredit {
         address authority;
-        uint serial;
+        uint serial; // FIXME: individual for each authority
         uint256 amount;
         address owner;
         bool retired;
         uint256 arweaveHash; // TODO: big or little endian?
     }
 
-    address globalCommunityFund;
-    int128 tax = int128(10).div(100); // 10%
+    address public globalCommunityFund;
+    uint256 public mainToken;
+    int128 public tax = int128(10).div(100); // 10%
 
-    mapping (address => bool) carbonCreditAuthorities;
-    mapping (address => bool) issuers; // who can retire
+    mapping (address => bool) public carbonCreditAuthorities; // TODO: Also hold the account of non-retired tokens it created and allow to delete these tokens
+    mapping (address => bool) public issuers; // who can retire
 
-    mapping (uint => CarbonCredit) credits;
-    uint maxCreditId;
+    mapping (uint => CarbonCredit) public credits; // TODO: needed?
+    uint public maxCreditId;
+
+    mapping (address => uint256) public nonRetiredCredits;
 
 // Admin
 
@@ -41,49 +48,40 @@ contract Carbon is TokensFlow
         tax = _tax;
     }
 
+    function setMainToken(uint256 _mainToken) external {
+        require(msg.sender == globalCommunityFund);
+        mainToken = _mainToken;
+    }
+
 // Credits
 
     constructor(address _globalCommunityFund) {
         globalCommunityFund = _globalCommunityFund;
     }
 
-    function createCredit(uint _serial, address _owner, uint256 _amount, uint256 _arweaveHash) external returns(uint _creditId) {
+    function createCredit(address _owner, uint256 _amount, uint256 _arweaveHash) external /*returns(uint _creditId)*/ {
         require(carbonCreditAuthorities[msg.sender]);
-        CarbonCredit memory credit = CarbonCredit({authority: msg.sender,
-                                                   serial: _serial,
-                                                   amount: _amount,
-                                                   owner: _owner,
-                                                   retired: false,
-                                                   arweaveHash: _arweaveHash});
-        credits[++maxCreditId] = credit;
-        emit CreditCreated(maxCreditId); // TODO: More arguments?
-        return maxCreditId;
+        // CarbonCredit memory credit = CarbonCredit({authority: msg.sender,
+        //                                            serial: _serial, // FIXME
+        //                                            amount: _amount,
+        //                                            owner: _owner,
+        //                                            retired: false,
+        //                                            arweaveHash: _arweaveHash});
+        // credits[++maxCreditId] = credit;
+        nonRetiredCredits[_owner] = _amount.add(nonRetiredCredits[_owner]);
+        // emit CreditCreated(maxCreditId); // TODO: More arguments?
+        // return maxCreditId;
     }
 
-    // TODO: It would be useful to be able to transfer a PART of a carbon credit to another owner before it is retired.
-    // TODO: Why at all we retire whole carbon credits not arbitrary amounts of tokens?!
-    function transferCarbonCredit(uint256 _creditId, address _newOwner) external {
-        CarbonCredit storage credit = credits[_creditId];
-        require(credit.owner == msg.sender);
-        require(_newOwner != address(0)); // TODO: needed?
-        credit.owner = _newOwner;
-        // TODO: emit event
-    }
-
-    // TODO: list of signers
-    function retireCredit(uint creditId) external {
-        require(issuers[msg.sender]);
-        uint256 _token = ownerTokens[msg.sender];
-        require(_token != 0); // We are an issuer.
-        CarbonCredit storage credit = credits[creditId];
-        require(!credit.retired, "Credit is already retired");
-        credit.retired = true;
-        uint256 _value = credit.amount;
-        uint256 _taxAmount = uint256(tax.mulu(_value));
+    // TODO: list of signers in a separate contract
+    function retireCredit(uint _amount) external {
+        nonRetiredCredits[msg.sender] = nonRetiredCredits[msg.sender].sub(_amount);
+        require(mainToken != 0); // TODO: check necessary?
+        uint256 _taxAmount = uint256(tax.mulu(_amount));
         bytes calldata _data;
-        _doMint(globalCommunityFund, _token, _taxAmount, _data);
-        _doMint(credit.owner, _token, _value - _taxAmount, _data);
-        emit CreditRetired(creditId); // TODO: More arguments?
+        _doMint(globalCommunityFund, mainToken, _taxAmount, _data);
+        _doMint(msg.sender, mainToken, _amount - _taxAmount, _data);
+        // emit CreditRetired(creditId); // TODO
     }
 
 // Admin
@@ -114,6 +112,5 @@ contract Carbon is TokensFlow
 
 // Events
 
-    event CreditCreated(uint creditId);
-    event CreditRetired(uint creditId);
+    event CreditCreated(uint creditId); // TODO: remove?
 }
