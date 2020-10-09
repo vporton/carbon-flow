@@ -145,22 +145,6 @@ Test `TokensFlow` transfer limits.
 
 ## FAQ
 
-**What is the difference between _issuer_ and _carbon credit authority_?**
-
-There is no strict difference. Carbon credit authority is an issuer. Even
-the Global Community Fund is an issuer. It is assumed that Global Community Fund
-has no parent issuer and carbon credit authorities are its direct children.
-Other issuers may be direct or indirect children of carbon credit authorities.
-
-However, it is also assumed that carbon credit authorities keep track of carbon
-credits data such as serial numbers, where common issuers may not do this.
-
-**Global Community Fund is an issuer. So it can issue tokens itself bypassing
-carbon credit authorities?**
-
-It can, but it may be more safe to delegate this task to carbon credit authorities
-instead of issuing tokens directly by Global Community Fund.
-
 **Which tokens do you have?**
 
 M+ token is the retired carbon credits.

@@ -2,62 +2,65 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
-import './TokensFlow.sol';
-import './ABDKMath64x64.sol';
+import './BaseCarbon.sol';
 
-contract Carbon is TokensFlow
+contract Carbon is BaseCarbon
 {
-    using SafeMath for uint256;
-    using ABDKMath64x64 for int128;
+    struct Authority {
+        bool enabled;
+        uint256 token;
+        uint maxSerial;
+    }
 
-    address public globalCommunityFund;
-    uint256 public retiredCreditsToken; // M+ token
-    uint256 public nonRetiredCreditsToken;
-    int128 public tax = int128(10).div(100); // 10%
+    // TODO: rename // TODO: only event?
+    struct CarbonCredit {
+        address authority;
+        uint serial;
+        uint256 amount;
+        address owner;
+        uint256 arweaveHash; // TODO: big or little endian?
+    }
 
-// Admin
+    mapping (address => Authority) public authorities;
+
+    mapping (uint256 => CarbonCredit) public credits;
+
+    uint256 maxCreditId;
 
     constructor(address _globalCommunityFund,
                 string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
                 string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
-    {
-        globalCommunityFund = _globalCommunityFund;
-        retiredCreditsToken = _newToken2(0, _retiredName, _retiredSymbol, _retiredUri);
-        nonRetiredCreditsToken = _newToken2(0, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri);
+        BaseCarbon(_globalCommunityFund,
+                   _retiredName, _retiredSymbol, _retiredUri, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri)
+    { }
+
+    // Anybody can create an authority, but its parent decides if its tokens can be swapped.
+    function createAuthority(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri) external {
+        // require(msg.sender == globalCommunityFund;
+        uint256 _token = _newToken(_parent, _name, _symbol, _uri);
+        Authority memory _authority = Authority({enabled: true, maxSerial: 0, token: _token});
+        authorities[msg.sender] = _authority;
+        // TODO: event
     }
 
-    function setGlobalCommunityFundAddress(address _globalCommunityFund) external {
-        require(msg.sender == globalCommunityFund);
-        require(_globalCommunityFund != address(0));
-        globalCommunityFund = _globalCommunityFund;
+    function setAuthorityEnabled(address _address, bool _enabled) external {
+        require(msg.sender == globalCommunityFund); // FIXME: its parent should be able to do this instead
+        authorities[_address].enabled = _enabled;
+        // TODO: event
     }
 
-    function setTax(int128 _tax) external {
-        require(msg.sender == globalCommunityFund);
-        require(_tax >= 0 && _tax < 1<<64); // 0-100%
-        tax = _tax;
-    }
-
-    function setMainTokens(uint256 _retiredCreditsToken, uint256 _nonRetiredCreditsToken) external { // needed?
-        require(msg.sender == globalCommunityFund);
-        require(_retiredCreditsToken != 0 && _nonRetiredCreditsToken != 0);
-        retiredCreditsToken = _retiredCreditsToken;
-        nonRetiredCreditsToken = _nonRetiredCreditsToken;
-    }
-
-// Credits
-
-    // TODO: list of signers in a separate contract
-    function retireCredit(uint _amount) external {
-        _doBurn(msg.sender, nonRetiredCreditsToken, _amount);
-        uint256 _taxAmount = uint256(tax.mulu(_amount));
+    function createCredit(uint256 _amount, address _owner, uint256 _arweaveHash) external returns(uint256) {
+        Authority storage _authority = authorities[msg.sender];
+        require(_authority.enabled);
+        CarbonCredit memory _credit = CarbonCredit({authority: msg.sender,
+                                                    serial: ++_authority.maxSerial,
+                                                    amount: _amount,
+                                                    owner: _owner,
+                                                    arweaveHash: _arweaveHash});
+        credits[++maxCreditId] = _credit;
         bytes memory _data = ""; // efficient?
-        _doMint(globalCommunityFund, retiredCreditsToken, _taxAmount, _data);
-        _doMint(msg.sender, retiredCreditsToken, _amount - _taxAmount, _data);
-        // emit CreditRetired(creditId); // TODO
+        _doMint(_owner, _authority.token, _amount, _data);
+        // TODO: event?
+        return maxCreditId;
     }
-
-// Events
-
-    event CreditCreated(uint creditId); // TODO: remove?
 }
