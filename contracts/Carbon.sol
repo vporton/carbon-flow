@@ -1,13 +1,17 @@
 //SPDX-License-Identifier: Apache-2.0	
 pragma solidity ^0.7.1;
+pragma experimental ABIEncoderV2;
 
-import './SumOfTokens.sol';
+import './TokensFlow.sol';
+import './ABDKMath64x64.sol';
 
-abstract contract Carbon is SumOfTokens
+abstract contract Carbon is TokensFlow
 {
+    using ABDKMath64x64 for int128;
+
     struct CarbonCreditAuthority {
         uint256 token;
-   }
+    }
 
     struct RetirementIssuer {
         uint256 token;
