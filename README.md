@@ -107,3 +107,40 @@ errors.
 `TokensFlow` - If overflowed then transfer nothing?
 
 Test `TokensFlow` transfer limits.
+
+## FAQ
+
+**What is the difference between _issuer_ and _carbon credit authority_?**
+
+There is no strict difference. Carbon credit authority is an issuer. Even
+the Global Community Fund is an issuer. It is assumed that Global Community Fund
+has no parent issuer and carbon credit authorities are its direct children.
+Other issuers may be direct or indirect children of carbon credit authorities.
+
+However, it is also assumed that carbon credit authorities keep track of carbon
+credits data such as serial numbers, where common issuers may not do this.
+
+**Global Community Fund is an issuer. So it can issue tokens itself bypassing
+carbon credit authorities?**
+
+It can, but it may be more safe to delegate this task to carbon credit authorities
+instead of issuing tokens directly by Global Community Fund.
+
+**Which tokens do you have?**
+
+M+ token is the retired carbon credits.
+
+M- token is the non-retired carbon credits.
+
+Each issuer has also its own token for retired carbon credits that could be exchanged
+for the token of its upper level issuer and ultimately for the M+ token.
+
+**There are both ERC-20 and ERC-1155 tokens. Which tokens should I use?**
+
+Our ERC-20 tokens wrap corresponding ERC-1155 so that the amounts on accounts of
+our ERC-20 and the corresponding ERC-1155 token are always equal. Transfer or approval
+of one of these two tokens automatically transfers or approves also the other one.
+
+You should use ERC-1155 tokens if you can, because they are both more secure (there
+is a security bug in ERC-20 that affects for example crypto exchanges) and use less
+gas. But many legacy softwares don't support ERC-1155, in this case use ERC-20.
