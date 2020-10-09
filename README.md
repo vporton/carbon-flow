@@ -74,7 +74,7 @@ the system is not notified of ERC-1155 transfers and other events by the corresp
 ERC-20 events.
 
 TODO: Should completely remove all events from the ERC-20 wrapper, because they
-don't happen realiably anyway (happen but not on every transfer)?
+don't happen reliably anyway (happen but not on every transfer)?
 
 The practical implications of the bug are as follows:
 
