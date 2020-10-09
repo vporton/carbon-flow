@@ -198,3 +198,11 @@ The structure of the tree can be set only by the owner, because otherwise a mali
 issuer could make the tree big, so producing high gas consumption or even out-of-gas
 errors.
 
+## Donations
+
+If you find this project useful, donate:
+
+- https://paypal.me/ViktorPorton
+- https://www.patreon.com/porton
+- BitCoin 174HGm3PfoxYZkx59hoxVseQZzW5KnCPij
+- Ethereum 0x722cE03C15670c313f9596544CDB582c19f810e2
