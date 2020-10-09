@@ -123,6 +123,15 @@ See also `TODO` and `FIXME` comments in the source.
 
 Test `TokensFlow` transfer limits.
 
+`buidler-deploy`.
+
+### Not doable things
+
+The bounty required
+_Create 10.000 carbon credit serial numbers, including a marker to identify them as “retired”_.
+That's a nonsense, because a carbon credit may be retired partially, so it makes no sense to
+mark it either as retired or non-retired.
+
 ## FAQ
 
 **Which tokens do you have?**
