@@ -34,10 +34,10 @@ describe("SmartWallet", function() {
     let smartWallets = [];
     for(let i = 0; i < walletOwners.length; ++i) {
       const deployResult = await deploy("TestSmartWallet", { from: await deployer.getAddress(), args: [walletOwners[i].address] });
-      // console.log(deployResult);
-      // const contract = await deployments.get("Token");
       const smartWallet = new SmartWallet();
-      smartWallet.init(deployResult, walletOwners[i]);
+      const contract = new ethers.Contract(deployResult.address, deployResult.abi, walletOwners[i]);
+      await smartWallet.init(contract);
+      console.log(await smartWallet.owner());
       smartWallets.push(smartWallet);
     }
   });

@@ -5,7 +5,7 @@ pragma solidity ^0.7.1;
 
 contract TestSmartWallet
 {
-    address payable owner;
+    address payable public owner;
 
     constructor(address payable _owner) payable {
         owner = _owner;
