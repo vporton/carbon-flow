@@ -17,7 +17,7 @@ There are basically two kinds of tokens:
 
 Each token has a token owner. Each token has either a parent token or no parent token.
 
-There are two "main tokens":
+There are two "main tokens" (they have no parents):
 
 - the M+ token represents retired carbon credits;
 - the M- token represents non-retired carbon credits.
