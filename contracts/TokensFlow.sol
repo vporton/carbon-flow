@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: Apache-2.0	
 pragma solidity ^0.7.1;
+pragma experimental ABIEncoderV2;
 
 // import '@nomiclabs/buidler/console.sol';
 
@@ -11,11 +12,13 @@ contract TokensFlow is ERC1155, IERC1155Views
     using SafeMath for uint256;
     using Address for address;
 
+    // TODO: rename variables
     struct TokenFlow {
         uint256 parentToken;
-        uint lastExchangeTime;
         uint256 maxSwapCredit;
         uint swapCreditPeriod;
+        uint timeEnteredSwapCredit; // zero means not in a swap credit
+        uint256 remainingSwapCredit;
         // uint256 maxCarbonCredits; // TODO
     }
 
@@ -83,13 +86,12 @@ contract TokensFlow is ERC1155, IERC1155Views
         _setTokenParent(_child, _parent);
     }
 
-    function setTokenFlow(uint256 _child, uint _lastExchangeTime, uint256 _maxExchangePerSecond) external {
+    function setTokenFlow(uint256 _child/* TODO:, ??*/) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
 
-        _flow.lastExchangeTime = _lastExchangeTime;
-        _flow.maxExchangePerSecond = _maxExchangePerSecond;
+        // _flow.?? = ; // TODO
     }
 
     function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
@@ -103,15 +105,20 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     // TODO: Several exchanges in one call.
     // TODO: Solidity 0.7.1 bug https://github.com/ethereum/solidity/issues/9988
-    function exchangeToParent(uint256 _id, bytes calldata _data) external {
+    function exchangeToParent(uint256 _id, uint256 _amount, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
         TokenFlow storage _flow = tokenFlow[_id];
-        uint256 _maxAllowedFlow = (_currentTime() - _flow.lastExchangeTime) * _flow.maxExchangePerSecond; // FIXME: overflow checking
+        uint256 _maxAllowedFlow = _maxSwapAmount(_flow);
+        require(_amount <= _maxAllowedFlow);
         uint256 _balance = balances[_id][msg.sender];
-        uint256 _value = _balance > _maxAllowedFlow ? _maxAllowedFlow : _balance;
-        _doBurn(msg.sender, _id, _value);
-        _doMint(msg.sender, _flow.parentToken, _value, _data);
-        _flow.lastExchangeTime = _currentTime();
+        require(_amount <= _balance);
+        _doBurn(msg.sender, _id, _amount);
+        _doMint(msg.sender, _flow.parentToken, _amount, _data);
+        if(_inSwapCredit(_flow)) { // TODO: called second time here (TODO: Use `pure` in the interface?)
+            _flow.timeEnteredSwapCredit = block.timestamp;
+        } else {
+            _flow.remainingSwapCredit -= _amount; // no need for overflow checking
+        }
     }
 
 // Internal
@@ -148,12 +155,25 @@ contract TokensFlow is ERC1155, IERC1155Views
         // require(_parent <= maxTokenId); // against an unwise child
 
         tokenFlow[_child] = TokenFlow({parentToken: _parent,
-                                       lastExchangeTime: _currentTime(),
-                                       maxExchangePerSecond: 0});
+                                       maxSwapCredit: 0,
+                                       swapCreditPeriod: 0,
+                                       timeEnteredSwapCredit: 0, // zero means not in a swap credit
+                                       remainingSwapCredit: 0});
     }
 
     function _currentTime() internal virtual view returns(uint256) {
         return block.timestamp;
+    }
+
+    // TODO: additional arguments to the below functions to optimize them
+
+    function _inSwapCredit(TokenFlow memory _flow) public returns(bool) {
+        return _flow.timeEnteredSwapCredit != 0 &&
+               _currentTime() - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
+    }
+
+    function _maxSwapAmount(TokenFlow memory _flow) public returns(uint256) {
+        return _inSwapCredit(_flow) ? _flow.remainingSwapCredit : _flow.maxSwapCredit;
     }
 
 // Events
