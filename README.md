@@ -28,41 +28,36 @@ these child tokens he has. (TODO: Should be able to swap a part.)
 The amount of child tokens that can be swapped for a parent token is limited
 by an algorithm parametrized with the following numbers:
 
-- R - a certain number of tokens per second (as determined by the time since
-  the very last swap);
+- C - max swap amount (a number of tokens);
 
-- C - max swap credit amount (a number of tokens);
-
-- P - swap credit period.
+- P - swap credit period (a number of seconds).
 
 This is to avoid some entity maliciously or erroneously minting producing a
 giant number of tokens and then swapping them for valuable parent token.
 
-The idea is that one can swap R tokens per seconds _plus_ up to C tokens per
-swap credit period P.
+The idea is that one can swap up to C tokens per swap period P.
 
 The algorithm is as follows:
 
 - At any moment of time we are either in a swap credit or no (intially we are
   not in a swap credit).
 
-- At any moment of time anyone can swap up to (R*t)+c where t is the time passed
-  from the very last swap for this child token, c is the remaining swap credit.
+- At any moment of time anyone can swap up to c token, (c is called
+  _the remaining swap credit_).
 
 - c = C if we were not in a swap credit.
 
 - c is set to C when we enter into a swap credit.
 
-- c is decreased by s-(R*t) where s is the swap amount at every swap if
-  s-(R*t) > 0.
+- c is decreased by s where s is the swap amount at every swap.
 
-- We enter swap credit if more than R*t tokens are swapped.
+- We enter swap credit if a swap not inside a swap credit happens.
 
-- We exit from swap credit as soon as P seconds passes since last entering swap credit.
+- We exit from swap credit as soon as P seconds passes since last entering
+  swap credit.
 
-Swap credit is intended for the situation when somebody swapped a token very
-recently and the allocated number of tokens is too small, as otherwise anyone
-would be able to hijack the system by swapping often.
+In the case if somebody needs to exceed a swap credit amount for a legitimate
+reason he may write an email to the parent token owner asking to raise the limits.
 
 ## Sum of Several Tokens
 
