@@ -60,6 +60,7 @@ abstract contract Carbon is TokensFlow
         return maxCreditId;
     }
 
+    // TODO: list of signers
     function retireCredit(uint creditId) external {
         require(issuers[msg.sender]);
         uint256 _token = ownerTokens[msg.sender];
