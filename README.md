@@ -7,25 +7,37 @@ https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty
 The task was formulated to produce an ERC-20 token, but I do a ERC-1155 token.
 The discrepancy is easily solvable by creating a ERC-1155/ERC-20 bridge.
 
+## Kinds of tokens
+
+There are basically two kinds of tokens:
+
+- non-retired carbon tokens;
+
+- retired carbon tokens.
+
+Each token has a token owner. Each token has either a parent token or no parent tokens.
+
+There are two "main tokens":
+
+- the M+ token represents retired carbon credits;
+- the M- token represents non-retired carbon credits.
+
+The token owner whose ultimate ancestor is the owner of M+ is called an _issuer_.
+
+The token owner whose ultimate ancestor is the owner of M- is called an _carbon credit authority_.
+
+There may be token owners who are neither issuers not authorities (either tokens
+unrelated with our carbon counting project (That's fine, there is no reason to use my project only
+for carbon counting, it may be useful also for something other,) or token owners temporarily having
+M+ or M- as the ultimate ancestor).
+
+A token owner can change its parent at any moment of time by its own will. (But
+if he does this, his swap limits (see below) are reset to zero until its new parent wishes to
+increase his limits.)
+
 ## Token flow
 
-I will use the word _issuer_ to denote issuer of retired carbon credits.
-
-The issuers are structured into child/parent relationships. Some issuers
-have no parent. One of the issuers is _primary_, it is the issuer or the
-main M+ token. Other issuers may have no parent, too, for example temporarily
-have no parent. (An issuer can change its parent at any moment of time by its
-own will.)
-
-Each issuer has its own token. (Tokens of several issuers may be the same.)
-
-Anybody can swap a child issuer token he holds for the same amount of its
-parent issuer token. The swap operation swaps the _entire amount_ of
-these child tokens he has. (TODO: Should be able to swap a part.)
-
-We have two "main tokens": the M+ tokens and the token M- to represent
-non-retired credits. All issuers are direct or indirect children of the
-main issuer (issuer for M-).
+Anybody can swap a child token he holds for the same amount of its parent token.
 
 ### Limiting token flow
 
@@ -37,11 +49,11 @@ by an algorithm parametrized with the following numbers:
 - P - swap credit period (a number of seconds).
 
 This is to avoid some entity maliciously or erroneously minting producing a
-giant number of tokens and then swapping them for valuable parent token.
+giant number of tokens and then swapping them for a valuable parent token.
 
 The idea is that one can swap up to C tokens per swap period P.
 
-The algorithm is as follows:
+TL;DR: The algorithm is as follows:
 
 - At any moment of time we are either in a swap credit or no (intially we are
   not in a swap credit).
@@ -98,6 +110,35 @@ This bug probably could be fixed, but:
 
 - You also should prefer to use the ERC-1155 version, because it uses less gas.
 
+## TODO
+
+See also `TODO` and `FIXME` comments in the source.
+
+`TokensFlow` - If overflowed then transfer nothing?
+
+Test `TokensFlow` transfer limits.
+
+## FAQ
+
+**Which tokens do you have?**
+
+M+ token is the retired carbon credits.
+
+M- token is the non-retired carbon credits.
+
+Each issuer has also its own token for retired carbon credits that could be exchanged
+for the token of its upper level issuer and ultimately for the M+ token.
+
+**There are both ERC-20 and ERC-1155 tokens. Which tokens should I use?**
+
+Our ERC-20 tokens wrap corresponding ERC-1155 so that the amounts on accounts of
+our ERC-20 and the corresponding ERC-1155 token are always equal. Transfer or approval
+of one of these two tokens automatically transfers or approves also the other one.
+
+You should use ERC-1155 tokens if you can, because they are both more secure (there
+is a security bug in ERC-20 that affects for example crypto exchanges) and use less
+gas. But many legacy softwares don't support ERC-1155, in this case use ERC-20.
+
 ## Sum of Several Tokens
 
 _When starting to work on this bounty, I first overengineered: My system of summing
@@ -137,29 +178,3 @@ The structure of the tree can be set only by the owner, because otherwise a mali
 issuer could make the tree big, so producing high gas consumption or even out-of-gas
 errors.
 
-## TODO
-
-`TokensFlow` - If overflowed then transfer nothing?
-
-Test `TokensFlow` transfer limits.
-
-## FAQ
-
-**Which tokens do you have?**
-
-M+ token is the retired carbon credits.
-
-M- token is the non-retired carbon credits.
-
-Each issuer has also its own token for retired carbon credits that could be exchanged
-for the token of its upper level issuer and ultimately for the M+ token.
-
-**There are both ERC-20 and ERC-1155 tokens. Which tokens should I use?**
-
-Our ERC-20 tokens wrap corresponding ERC-1155 so that the amounts on accounts of
-our ERC-20 and the corresponding ERC-1155 token are always equal. Transfer or approval
-of one of these two tokens automatically transfers or approves also the other one.
-
-You should use ERC-1155 tokens if you can, because they are both more secure (there
-is a security bug in ERC-20 that affects for example crypto exchanges) and use less
-gas. But many legacy softwares don't support ERC-1155, in this case use ERC-20.
