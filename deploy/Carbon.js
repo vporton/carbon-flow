@@ -10,3 +10,4 @@ module.exports = async ({
       "Retired carbon credits", "M+", "https://example.com/retired",
       "Non-retired carbon credits", "M-", "https://example.com/nonretired"] });
 };
+module.exports.tags = ["Carbon"];
