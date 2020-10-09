@@ -42,7 +42,6 @@ describe("SmartWallet", function() {
       const smartWallet = new SmartWallet();
       const contract = new ethers.Contract(deployResult.address, deployResult.abi, walletOwners[i]);
       await smartWallet.init(contract);
-      console.log(await smartWallet.owner());
       smartWallets.push(smartWallet);
     }
   });
