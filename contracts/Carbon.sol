@@ -29,6 +29,15 @@ contract Carbon is TokensFlow
 
 // Admin
 
+    constructor(address _globalCommunityFund,
+                string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
+                string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
+    {
+        globalCommunityFund = _globalCommunityFund;
+        mainToken = _newToken2(0, _retiredName, _retiredSymbol, _retiredUri);
+        nonRetiredCredits = _newToken2(0, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri);
+    }
+
     function setGlobalCommunityFundAddress(address _globalCommunityFund) external {
         require(msg.sender == globalCommunityFund);
         require(_globalCommunityFund != address(0));
@@ -49,15 +58,6 @@ contract Carbon is TokensFlow
     }
 
 // Credits
-
-    constructor(address _globalCommunityFund,
-                string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
-                string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
-    {
-        globalCommunityFund = _globalCommunityFund;
-        mainToken = _newToken2(0, _retiredName, _retiredSymbol, _retiredUri);
-        nonRetiredCredits = _newToken2(0, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri);
-    }
 
     // TODO: list of signers in a separate contract
     function retireCredit(uint _amount) external {
