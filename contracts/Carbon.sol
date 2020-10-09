@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import './TokensFlow.sol';
 import './ABDKMath64x64.sol';
 
-abstract contract Carbon is TokensFlow
+contract Carbon is TokensFlow
 {
     using ABDKMath64x64 for int128;
 
