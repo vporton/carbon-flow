@@ -31,6 +31,12 @@ describe("SmartWallet", function() {
       walletOwners.push(wallet);
     }
 
+    const erc20DeployResult = await deploy("SimpleERC20", {
+      from: await deployer.getAddress(),
+      args: ['TST', 'Test', 18, await owner.getAddress()]
+    });
+    const erc20Contract = new ethers.Contract(erc20DeployResult.address, erc20DeployResult.abi, owner);
+
     let smartWallets = [];
     for(let i = 0; i < walletOwners.length; ++i) {
       const deployResult = await deploy("TestSmartWallet", { from: await deployer.getAddress(), args: [walletOwners[i].address] });
