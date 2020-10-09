@@ -32,7 +32,7 @@ authorities.
 
 There may be token owners who are neither issuers not authorities (either tokens
 unrelated with our carbon counting project (That's fine, there is no reason to use my project only
-for carbon counting, it may be useful also for something other.) or token owners temporarily having
+for carbon counting, it may be useful also for something other.) or token owners temporarily not having
 M+ or M- as the ultimate ancestor).
 
 A token owner can change its parent at any moment of time by its own will. (But
