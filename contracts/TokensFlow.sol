@@ -59,17 +59,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     function newToken(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)
         external returns (uint256)
     {
-        tokenOwners[++maxTokenId] = msg.sender;
-
-        nameImpl[maxTokenId] = _name;
-        symbolImpl[maxTokenId] = _symbol;
-        uriImpl[maxTokenId] = _uri;
-
-        _setTokenParent(maxTokenId, _parent);
-
-        emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
-
-        return maxTokenId;
+        return _newToken(_parent, _name, _symbol, _uri);
     }
 
     // Intentially no setTokenName() and setTokenSymbol()
@@ -126,7 +116,41 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Internal
 
-    function _doMint(address _to, uint256 _id, uint256 _value, bytes calldata _data) public {
+    // Keep in sync with _newToken2
+    function _newToken(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)
+        internal returns (uint256)
+    {
+        tokenOwners[++maxTokenId] = msg.sender;
+
+        nameImpl[maxTokenId] = _name;
+        symbolImpl[maxTokenId] = _symbol;
+        uriImpl[maxTokenId] = _uri;
+
+        _setTokenParent(maxTokenId, _parent);
+
+        emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
+
+        return maxTokenId;
+    }
+
+    // Keep in sync with _newToken
+    function _newToken2(uint256 _parent, string memory _name, string memory _symbol, string memory _uri)
+        internal returns (uint256)
+    {
+        tokenOwners[++maxTokenId] = msg.sender;
+
+        nameImpl[maxTokenId] = _name;
+        symbolImpl[maxTokenId] = _symbol;
+        uriImpl[maxTokenId] = _uri;
+
+        _setTokenParent(maxTokenId, _parent);
+
+        emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
+
+        return maxTokenId;
+    }
+
+    function _doMint(address _to, uint256 _id, uint256 _value, bytes memory _data) public {
         require(_to != address(0), "_to must be non-zero.");
 
         if(_value != 0) {

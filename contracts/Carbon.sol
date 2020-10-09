@@ -13,26 +13,19 @@ contract Carbon is TokensFlow
     // TODO: Limit the amount of credits authorities issue
 
     // TODO: Only as an event? TODO: rename
-    struct CarbonCredit {
-        address authority;
-        uint serial; // FIXME: individual for each authority
-        uint256 amount;
-        address owner;
-        bool retired;
-        uint256 arweaveHash; // TODO: big or little endian?
-    }
+    // struct CarbonCredit {
+    //     address authority;
+    //     uint serial; // FIXME: individual for each authority
+    //     uint256 amount;
+    //     address owner;
+    //     bool retired;
+    //     uint256 arweaveHash; // TODO: big or little endian?
+    // }
 
     address public globalCommunityFund;
-    uint256 public mainToken;
+    uint256 public mainToken; // TODO: rename
+    uint256 public nonRetiredCredits;
     int128 public tax = int128(10).div(100); // 10%
-
-    mapping (address => bool) public carbonCreditAuthorities; // TODO: Also hold the account of non-retired tokens it created and allow to delete these tokens
-    mapping (address => bool) public issuers; // who can retire
-
-    mapping (uint => CarbonCredit) public credits; // TODO: needed?
-    uint public maxCreditId;
-
-    mapping (address => uint256) public nonRetiredCredits;
 
 // Admin
 
@@ -48,66 +41,32 @@ contract Carbon is TokensFlow
         tax = _tax;
     }
 
-    function setMainToken(uint256 _mainToken) external {
+    function setMainTokens(uint256 _mainToken, uint256 _nonRetiredCredits) external { // needed?
         require(msg.sender == globalCommunityFund);
+        require(_mainToken != 0 && _nonRetiredCredits != 0);
         mainToken = _mainToken;
+        nonRetiredCredits = _nonRetiredCredits;
     }
 
 // Credits
 
-    constructor(address _globalCommunityFund) {
+    constructor(address _globalCommunityFund,
+                string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
+                string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
+    {
         globalCommunityFund = _globalCommunityFund;
-    }
-
-    function createCredit(address _owner, uint256 _amount, uint256 _arweaveHash) external /*returns(uint _creditId)*/ {
-        require(carbonCreditAuthorities[msg.sender]);
-        // CarbonCredit memory credit = CarbonCredit({authority: msg.sender,
-        //                                            serial: _serial, // FIXME
-        //                                            amount: _amount,
-        //                                            owner: _owner,
-        //                                            retired: false,
-        //                                            arweaveHash: _arweaveHash});
-        // credits[++maxCreditId] = credit;
-        nonRetiredCredits[_owner] = _amount.add(nonRetiredCredits[_owner]);
-        // emit CreditCreated(maxCreditId); // TODO: More arguments?
-        // return maxCreditId;
+        mainToken = _newToken2(0, _retiredName, _retiredSymbol, _retiredUri);
+        nonRetiredCredits = _newToken2(0, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri);
     }
 
     // TODO: list of signers in a separate contract
     function retireCredit(uint _amount) external {
-        nonRetiredCredits[msg.sender] = nonRetiredCredits[msg.sender].sub(_amount);
-        require(mainToken != 0); // TODO: check necessary?
+        _doBurn(msg.sender, nonRetiredCredits, _amount);
         uint256 _taxAmount = uint256(tax.mulu(_amount));
-        bytes calldata _data;
+        bytes memory _data = ""; // efficient?
         _doMint(globalCommunityFund, mainToken, _taxAmount, _data);
         _doMint(msg.sender, mainToken, _amount - _taxAmount, _data);
         // emit CreditRetired(creditId); // TODO
-    }
-
-// Admin
-
-    function createCarbonCreditAuthority(address _authority) external {
-        require(msg.sender == globalCommunityFund);
-        carbonCreditAuthorities[_authority] = true;
-        // TODO: event
-    }
-
-    function deleteCarbonCreditAuthority(address _authority) external {
-        require(msg.sender == globalCommunityFund);
-        carbonCreditAuthorities[_authority] = false;
-        // TODO: event
-    }
-
-    function createIssuer(address _issuer) external {
-        require(msg.sender == globalCommunityFund);
-        issuers[_issuer] = true;
-        // TODO: event
-    }
-
-    function deleteIssuer(address _issuer) external {
-        require(msg.sender == globalCommunityFund);
-        issuers[_issuer] = false;
-        // TODO: event
     }
 
 // Events

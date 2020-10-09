@@ -23,6 +23,10 @@ Anybody can swap a child issuer token he holds for the same amount of its
 parent issuer token. The swap operation swaps the _entire amount_ of
 these child tokens he has. (TODO: Should be able to swap a part.)
 
+We have two "main tokens": the M+ tokens and the token M- to represent
+non-retired credits. All issuers are direct or indirect children of the
+main issuer (issuer for M-).
+
 ### Limiting token flow
 
 The amount of child tokens that can be swapped for a parent token is limited
