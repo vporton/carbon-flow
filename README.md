@@ -151,7 +151,7 @@ You should use ERC-1155 tokens if you can, because they are both more secure (th
 is a security bug in ERC-20 that affects for example crypto exchanges) and use less
 gas. But many legacy softwares don't support ERC-1155, in this case use ERC-20.
 
-**Can M+/M- tokens owner mint directly**
+**Can M+/M- tokens owner mint directly?**
 
 Non-retired (M-) tokens can be minted only through the authority mechanism.
 
