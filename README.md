@@ -63,6 +63,41 @@ The algorithm is as follows:
 In the case if somebody needs to exceed a swap credit amount for a legitimate
 reason he may write an email to the parent token owner asking to raise the limits.
 
+## ERC-20 tokens
+
+Our ERC-20 tokens wrap corresponding ERC-1155 so that the amounts on accounts of
+our ERC-20 and the corresponding ERC-1155 token are always equal. Transfer or approval
+of one of these two tokens automatically transfers or approves also the other one.
+
+_Our ERC-20 tokens have a bug (do not fully conform to the ERC-20 standard):_
+the system is not notified of ERC-1155 transfers and other events by the corresponding
+ERC-20 events.
+
+TODO: Should completely remove all events from the ERC-20 wrapper, because they
+don't happen realiably anyway (happen but not on every transfer)?
+
+The practical implications of the bug are as follows:
+
+- A user may be not notified (e.g. by email sent by EtherScan.io) about a transfer
+  or other event with his token.
+
+- Some software for re-creating a new ERC-20 token with the same balances as our token
+  may produce a new token with wrong balances.
+
+- Other failures.
+
+This bug probably could be fixed, but:
+
+- Fixing it would significally increase gas usage, what is not green.
+
+- Most ERC-20 software does work correctly with our tokens despite this bug.
+
+- ERC-20 is an old legacy standard, ERC-1155 tokens should be used instead.
+  It is expected that after a few years most Ethereum wallets and exchanged will
+  support ERC-1155, so ERC-20 support is just a temporary measure.
+
+- You also should prefer to use the ERC-1155 version, because it uses less gas.
+
 ## Sum of Several Tokens
 
 _When starting to work on this bounty, I first overengineered: My system of summing
