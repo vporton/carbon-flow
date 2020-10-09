@@ -53,7 +53,8 @@ by an algorithm parametrized with the following numbers:
 - P - swap credit period (a number of seconds).
 
 This is to avoid some entity maliciously or erroneously minting producing a
-giant number of tokens and then swapping them for a valuable parent token.
+giant number of tokens and then swapping them for a valuable parent token faster than an
+ancestor token owner removes it from its descendants.
 
 The idea is that one can swap up to C tokens per swap period P.
 
@@ -130,8 +131,8 @@ M+ token is the retired carbon credits.
 
 M- token is the non-retired carbon credits.
 
-Each issuer has also its own token for retired carbon credits that could be exchanged
-for the token of its upper level issuer and ultimately for the M+ token.
+Each issuer and each authority has also its own token for carbon credits that could be exchanged
+for the token of its upper level issuer and ultimately for the M+ or M- token.
 
 **There are both ERC-20 and ERC-1155 tokens. Which tokens should I use?**
 
