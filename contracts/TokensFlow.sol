@@ -205,7 +205,9 @@ contract TokensFlow is ERC1155, IERC1155Views
         emit TransferSingle(msg.sender, _from, address(0), _id, _value);
     }
 
-    // Also resets swap credits, so use with caution.
+    // Also resets swap credits and `enabled`, so use with caution.
+    // Allow this even if `!enabled` and set `enabled` to `true` if no parent,
+    // as otherwise impossible to enable it again.
     function _setTokenParentNoCheck(uint256 _child, uint256 _parent) virtual internal {
         // require(_parent <= maxTokenId); // TODO: against an unwise child
 
