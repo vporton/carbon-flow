@@ -186,6 +186,8 @@ Indexed events.
 
 Should allow to allocate a swap credit once, not periodically?
 
+Lock also transfers of disabled tokens? Allow parents to burn child tokens?
+
 See also `TODO` and `FIXME` comments in the source.
 
 Lint Solidity.
