@@ -41,7 +41,7 @@ contract Carbon is BaseCarbon
         uint256 _token = _newToken(_parent, false, _name, _symbol, _uri);
         Authority memory _authority = Authority({enabled: false, maxSerial: 0, token: _token});
         authorities[_token] = _authority;
-        emit AuthorityCreated(msg.sender, _parent, _name, _symbol, _uri);
+        emit AuthorityCreated(msg.sender, _token, _name, _symbol, _uri);
     }
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
@@ -89,5 +89,5 @@ contract Carbon is BaseCarbon
         authorities[_child].enabled = false;
     }
 
-    event AuthorityCreated(address owner, uint256 parent, string name, string symbol, string uri);
+    event AuthorityCreated(address owner, uint256 token, string name, string symbol, string uri);
 }
