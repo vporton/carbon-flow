@@ -141,6 +141,8 @@ Test `TokensFlow` transfer limits.
 
 `buidler-deploy`.
 
+Documentation comments in contracts.
+
 ### Not doable things
 
 The bounty required
