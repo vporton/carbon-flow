@@ -19,6 +19,8 @@ describe("TokensFlow", function() {
   it("Checks correct transfers", async function() {
     this.timeout(60*1000*100);
 
+    let expectations = [];
+
     console.log("Initializing...");
 
     const [ deployer, owner ] = await ethers.getSigners();
