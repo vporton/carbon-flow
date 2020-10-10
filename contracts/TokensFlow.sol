@@ -2,7 +2,7 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
-import '@nomiclabs/buidler/console.sol';
+// import '@nomiclabs/buidler/console.sol';
 
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
@@ -205,7 +205,6 @@ contract TokensFlow is ERC1155, IERC1155Views
     // TODO: additional arguments to the below functions to optimize them
 
     function _inSwapCredit(TokenFlow memory _flow) public view returns(bool) {
-        // console.log(_flow.timeEnteredSwapCredit, _currentTime(), _flow.timeEnteredSwapCredit, _flow.swapCreditPeriod);
         return _flow.timeEnteredSwapCredit != 0 &&
                int256(_currentTime()) - int256(_flow.timeEnteredSwapCredit) < int256(_flow.swapCreditPeriod);
     }
@@ -215,12 +214,10 @@ contract TokensFlow is ERC1155, IERC1155Views
         if(_inSwapCredit(_flow)) {
             // TODO: Will it use less gas if store data in int256?
             int256 passedTime = int256(_currentTime()) - int256(_flow.lastSwapTime);
-            int256 delta = passedTime * int256(_flow.maxSwapCredit) / int256(_flow.swapCreditPeriod);
+            int256 delta = int256(_flow.maxSwapCredit) * passedTime / int256(_flow.swapCreditPeriod);
             int256 result = int256(_flow.remainingSwapCredit) - delta;
-            console.log(result < 0 ? 0 : uint256(result));
             return result < 0 ? 0 : uint256(result); // TODO: slow
         } else {
-            console.log(_flow.maxSwapCredit);
             return _flow.maxSwapCredit;
         }
     }

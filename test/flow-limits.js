@@ -95,6 +95,7 @@ describe("TokensFlow (limits)", function() {
       await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
     await skipTime(8);
+    // Start new swap credit period here.
     {
       const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('501'), []);
       await ethers.provider.getTransactionReceipt(tx.hash);
@@ -105,9 +106,9 @@ describe("TokensFlow (limits)", function() {
       }
       await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
-    await skipTime(5);
+    await skipTime(2);
     {
-      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('200'), []);
+      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('100'), []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
   });
