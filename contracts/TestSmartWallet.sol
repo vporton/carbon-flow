@@ -3,6 +3,7 @@
 // Based on code from https://github.com/argentlabs/argent-contracts/blob/develop/contracts/wallet/BaseWallet.sol
 pragma solidity ^0.7.1;
 
+// import '@nomiclabs/buidler/console.sol';
 import './IERC1155TokenReceiver.sol';
 
 contract TestSmartWallet is ERC1155TokenReceiver
@@ -28,10 +29,9 @@ contract TestSmartWallet is ERC1155TokenReceiver
         require (msg.sender == owner);
 
         (bool success, bytes memory result) = _target.call{value: _value}(_data);
-
         require (success, string (result));
-        return result;
         // emit Invoked(msg.sender, _target, _value, _data);
+        return result;
     }
 
     receive() external payable {

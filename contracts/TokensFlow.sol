@@ -3,7 +3,6 @@ pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 // import '@nomiclabs/buidler/console.sol';
-
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
 

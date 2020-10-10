@@ -19,11 +19,11 @@ chai.use(chaiAsPromised);
 // }
 
 describe("Main test", function() {
-  beforeEach(async () => {
-    console.log("Deploy the official contracts...");
-    // await deployments.run(["Carbon"], { writeDeploymentsToFiles: false });
-    await deployments.fixture();
-  });
+  // beforeEach(async () => {
+  //   console.log("Deploy the official contracts...");
+  //   // await deployments.run(["Carbon"], { writeDeploymentsToFiles: false });
+  //   await deployments.fixture();
+  // });
   it("Accordingly to the tech specification", async function() {
     this.timeout(60*1000*100);
 
@@ -42,11 +42,14 @@ describe("Main test", function() {
 
     // In this test communityFundDAO is just a smart wallet.
     const cfDAODeployResult = await deploy("TestSmartWallet", { from: await deployer.getAddress(), args: [communityFundDAOVoter.address] });
-    const communityFundDAO = new SmartWallet();
     const cfDAOContract = new ethers.Contract(cfDAODeployResult.address, cfDAODeployResult.abi, communityFundDAOVoter);
+    const communityFundDAO = new SmartWallet();
     await communityFundDAO.init(cfDAOContract);
 
-    const carbonDeployResult = await deployments.get("Carbon");
+    const carbonDeployResult = await deploy("Carbon", { from: await deployer.getAddress(), args: [
+      communityFundDAO.address(),
+      "Retired carbon credits", "M+", "https://example.com/retired",
+      "Non-retired carbon credits", "M-", "https://example.com/nonretired"] });
     const carbon = new ethers.Contract(carbonDeployResult.address, carbonDeployResult.abi, ethers.provider);
     const communityFund = new ethers.Contract(communityFundDAO.address(), carbonDeployResult.abi, communityFundDAOVoter);
 
@@ -73,7 +76,7 @@ describe("Main test", function() {
       const tx2 = await carbon.connect(authoritityOwner).createAuthority(nonRetiredToken, info.name, info.symbol, info.url);
       const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
       const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
-      const tx3 = await carbon.connect(communityFundDAOVoter).setEnabled(token, true); // FIXME: invoke
+      const tx3 = await communityFundDAO.func(carbon, '0', 'setEnabled', token, true);
       const receipt3 = await ethers.provider.getTransactionReceipt(tx3.hash);
       authorities.push(authoritityOwner);
       authorityTokens.push(token);
