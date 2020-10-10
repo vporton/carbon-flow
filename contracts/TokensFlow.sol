@@ -80,7 +80,11 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     function setEnabled(uint256 _child, bool _enabled) external {
         bool _found = false;
-        for(uint256 _id = _child; _id != 0; _id = tokenFlow[_id].parentToken) {
+        for(uint256 _id = tokenFlow[_child].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
+            require(_id != _child); // Prevent irrevocably disable itself, also save gas.
+            if(!tokenFlow[_id].enabled) {
+                break; // A disabled entity cannot enable/disable other entities.
+            }
             if(msg.sender == tokenOwners[_id]) {
                 _found = true;
                 break;
@@ -203,6 +207,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // Also resets swap credits, so use with caution.
+    // FIXME: This does not reset disability status of an authority!
     function _setTokenParent(uint256 _child, uint256 _parent) internal {
         // require(_parent <= maxTokenId); // TODO: against an unwise child
 

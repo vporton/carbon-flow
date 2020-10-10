@@ -115,24 +115,22 @@ too big number fo tokens by mistake.
 
 TODO: Test.
 
-Any authority token or issuer token can be disabled (remark: functions used to disable
-an authority token and an issuer token are different).
+Any authority token or issuer token can be disabled. (Remark: functions used to disable
+an authority token and an issuer token are different.)
 
 Anyone upward in the tree can disable any of its descendants.
+
+Disabled authority cannot create credits, disabled issuer cannot retire credits.
 
 Remark: A malignant or otherwise weird user may produce too long chain of descendants
 of some token, making it impossible to disable all the descendants because of gas
 limitations. In this case, only some of the ancestors in the chain should be disabled.
 
-FIXME: Make only one who disabled able to enable back!
+Disabled tokens also can't enable/disable other tokens.
 
 Remark: Because it is in reality a directed graph, not a tree, two tokens in the tree
-can be disabled by each other.
-
-TODO: Should an entity auto-enable if it changes its parent? Be careful in the case
-if then it changes the parent back.
-
-Disabled authority cannot create credits, disabled issuer cannot retire credits.
+could be disabled by each other. We prevent the special case of an authority disabling
+itself, because otherwise it can't enable itself back.
 
 #### Theft recovery procedure
 

@@ -20,7 +20,7 @@ contract Carbon is BaseCarbon
         bytes32 arweaveHash;
     }
 
-    mapping (address => Authority) public authorities;
+    mapping (token => Authority) public authorities;
 
     mapping (uint256 => CarbonCredit) public credits;
 
@@ -39,13 +39,13 @@ contract Carbon is BaseCarbon
         // Minting restricted because minting can happen only through createCredit().
         uint256 _token = _newToken(_parent, false, _name, _symbol, _uri);
         Authority memory _authority = Authority({enabled: true, maxSerial: 0, token: _token});
-        authorities[msg.sender] = _authority;
+        authorities[_token] = _authority;
         emit AuthorityCreated(msg.sender, _parent, _name, _symbol, _uri);
     }
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
     function createCredit(uint256 _amount, address _owner, bytes32 _arweaveHash) external returns(uint256) {
-        Authority storage _authority = authorities[msg.sender];
+        Authority storage _authority = authorities[tokenOwners[msg.sender]];
         require(_authority.enabled);
         CarbonCredit memory _credit = CarbonCredit({authority: msg.sender,
                                                     serial: ++_authority.maxSerial,
@@ -59,11 +59,15 @@ contract Carbon is BaseCarbon
         return maxCreditId;
     }
 
-    function setAuthorityEnabled(address _address, bool _enabled) external {
-        Authority storage _authority = authorities[_address];
+    function setAuthorityEnabled(uint256 _token, bool _enabled) external {
+        Authority storage _authority = authorities[_token];
 
         bool _found = false;
-        for(uint256 _id = _authority.token; _id != 0; _id = tokenFlow[_id].parentToken) {
+        for(uint256 _id = tokenFlow[_authority.token].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
+            require(_id != _authority.token); // Prevent irrevocably disable itself, also save gas.
+            if(!authorities[_id].enabled) {
+                break; // A disabled entity cannot enable/disable other entities.
+            }
             if(msg.sender == tokenOwners[_id]) {
                 _found = true;
                 break;
