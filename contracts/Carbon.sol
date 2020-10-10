@@ -39,7 +39,7 @@ contract Carbon is BaseCarbon
         // require(msg.sender == globalCommunityFund;
         // Minting restricted because minting can happen only through createCredit().
         uint256 _token = _newToken(_parent, false, _name, _symbol, _uri);
-        Authority memory _authority = Authority({enabled: true, maxSerial: 0, token: _token});
+        Authority memory _authority = Authority({enabled: false, maxSerial: 0, token: _token});
         authorities[_token] = _authority;
         emit AuthorityCreated(msg.sender, _parent, _name, _symbol, _uri);
     }
