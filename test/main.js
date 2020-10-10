@@ -62,7 +62,7 @@ describe("Main test", function() {
       // In reality should be controlled by a DAO
       const authoritityOwner0 = ethers.Wallet.createRandom();
       const authoritityOwner = authoritityOwner0.connect(ethers.provider);
-      const tx = await owner.sendTransaction({to: authoritityOwner.address, value: ethers.utils.parseEther('1')}); // provide gas
+      const tx = await owner.sendTransaction({to: authoritityOwner.address, value: ethers.utils.parseEther('20')}); // provide gas
       await ethers.provider.getTransactionReceipt(tx.hash);
 
       const info = authoritiesData[i];
@@ -93,8 +93,10 @@ describe("Main test", function() {
 
     console.log("Creating carbon credits...");
 
+    const numberOfCredits = 100; // TODO: Should be 10000 accordingly to the tech specification
+
     let credits = [];
-    for(let i = 0; i < 10000; ++i) {
+    for(let i = 0; i < numberOfCredits; ++i) {
       // console.log(`credit ${i}`);
       const authority = authorities[random.int(0, authorities.length - 1)];
       const owner = smartWallets[random.int(0, smartWallets.length - 1)];
@@ -105,5 +107,7 @@ describe("Main test", function() {
       const credit = {}; // TODO
       credits.push(credit);
     }
+    expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.BigNumber.from('0')); // not yet swapped
+    // expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.utils.parseEther('200').mul(String(numberOfCredits)));
   });
 });
