@@ -81,15 +81,41 @@ describe("Main test", function() {
       const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
       const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
       const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', token, true);
+      await ethers.provider.getTransactionReceipt(tx3.hash);
 
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
       const tx4 = await communityFundDAO.invoke(carbon, '0', 'setTokenFlow', token, veryBigAmount, veryBigAmount, 10);
       await ethers.provider.getTransactionReceipt(tx4.hash);  
 
-      await ethers.provider.getTransactionReceipt(tx3.hash);
       authorities.push(authoritityOwner);
       authorityTokens.push(token);
       authorityIndexes[await authoritityOwner.getAddress()] = i;
+    }
+
+    console.log("Creating the M+ issuers...");
+
+    let issuers = [];
+    let issuerTokens = [];
+    for(let i = 0; i < 1; ++i) { // TODO: Test more that one issuer.
+      // In reality should be controlled by a DAO
+      const issuerOwner0 = ethers.Wallet.createRandom();
+      const issuerOwner = issuerOwner0.connect(ethers.provider);
+      const tx = await owner.sendTransaction({to: issuerOwner.address, value: ethers.utils.parseEther('20')}); // provide gas
+      await ethers.provider.getTransactionReceipt(tx.hash);
+
+      const tx2 = await carbon.connect(issuerOwner).createAuthority(retiredToken, `Issuer ${i}`, `ISU${i}`, "https://example.com/issuer");
+      const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
+      const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
+      const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', token, true);
+      await ethers.provider.getTransactionReceipt(tx3.hash);
+
+      const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
+      const tx4 = await communityFundDAO.invoke(carbon, '0', 'setTokenFlow', token, veryBigAmount, veryBigAmount, 10);
+      await ethers.provider.getTransactionReceipt(tx4.hash);  
+
+      issuers.push(issuerOwner);
+      issuerTokens.push(token);
+      // issuerIndexes[await issuerOwner.getAddress()] = i;
     }
 
     console.log("Creating the zero pledgers...");
@@ -134,7 +160,7 @@ describe("Main test", function() {
     }
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.BigNumber.from('0')); // not yet swapped
 
-    console.log("Exchanging carbon credits...");
+    console.log("Exchanging to M-...");
 
     for(let i = 0; i < credits.length; ++i) {
       const token = authorityTokens[authorityIndexes[credits[i].authority]];
@@ -143,5 +169,17 @@ describe("Main test", function() {
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))));
+
+    console.log("Retiring carbon credits...")
+
+    for(let i = 0; i < 1; ++i) { // TODO: more tests
+      const issuer = issuers[i];
+      const issuerToken = issuerTokens[i];
+      const tx = await carbon.connect(issuer).retireCredit(
+        nonRetiredToken, ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))));
+      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.BigNumber.from('0')); // was retired
+    expect(await carbon.totalSupply(retiredToken)).to.equal(ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))));
   });
 });

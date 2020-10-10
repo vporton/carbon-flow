@@ -50,6 +50,7 @@ contract BaseCarbon is TokensFlow
     // TODO: list of signers in a separate contract
     // WARNING: If the caller of this function is a contract, it must implement ERC1155TokenReceiver interface.
     function retireCredit(uint256 _token, uint _amount) external {
+        // FIXME: check ownership
         require(tokenOwners[_token] == msg.sender);
         _doBurn(msg.sender, nonRetiredCreditsToken, _amount);
         uint256 _taxAmount = uint256(tax.mulu(_amount));
