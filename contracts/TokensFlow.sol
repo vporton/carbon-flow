@@ -85,7 +85,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
         _flow.maxSwapCredit = _maxSwapCredit;
         _flow.swapCreditPeriod = _swapCreditPeriod;
-        _flow.timeEnteredSwapCredit = block.timestamp;
+        _flow.timeEnteredSwapCredit = block.timestamp; // TODO: Allow to set an arbitrary timestamp here.
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
