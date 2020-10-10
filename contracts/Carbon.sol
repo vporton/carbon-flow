@@ -17,7 +17,7 @@ contract Carbon is BaseCarbon
         uint serial;
         uint256 amount;
         address owner;
-        uint256 arweaveHash; // TODO: big or little endian?
+        bytes32 arweaveHash;
     }
 
     mapping (address => Authority) public authorities;
@@ -50,7 +50,7 @@ contract Carbon is BaseCarbon
     }
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
-    function createCredit(uint256 _amount, address _owner, uint256 _arweaveHash) external returns(uint256) {
+    function createCredit(uint256 _amount, address _owner, bytes32 _arweaveHash) external returns(uint256) {
         Authority storage _authority = authorities[msg.sender];
         require(_authority.enabled);
         CarbonCredit memory _credit = CarbonCredit({authority: msg.sender,
