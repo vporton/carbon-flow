@@ -140,7 +140,7 @@ describe("TokensFlow", function() {
           const fromTokenIndex = random.int(1, tokens.length - 1);
           const fromToken = tokens[fromTokenIndex];
           const toToken = tokens[0];
-          const wallet = wallets[random.int(0, wallets.length -1)];
+          const wallet = wallets[random.int(0, wallets.length - 1)];
           const oldFromBalance = await tokensFlow.balanceOf(wallet.address, fromToken);
           const oldFromTotal = await tokensFlow.totalSupply(fromToken);
           const oldToBalance = await tokensFlow.balanceOf(wallet.address, toToken);
@@ -176,9 +176,9 @@ describe("TokensFlow", function() {
             }
           } else {
             async function mycall() {
-              await tokensFlow.connect(from).safeTransferFrom(from.address, to.address, token, amount, [], {gasLimit: 1000000});
+              await tokensFlow.connect(wallet).exchangeToParent(fromToken, amount, [], {gasLimit: 1000000});
             }
-            expect(mycall()).to.eventually.be.rejected; 
+            expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
           }
           break;
         }
