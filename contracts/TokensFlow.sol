@@ -141,7 +141,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     // Keep in sync with _newToken
     function _newToken2(uint256 _parent, bool _mintingAllowed,
-                       string memory _name, string memory _symbol, string memory _uri)
+                        string memory _name, string memory _symbol, string memory _uri)
         internal returns (uint256)
     {
         tokenOwners[++maxTokenId] = msg.sender;
