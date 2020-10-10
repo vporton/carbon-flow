@@ -79,6 +79,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         _setTokenParentNoCheck(_child, _parent);
     }
 
+    // TODO: Enable/disable multiple childs in one call.
     function setEnabled(uint256 _child, bool _enabled) external {
         bool _found = false;
         for(uint256 _id = tokenFlow[_child].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
