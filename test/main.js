@@ -25,6 +25,8 @@ describe("Main test", function() {
     await deployments.fixture();
   });
   it("Accordingly to the tech specification", async function() {
+    this.timeout(60*1000*100);
+
     const [ deployer, owner ] = await ethers.getSigners();
 
     console.log("Creating the Community Fund and main contract...");
@@ -93,7 +95,7 @@ describe("Main test", function() {
 
     let credits = [];
     for(let i = 0; i < 10000; ++i) {
-      console.log(`credit ${i}`);
+      // console.log(`credit ${i}`);
       const authority = authorities[random.int(0, authorities.length - 1)];
       const owner = smartWallets[random.int(0, smartWallets.length - 1)];
       const arweaveHash = '123'; // just an arbitrary 256-bit number
