@@ -34,13 +34,13 @@ describe("TokensFlow (limits)", function() {
     let tokens = []; // needed?
     let tree = {};
 
-    const tx2 = await tokensFlow.connect(wallet).newToken(0, true, "M+C Token", "M+C", "https://example.com");
+    const tx2 = await tokensFlow.connect(wallet).newToken(0, "M+C Token", "M+C", "https://example.com");
     const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
     const rootToken = createTokenEventIface.parseLog(receipt2.logs[0]).args.id;
 
     tokens.push(rootToken);
     for(let i = 0; i < 1; ++i) {
-      const tx = await tokensFlow.connect(wallet).newToken(rootToken, true, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
+      const tx = await tokensFlow.connect(wallet).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
       tokens.push(token);

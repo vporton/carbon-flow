@@ -296,7 +296,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
                 }
             }
         } else {
-            assert(_balanceOf(_from, _id) != 0); // FIXME: slow
+            assert(_balanceOf(_from, _id) != 0); // : slow
         }
 
         _transferred = _value - _remainingValue;

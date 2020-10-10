@@ -46,13 +46,13 @@ describe("TokensFlow", function() {
     let tokens = []; // correspond to a first few wallets
     let tree = {};
 
-    const tx = await tokensFlow.connect(wallets[0]).newToken(0, true, "M+C Token", "M+C", "https://example.com");
+    const tx = await tokensFlow.connect(wallets[0]).newToken(0, "M+C Token", "M+C", "https://example.com");
     const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
     const rootToken = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
 
     tokens.push(rootToken);
     for(let i = 0; i < 4; ++i) {
-      const tx = await tokensFlow.connect(wallets[i+1]).newToken(rootToken, true, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
+      const tx = await tokensFlow.connect(wallets[i+1]).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
       tokens.push(token);

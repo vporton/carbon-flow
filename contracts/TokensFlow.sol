@@ -107,15 +107,6 @@ contract TokensFlow is ERC1155, IERC1155Views
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
-    // Removed!
-    // function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
-    //     require(tokenOwners[_id] == msg.sender);
-    //     // require(_id != 0);
-    //     require(tokenFlow[_id].enabled);
-
-    //     _doMint(_to, _id, _value, _data);
-    // }
-
 // Flow
 
     // TODO: Several exchanges in one call.

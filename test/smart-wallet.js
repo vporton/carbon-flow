@@ -32,7 +32,7 @@ describe("SmartWallet", function() {
     }
 
     const erc20DeployResult = await deploy("SimpleERC20", {
-      from: await deployer.getAddress(), args: ['TST', 'Test', 18, 1000000]
+      from: await owner.getAddress(), args: ['TST', 'Test', 18, ethers.utils.parseEther('1000000')]
     });
     const erc20Contract = new ethers.Contract(erc20DeployResult.address, erc20DeployResult.abi, owner);
 
@@ -55,7 +55,7 @@ describe("SmartWallet", function() {
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
-      const balance = await smartWallets[1].getBalance();
+      const balance = await ethers.provider.getBalance(smartWallets[1].address());
       expect(balance).to.equal(ethers.utils.parseEther('0.01'));
     }
 
@@ -65,7 +65,8 @@ describe("SmartWallet", function() {
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
-      const tx = await smartWallets[0].func('transfer', smartWallets[1].address(), ethers.utils.parseEther('1'));
+      const tx = await smartWallets[0].invoke(
+        erc20Contract, '0', 'transfer', smartWallets[1].address(), ethers.utils.parseEther('1'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
