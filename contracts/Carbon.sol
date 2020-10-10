@@ -86,7 +86,9 @@ contract Carbon is BaseCarbon
         require(msg.sender == tokenOwners[_child]);
 
         super._setTokenParent(_child, _parent);
-        authorities[_child].enabled = false;
+        if(_parent != 0) {
+            authorities[_child].enabled = false;
+        }
     }
 
     event AuthorityCreated(address owner, uint256 token, string name, string symbol, string uri);

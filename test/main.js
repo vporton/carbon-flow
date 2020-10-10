@@ -58,6 +58,7 @@ describe("Main test", function() {
       { name: "Climate Action Registry", symbol: "CLIM", url: "https://example.com/ClimateActionRegistry" },
     ];
     let authorities = [];
+    let authorityTokens = [];
     for(let i = 0; i < authoritiesData.length; ++i) {
       // In reality should be controlled by a DAO
       const authoritityOwner0 = ethers.Wallet.createRandom();
@@ -67,8 +68,10 @@ describe("Main test", function() {
 
       const info = authoritiesData[i];
       const tx2 = await carbon.connect(authoritityOwner).createAuthority(nonRetiredToken, info.name, info.symbol, info.url);
-      await ethers.provider.getTransactionReceipt(tx2.hash);
+      const receipt = await ethers.provider.getTransactionReceipt(tx2.hash);
+      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.token;
       authorities.push(authoritityOwner);
+      authorityTokens.push(token);
     }
 
     console.log("Creating the zero pledgers...");
@@ -102,7 +105,7 @@ describe("Main test", function() {
       const owner = smartWallets[random.int(0, smartWallets.length - 1)];
       const arweaveHash = '123'; // just an arbitrary 256-bit number
       const tx = await carbon.connect(authority).createCredit(
-        ethers.utils.parseEther('200'), owner.address(), arweaveHash);
+        authorityTokens[i], ethers.utils.parseEther('200'), owner.address(), arweaveHash);
       await ethers.provider.getTransactionReceipt(tx.hash);
       const credit = {}; // TODO
       credits.push(credit);
