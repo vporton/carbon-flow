@@ -63,7 +63,7 @@ contract TokensFlow is ERC1155, IERC1155Views
                       string calldata _name, string calldata _symbol, string calldata _uri)
         external returns (uint256)
     {
-        return _newToken(_parent, _mintingAllowed, _name, _symbol, _uri);
+        return _newToken(_parent, _mintingAllowed, _name, _symbol, _uri, msg.sender);
     }
 
     // Intentially no setTokenName() and setTokenSymbol()
@@ -138,27 +138,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Internal
 
-    // Keep in sync with _newToken2
     function _newToken(uint256 _parent, bool _mintingAllowed,
-                       string calldata _name, string calldata _symbol, string calldata _uri)
-        internal returns (uint256)
-    {
-        tokenOwners[++maxTokenId] = msg.sender;
-
-        nameImpl[maxTokenId] = _name;
-        symbolImpl[maxTokenId] = _symbol;
-        uriImpl[maxTokenId] = _uri;
-
-        _setTokenParentNoCheck(maxTokenId, _parent);
-        tokenFlow[maxTokenId].mintingAllowed = _mintingAllowed;
-
-        emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
-
-        return maxTokenId;
-    }
-
-    // Keep in sync with _newToken
-    function _newToken2(uint256 _parent, bool _mintingAllowed,
                         string memory _name, string memory _symbol, string memory _uri,
                         address _owner)
         internal returns (uint256)

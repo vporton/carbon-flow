@@ -22,8 +22,8 @@ contract BaseCarbon is TokensFlow
                 string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
     {
         globalCommunityFund = _globalCommunityFund;
-        retiredCreditsToken = _newToken2(0, true, _retiredName, _retiredSymbol, _retiredUri, _globalCommunityFund);
-        nonRetiredCreditsToken = _newToken2(0, false, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri, _globalCommunityFund);
+        retiredCreditsToken = _newToken(0, true, _retiredName, _retiredSymbol, _retiredUri, _globalCommunityFund);
+        nonRetiredCreditsToken = _newToken(0, false, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri, _globalCommunityFund);
     }
 
     function setGlobalCommunityFundAddress(address _globalCommunityFund) external {
