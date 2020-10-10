@@ -12,7 +12,6 @@ contract Carbon is BaseCarbon
         uint maxSerial;
     }
 
-    // TODO: rename // TODO: only event?
     struct CarbonCredit {
         address authority;
         uint serial;
