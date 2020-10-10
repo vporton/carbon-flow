@@ -73,7 +73,7 @@ describe("Main test", function() {
       const tx2 = await carbon.connect(authoritityOwner).createAuthority(nonRetiredToken, info.name, info.symbol, info.url);
       const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
       const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
-      const tx3 = await carbon.connect(communityFundDAOVoter).setAuthorityEnabled(token, true); // FIXME: invoke
+      const tx3 = await carbon.connect(communityFundDAOVoter).setEnabled(token, true); // FIXME: invoke
       const receipt3 = await ethers.provider.getTransactionReceipt(tx3.hash);
       authorities.push(authoritityOwner);
       authorityTokens.push(token);
