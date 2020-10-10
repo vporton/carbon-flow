@@ -214,6 +214,10 @@ The structure of the tree can be set only by the owner, because otherwise a mali
 issuer could make the tree big, so producing high gas consumption or even out-of-gas
 errors.
 
+## See also
+
+`doc/` folder. Use LibreOffice to read these files.
+
 ## Donations
 
 If you find this project useful, donate:
