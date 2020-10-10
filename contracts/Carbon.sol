@@ -41,7 +41,7 @@ contract Carbon is BaseCarbon
         uint256 _token = _newToken(_parent, false, _name, _symbol, _uri);
         Authority memory _authority = Authority({enabled: true, maxSerial: 0, token: _token});
         authorities[msg.sender] = _authority;
-        // TODO: event
+        emit AuthorityCreated(msg.sender, _parent, _name, _symbol, _uri);
     }
 
     function setAuthorityEnabled(address _address, bool _enabled) external {
@@ -64,4 +64,6 @@ contract Carbon is BaseCarbon
         // TODO: event?
         return maxCreditId;
     }
+
+    event AuthorityCreated(address owner, uint256 parent, string name, string symbol, string uri);
 }
