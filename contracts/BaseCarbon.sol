@@ -58,8 +58,4 @@ contract BaseCarbon is TokensFlow
         _doMint(msg.sender, _token, _amount - _taxAmount, _data);
         // emit CreditRetired(creditId); // TODO
     }
-
-// Events
-
-    event CreditCreated(uint creditId); // TODO: remove?
 }

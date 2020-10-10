@@ -30,6 +30,9 @@ describe("Main test", function() {
     const createTokenEventAbi = [ "event NewToken(uint256 id, address owner, string name, string symbol, string uri)" ];
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
+    const createCreditEventAbi = [ "event CreditCreated(uint256 id, address authority, uint serial, uint256 amount, address owner, bytes32 arweaveHash)" ];
+    const createCreditEventIface = new ethers.utils.Interface(createCreditEventAbi);
+
     const [ deployer, owner ] = await ethers.getSigners();
 
     console.log("Creating the Community Fund and main contract...");
@@ -63,6 +66,7 @@ describe("Main test", function() {
       { name: "The Gold Standard", symbol: "GOLD", url: "https://example.com/GoldStandard" },
       { name: "Climate Action Registry", symbol: "CLIM", url: "https://example.com/ClimateActionRegistry" },
     ];
+    let authorityIndexes = {};
     let authorities = [];
     let authorityTokens = [];
     for(let i = 0; i < authoritiesData.length; ++i) {
@@ -77,9 +81,15 @@ describe("Main test", function() {
       const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
       const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
       const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', token, true);
-      const receipt3 = await ethers.provider.getTransactionReceipt(tx3.hash);
+
+      const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
+      const tx4 = await communityFundDAO.invoke(carbon, '0', 'setTokenFlow', token, veryBigAmount, veryBigAmount, 10);
+      await ethers.provider.getTransactionReceipt(tx4.hash);  
+
+      await ethers.provider.getTransactionReceipt(tx3.hash);
       authorities.push(authoritityOwner);
       authorityTokens.push(token);
+      authorityIndexes[await authoritityOwner.getAddress()] = i;
     }
 
     console.log("Creating the zero pledgers...");
@@ -94,17 +104,19 @@ describe("Main test", function() {
     }
 
     let smartWallets = [];
+    let smartWalletsIndexes = [];
     for(let i = 0; i < walletOwners.length; ++i) {
       const deployResult = await deploy("TestSmartWallet", { from: await deployer.getAddress(), args: [walletOwners[i].address] });
       const smartWallet = new SmartWallet();
       const contract = new ethers.Contract(deployResult.address, deployResult.abi, walletOwners[i]);
       await smartWallet.init(contract);
       smartWallets.push(smartWallet);
+      smartWalletsIndexes[smartWallet.address()] = i;
     }
 
-    console.log("Creating carbon credits...");
-
     const numberOfCredits = 100; // TODO: Should be 10000 accordingly to the tech specification
+
+    console.log("Creating carbon credits...");
 
     let credits = [];
     for(let i = 0; i < numberOfCredits; ++i) {
@@ -116,11 +128,20 @@ describe("Main test", function() {
       const arweaveHash = ethers.utils.formatBytes32String('vaeSho5IbaiGh5ui'); // just an arbitrary 32 bits
       const tx = await carbon.connect(authority).createCredit(
         authorityToken, ethers.utils.parseEther('200'), owner.address(), arweaveHash);
-      await ethers.provider.getTransactionReceipt(tx.hash);
-      const credit = {}; // TODO
-      credits.push(credit);
+      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+      const credit = createCreditEventIface.parseLog(receipt.logs[1]).args; // TODO: check carefully
+      credits.push({ id: credit.id, owner: credit.owner, authority: credit.authority, amount: credit.amount });
     }
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.BigNumber.from('0')); // not yet swapped
-    // expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.utils.parseEther('200').mul(String(numberOfCredits)));
+
+    console.log("Exchanging carbon credits...");
+
+    for(let i = 0; i < credits.length; ++i) {
+      const token = authorityTokens[authorityIndexes[credits[i].authority]];
+      const wallet = smartWallets[smartWalletsIndexes[credits[i].owner]];
+      const tx = await wallet.invoke(carbon, '0', 'exchangeToParent', token, credits[i].amount, []);
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))));
   });
 });

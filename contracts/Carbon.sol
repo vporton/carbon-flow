@@ -56,7 +56,7 @@ contract Carbon is BaseCarbon
         credits[++maxCreditId] = _credit;
         bytes memory _data = ""; // efficient?
         _doMint(_owner, _token, _amount, _data);
-        // TODO: event?
+        emit CreditCreated(maxCreditId, msg.sender, _authority.maxSerial, _amount, _owner, _arweaveHash);
         return maxCreditId;
     }
 
@@ -68,4 +68,5 @@ contract Carbon is BaseCarbon
     }
 
     event AuthorityCreated(address owner, uint256 token, string name, string symbol, string uri);
+    event CreditCreated(uint256 id, address authority, uint serial, uint256 amount, address owner, bytes32 arweaveHash);
 }

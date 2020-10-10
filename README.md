@@ -183,6 +183,8 @@ This bug probably could be fixed, but:
 
 Documentation comments in contracts.
 
+Indexed events.
+
 See also `TODO` and `FIXME` comments in the source.
 
 Lint Solidity.
