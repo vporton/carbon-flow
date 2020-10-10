@@ -43,12 +43,6 @@ contract Carbon is BaseCarbon
         emit AuthorityCreated(msg.sender, _parent, _name, _symbol, _uri);
     }
 
-    function setAuthorityEnabled(address _address, bool _enabled) external {
-        require(msg.sender == globalCommunityFund); // FIXME: its parent should be able to do this instead
-        authorities[_address].enabled = _enabled;
-        // TODO: event
-    }
-
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
     function createCredit(uint256 _amount, address _owner, bytes32 _arweaveHash) external returns(uint256) {
         Authority storage _authority = authorities[msg.sender];
@@ -63,6 +57,22 @@ contract Carbon is BaseCarbon
         _doMint(_owner, _authority.token, _amount, _data);
         // TODO: event?
         return maxCreditId;
+    }
+
+    function setAuthorityEnabled(address _address, bool _enabled) external {
+        Authority storage _authority = authorities[_address];
+
+        bool _found = false;
+        for(uint256 _id = _authority.token; _id != 0; _id = tokenFlow[_id].parentToken) {
+            if(msg.sender == tokenOwners[_id]) {
+                _found = true;
+                break;
+            }
+        }
+        require(_found);
+
+        _authority.enabled = _enabled;
+        // TODO: event
     }
 
     event AuthorityCreated(address owner, uint256 parent, string name, string symbol, string uri);

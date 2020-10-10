@@ -113,10 +113,10 @@ reason he may write an email to the parent token owner asking to raise the limit
 I will use the word _theft_ to denote both malignant generation of tokens and generating
 too big number fo tokens by mistake.
 
-TODO: Implement and test.
+TODO: Test.
 
-Any authority or issuer can be disabled (TODO: explain the difference between being
-disabled as an authority and as an issuer).
+Any authority token or issuer token can be disabled (remark: functions used to disable
+an authority token and an issuer token are different).
 
 Anyone upward in the tree can disable any of its descendants.
 

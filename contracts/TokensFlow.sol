@@ -20,12 +20,12 @@ contract TokensFlow is ERC1155, IERC1155Views
         uint timeEnteredSwapCredit; // zero means not in a swap credit
         uint lastSwapTime; // ignored when not in a swap credit
         uint256 remainingSwapCredit;
+        bool enabled;
     }
 
     uint256 public maxTokenId;
 
     mapping (uint256 => address) public tokenOwners;
-    mapping (uint256 => bool) public mintingAllowed; // TODO: setter for this?
 
     mapping (uint256 => TokenFlow) public tokenFlow;
 
@@ -78,6 +78,19 @@ contract TokensFlow is ERC1155, IERC1155Views
         _setTokenParent(_child, _parent);
     }
 
+    function setEnabled(uint256 _child, bool _enabled) external {
+        bool _found = false;
+        for(uint256 _id = _child; _id != 0; _id = tokenFlow[_id].parentToken) {
+            if(msg.sender == tokenOwners[_id]) {
+                _found = true;
+                break;
+            }
+        }
+        require(_found);
+
+        tokenFlow[_child].enabled = _enabled;
+    }
+
     function setTokenFlow(uint256 _child, uint256 _maxSwapCredit, uint256 _remainingSwapCredit, uint _swapCreditPeriod) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
@@ -93,7 +106,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
         require(tokenOwners[_id] == msg.sender);
         // require(_id != 0);
-        require(mintingAllowed[_id]);
+        require(tokenFlow[_id].enabled);
 
         _doMint(_to, _id, _value, _data);
     }
@@ -126,13 +139,14 @@ contract TokensFlow is ERC1155, IERC1155Views
         internal returns (uint256)
     {
         tokenOwners[++maxTokenId] = msg.sender;
-        mintingAllowed[maxTokenId] = _mintingAllowed;
 
         nameImpl[maxTokenId] = _name;
         symbolImpl[maxTokenId] = _symbol;
         uriImpl[maxTokenId] = _uri;
 
+        // TODO: inefficient: sets `.enabled` two times
         _setTokenParent(maxTokenId, _parent);
+        tokenFlow[maxTokenId].enabled = _mintingAllowed;
 
         emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
 
@@ -146,13 +160,14 @@ contract TokensFlow is ERC1155, IERC1155Views
         internal returns (uint256)
     {
         tokenOwners[++maxTokenId] = _owner;
-        mintingAllowed[maxTokenId] = _mintingAllowed;
 
         nameImpl[maxTokenId] = _name;
         symbolImpl[maxTokenId] = _symbol;
         uriImpl[maxTokenId] = _uri;
 
+        // TODO: inefficient: sets `.enabled` two times
         _setTokenParent(maxTokenId, _parent);
+        tokenFlow[maxTokenId].enabled = _mintingAllowed;
 
         emit NewToken(maxTokenId, _owner, _name, _symbol, _uri);
 
@@ -189,14 +204,15 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     // Also resets swap credits, so use with caution.
     function _setTokenParent(uint256 _child, uint256 _parent) internal {
-        // require(_parent <= maxTokenId); // against an unwise child
+        // require(_parent <= maxTokenId); // TODO: against an unwise child
 
         tokenFlow[_child] = TokenFlow({parentToken: _parent,
                                        maxSwapCredit: 0,
                                        swapCreditPeriod: 0,
                                        timeEnteredSwapCredit: 0, // zero means not in a swap credit
                                        lastSwapTime: 0,
-                                       remainingSwapCredit: 0});
+                                       remainingSwapCredit: 0,
+                                       enabled: false});
     }
 
     function _currentTime() internal virtual view returns(uint256) {
