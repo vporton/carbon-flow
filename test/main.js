@@ -27,6 +27,9 @@ describe("Main test", function() {
   it("Accordingly to the tech specification", async function() {
     this.timeout(60*1000*100);
 
+    const createTokenEventAbi = [ "event NewToken(uint256 id, address owner, string name, string symbol, string uri)" ];
+    const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
+
     const [ deployer, owner ] = await ethers.getSigners();
 
     console.log("Creating the Community Fund and main contract...");
@@ -68,8 +71,10 @@ describe("Main test", function() {
 
       const info = authoritiesData[i];
       const tx2 = await carbon.connect(authoritityOwner).createAuthority(nonRetiredToken, info.name, info.symbol, info.url);
-      const receipt = await ethers.provider.getTransactionReceipt(tx2.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.token;
+      const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
+      const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
+      const tx3 = await carbon.connect(communityFundDAOVoter).setAuthorityEnabled(token, true); // FIXME: invoke
+      const receipt3 = await ethers.provider.getTransactionReceipt(tx3.hash);
       authorities.push(authoritityOwner);
       authorityTokens.push(token);
     }
@@ -101,11 +106,13 @@ describe("Main test", function() {
     let credits = [];
     for(let i = 0; i < numberOfCredits; ++i) {
       // console.log(`credit ${i}`);
-      const authority = authorities[random.int(0, authorities.length - 1)];
+      const authorityIndex = random.int(0, authorities.length - 1);
+      const authority = authorities[authorityIndex];
+      const authorityToken = authorityTokens[authorityIndex];
       const owner = smartWallets[random.int(0, smartWallets.length - 1)];
-      const arweaveHash = '123'; // just an arbitrary 256-bit number
+      const arweaveHash = ethers.utils.formatBytes32String('vaeSho5IbaiGh5ui'); // just an arbitrary 32 bits
       const tx = await carbon.connect(authority).createCredit(
-        authorityTokens[i], ethers.utils.parseEther('200'), owner.address(), arweaveHash);
+        authorityToken, ethers.utils.parseEther('200'), owner.address(), arweaveHash);
       await ethers.provider.getTransactionReceipt(tx.hash);
       const credit = {}; // TODO
       credits.push(credit);
