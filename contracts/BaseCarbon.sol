@@ -48,7 +48,7 @@ contract BaseCarbon is TokensFlow
 // Credits
 
     // TODO: list of signers in a separate contract
-    // WARNING: If the called of this function is a contract, it must implement ERC1155TokenReceiver interface.
+    // WARNING: If the caller of this function is a contract, it must implement ERC1155TokenReceiver interface.
     function retireCredit(uint _amount) external {
         _doBurn(msg.sender, nonRetiredCreditsToken, _amount);
         uint256 _taxAmount = uint256(tax.mulu(_amount));

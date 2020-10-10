@@ -50,6 +50,7 @@ contract Carbon is BaseCarbon
         // TODO: event
     }
 
+    // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
     function createCredit(uint256 _amount, address _owner, uint256 _arweaveHash) external returns(uint256) {
         Authority storage _authority = authorities[msg.sender];
         require(_authority.enabled);
