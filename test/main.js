@@ -25,17 +25,25 @@ describe("Main test", function() {
     it("Accordingly to the tech specificatin", async function() {
     const [ deployer, owner ] = await ethers.getSigners();
 
-    // In this test Community Fund has an owner, in reality it will be controlled by voting
-    const communityFundOwner0 = ethers.Wallet.createRandom();
-    const communityFundOwner = communityFundOwner0.connect(ethers.provider);
-    const tx = await owner.sendTransaction({to: communityFundOwner.address, value: ethers.utils.parseEther('1')}); // provide gas
+    // In this test Community Fund has one voter (in fact owner).
+    const communityFundDAOVoter0 = ethers.Wallet.createRandom();
+    const communityFundDAOVoter = communityFundDAOVoter0.connect(ethers.provider);
+    const tx = await owner.sendTransaction({to: communityFundDAOVoter.address, value: ethers.utils.parseEther('1')}); // provide gas
     await ethers.provider.getTransactionReceipt(tx.hash);
 
-    // In this test communityFund is just a smart wallet.
-    const cfDeployResult = await deploy("TestSmartWallet", { from: await deployer.getAddress(), args: [communityFundOwner.address] });
-    const communityFund = new SmartWallet();
-    const cfContract = new ethers.Contract(cfDeployResult.address, cfDeployResult.abi, communityFundOwner);
-    await communityFund.init(cfContract);
+    // In this test communityFundDAO is just a smart wallet.
+    const cfDAODeployResult = await deploy("TestSmartWallet", { from: await deployer.getAddress(), args: [communityFundDAOVoter.address] });
+    const communityFundDAO = new SmartWallet();
+    const cfDAOContract = new ethers.Contract(cfDAODeployResult.address, cfDAODeployResult.abi, communityFundDAOVoter);
+    await communityFundDAO.init(cfDAOContract);
+
+    const carbonDeployResult = await deploy("Carbon", {
+      from: await deployer.getAddress(),
+      args: [communityFundDAO.address(),
+        "Retired carbon credits", "M+", "https://example.com/retired.json",
+        "Non-retired carbon credits", "M-", "https://example.com/nonretired.json"],
+    });
+    const carbon = new ethers.Contract(communityFundDAO.address(), carbonDeployResult.abi, communityFundDAOVoter);
 
     let walletOwners = [];
     for(let i = 0; i < 50; ++i) {
@@ -54,5 +62,7 @@ describe("Main test", function() {
       await smartWallet.init(contract);
       smartWallets.push(smartWallet);
     }
+
+
   });
 });
