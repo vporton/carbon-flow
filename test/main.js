@@ -76,7 +76,7 @@ describe("Main test", function() {
       const tx2 = await carbon.connect(authoritityOwner).createAuthority(nonRetiredToken, info.name, info.symbol, info.url);
       const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
       const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
-      const tx3 = await communityFundDAO.func(carbon, '0', 'setEnabled', token, true);
+      const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', token, true);
       const receipt3 = await ethers.provider.getTransactionReceipt(tx3.hash);
       authorities.push(authoritityOwner);
       authorityTokens.push(token);
