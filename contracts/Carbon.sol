@@ -38,7 +38,7 @@ contract Carbon is BaseCarbon
     function createAuthority(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri) external {
         // require(msg.sender == globalCommunityFund;
         // Minting restricted because minting can happen only through createCredit().
-        uint256 _token = _newToken(_parent, false, _name, _symbol, _uri, msg.sender);
+        uint256 _token = _newToken(_parent, _name, _symbol, _uri, msg.sender);
         Authority memory _authority = Authority({maxSerial: 0, token: _token});
         authorities[_token] = _authority;
         emit AuthorityCreated(msg.sender, _token, _name, _symbol, _uri);

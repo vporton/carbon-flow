@@ -20,7 +20,6 @@ contract TokensFlow is ERC1155, IERC1155Views
         uint lastSwapTime; // ignored when not in a swap credit
         uint256 remainingSwapCredit;
         bool enabled;
-        bool mintingAllowed; // useful only for derived contracts
     }
 
     uint256 public maxTokenId;
@@ -58,11 +57,11 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Administrativia
 
-    function newToken(uint256 _parent, bool _mintingAllowed,
+    function newToken(uint256 _parent,
                       string calldata _name, string calldata _symbol, string calldata _uri)
         external returns (uint256)
     {
-        return _newToken(_parent, _mintingAllowed, _name, _symbol, _uri, msg.sender);
+        return _newToken(_parent, _name, _symbol, _uri, msg.sender);
     }
 
     // Intentially no setTokenName() and setTokenSymbol()
@@ -108,13 +107,14 @@ contract TokensFlow is ERC1155, IERC1155Views
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
-    function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
-        require(tokenOwners[_id] == msg.sender);
-        // require(_id != 0);
-        require(tokenFlow[_id].enabled && tokenFlow[_id].mintingAllowed); // TODO: don't query two times
+    // Removed!
+    // function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
+    //     require(tokenOwners[_id] == msg.sender);
+    //     // require(_id != 0);
+    //     require(tokenFlow[_id].enabled);
 
-        _doMint(_to, _id, _value, _data);
-    }
+    //     _doMint(_to, _id, _value, _data);
+    // }
 
 // Flow
 
@@ -138,7 +138,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Internal
 
-    function _newToken(uint256 _parent, bool _mintingAllowed,
+    function _newToken(uint256 _parent,
                         string memory _name, string memory _symbol, string memory _uri,
                         address _owner)
         internal returns (uint256)
@@ -150,7 +150,6 @@ contract TokensFlow is ERC1155, IERC1155Views
         uriImpl[maxTokenId] = _uri;
 
         _setTokenParentNoCheck(maxTokenId, _parent);
-        tokenFlow[maxTokenId].mintingAllowed = _mintingAllowed;
 
         emit NewToken(maxTokenId, _owner, _name, _symbol, _uri);
 
@@ -197,8 +196,7 @@ contract TokensFlow is ERC1155, IERC1155Views
                                        timeEnteredSwapCredit: 0, // zero means not in a swap credit
                                        lastSwapTime: 0,
                                        remainingSwapCredit: 0,
-                                       enabled: _parent == 0,
-                                       mintingAllowed: tokenFlow[_child].mintingAllowed});
+                                       enabled: _parent == 0});
     }
 
     function _currentTime() internal virtual view returns(uint256) {

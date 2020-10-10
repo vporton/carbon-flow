@@ -172,14 +172,26 @@ describe("Main test", function() {
 
     console.log("Retiring carbon credits...")
 
-    for(let i = 0; i < 1; ++i) { // TODO: more tests
-      const issuer = issuers[i];
-      const issuerToken = issuerTokens[i];
-      const tx = await carbon.connect(issuer).retireCredit(
-        nonRetiredToken, ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))));
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+    // Retire all the M- tokens:
+    for(let i = 0; i < smartWallets.length; ++i) { // TODO: more tests
+      const owner = smartWallets[i];
+      const balance = await carbon.balanceOf(owner.address(), nonRetiredToken);
+      const tx = await owner.invoke(carbon, '0', 'retireCredit', balance);
+       ethers.provider.getTransactionReceipt(tx.hash);
+      const diff = (await carbon.balanceOf(owner.address(), retiredToken)).sub(
+        balance.mul(90).div(100)
+      ).abs();
+      console.log(diff.toString());
+      expect(diff).to.be.below(ethers.BigNumber.from('100000')); // not yet swapped
     }
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.BigNumber.from('0')); // was retired
-    expect(await carbon.totalSupply(retiredToken)).to.equal(ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))));
+    {
+      const diff = (await carbon.balanceOf(communityFundDAO.address(), retiredToken)).sub(
+        ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))).mul(10).div(100)
+      ).abs();
+      console.log(diff.toString());
+      expect(diff).to.be.below(ethers.BigNumber.from('100000'));
+    }
+    // TODO: Also test revert retiring more M- that we have.
   });
 });

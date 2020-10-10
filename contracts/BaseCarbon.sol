@@ -2,6 +2,7 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
+import '@nomiclabs/buidler/console.sol';
 import './TokensFlow.sol';
 import './ABDKMath64x64.sol';
 
@@ -22,8 +23,8 @@ contract BaseCarbon is TokensFlow
                 string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
     {
         globalCommunityFund = _globalCommunityFund;
-        retiredCreditsToken = _newToken(0, true, _retiredName, _retiredSymbol, _retiredUri, _globalCommunityFund);
-        nonRetiredCreditsToken = _newToken(0, false, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri, _globalCommunityFund);
+        retiredCreditsToken = _newToken(0, _retiredName, _retiredSymbol, _retiredUri, _globalCommunityFund);
+        nonRetiredCreditsToken = _newToken(0, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri, _globalCommunityFund);
     }
 
     function setGlobalCommunityFundAddress(address _globalCommunityFund) external {
@@ -49,14 +50,12 @@ contract BaseCarbon is TokensFlow
 
     // TODO: list of signers in a separate contract
     // WARNING: If the caller of this function is a contract, it must implement ERC1155TokenReceiver interface.
-    function retireCredit(uint256 _token, uint _amount) external {
-        // FIXME: check ownership
-        require(tokenOwners[_token] == msg.sender);
+    function retireCredit(uint _amount) external {
         _doBurn(msg.sender, nonRetiredCreditsToken, _amount);
         uint256 _taxAmount = uint256(tax.mulu(_amount));
         bytes memory _data = ""; // efficient?
-        _doMint(globalCommunityFund, _token, _taxAmount, _data);
-        _doMint(msg.sender, _token, _amount - _taxAmount, _data);
+        _doMint(globalCommunityFund, retiredCreditsToken, _taxAmount, _data);
+        _doMint(msg.sender, retiredCreditsToken, _amount - _taxAmount, _data);
         // emit CreditRetired(creditId); // TODO
     }
 }
