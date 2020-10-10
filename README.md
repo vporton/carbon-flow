@@ -109,7 +109,11 @@ TODO: Implement and test.
 Any authority or issuer can be disabled (TODO: explain the difference between being
 disabled as an authority and as an issuer).
 
-Anyone upward in the tree can disable any of its children.
+Anyone upward in the tree can disable any of its descendants.
+
+Remark: A malignant or otherwise weird user may produce too long chain of descendants
+of some token, making it impossible to disable all the descendants because of gas
+limitations. In this case, only some of the ancestors in the chain should be disabled.
 
 FIXME: Make only one who disabled able to enable back!
 
