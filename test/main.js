@@ -19,11 +19,15 @@ chai.use(chaiAsPromised);
 // }
 
 describe("Main test", function() {
-    beforeEach(async () => {
-      await deployments.fixture();
-    });
-    it("Accordingly to the tech specificatin", async function() {
+  beforeEach(async () => {
+    console.log("Deploy the official contracts...");
+    // await deployments.run(["Carbon"], { writeDeploymentsToFiles: false });
+    await deployments.fixture();
+  });
+  it("Accordingly to the tech specification", async function() {
     const [ deployer, owner ] = await ethers.getSigners();
+
+    console.log("Creating the Community Fund and main contract...");
 
     // In this test Community Fund has one voter (in fact owner).
     const communityFundDAOVoter0 = ethers.Wallet.createRandom();
@@ -37,17 +41,14 @@ describe("Main test", function() {
     const cfDAOContract = new ethers.Contract(cfDAODeployResult.address, cfDAODeployResult.abi, communityFundDAOVoter);
     await communityFundDAO.init(cfDAOContract);
 
-    const carbonDeployResult = await deploy("Carbon", {
-      from: await deployer.getAddress(),
-      args: [communityFundDAO.address(),
-        "Retired carbon credits", "M+", "https://example.com/retired.json",
-        "Non-retired carbon credits", "M-", "https://example.com/nonretired.json"],
-    });
-    const carbon = new ethers.Contract(carbonDeployResult.address, carbonDeployResult.abi, communityFundDAOVoter);
-    const carbon2 = new ethers.Contract(communityFundDAO.address(), carbonDeployResult.abi, communityFundDAOVoter);
+    const carbonDeployResult = await deployments.get("Carbon");
+    const carbon = new ethers.Contract(carbonDeployResult.address, carbonDeployResult.abi, ethers.provider);
+    const communityFund = new ethers.Contract(communityFundDAO.address(), carbonDeployResult.abi, communityFundDAOVoter);
 
     const nonRetiredToken = await carbon.nonRetiredCreditsToken();
     const retiredToken = await carbon.retiredCreditsToken();
+
+    console.log("Creating the carbon authorities...");
 
     const authoritiesData = [
       { name: "Verra", symbol: "VER", url: "https://example.com/Verra" },
@@ -68,6 +69,8 @@ describe("Main test", function() {
       authorities.push(authoritityOwner);
     }
 
+    console.log("Creating the zero pledgers...");
+
     let walletOwners = [];
     for(let i = 0; i < 50; ++i) {
       const wallet0 = ethers.Wallet.createRandom();
@@ -86,6 +89,19 @@ describe("Main test", function() {
       smartWallets.push(smartWallet);
     }
 
+    console.log("Creating carbon credits...");
 
+    let credits = [];
+    for(let i = 0; i < 10000; ++i) {
+      console.log(`credit ${i}`);
+      const authority = authorities[random.int(0, authorities.length - 1)];
+      const owner = smartWallets[random.int(0, smartWallets.length - 1)];
+      const arweaveHash = '123'; // just an arbitrary 256-bit number
+      const tx = await carbon.connect(authority).createCredit(
+        ethers.utils.parseEther('200'), owner.address(), arweaveHash);
+      await ethers.provider.getTransactionReceipt(tx.hash);
+      const credit = {}; // TODO
+      credits.push(credit);
+    }
   });
 });
