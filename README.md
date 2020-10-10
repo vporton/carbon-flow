@@ -27,6 +27,8 @@ npx buidler test
 
 ## Kinds of tokens
 
+See `doc/tree.odg`.
+
 There are basically two kinds of tokens:
 
 - non-retired carbon tokens;
