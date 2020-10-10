@@ -262,6 +262,12 @@ The structure of the tree can be set only by the owner, because otherwise a mali
 issuer could make the tree big, so producing high gas consumption or even out-of-gas
 errors.
 
+## Other problems
+
+Some DAOs cannot be ERC-1155 smart wallets (because ERC-1155 smart wallet must implement
+certain functions that may be missing in a DAO). The trouble is solvable by making the DAO
+to control a separate contract acting as a ERC-1155 smart wallet.
+
 ## See also
 
 `doc/` folder. Use LibreOffice to read these files.
