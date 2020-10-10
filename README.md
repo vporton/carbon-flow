@@ -42,28 +42,27 @@ There are two "main tokens" (they have no parents):
 - the M+ token represents retired carbon credits;
 - the M- token represents non-retired carbon credits.
 
-The token owner whose ultimate ancestor is the owner of M+ is called an _issuer_.
-
 The token owner whose ultimate ancestor is the owner of M- is called an _carbon credit authority_.
 
-So, we have two trees (there may be more, see the next paragraph): the tree of child/parent
-relationships between issuers and the tree of child/parent relationships between carbon credit
-authorities.
+So, we have the M+ token _and_ a tree of tokens of child/parent
+relationships between authorities rooting in M- token (there may be more, see the next paragraph).
 
 Remark: In fact they are not trees but directed graphs.
 
-There may be token owners who are neither issuers not authorities (either tokens
+There may be token owners who are not authorities (either tokens
 unrelated with our carbon counting project (That's fine, there is no reason to use my project only
 for carbon counting, it may be useful also for something other.) or token owners temporarily not having
 M+ or M- as the ultimate ancestor).
 
 A token owner can change its parent at any moment of time by its own will. (But
-if he does this, his swap limits (see below) are reset to zero until its new parent wishes to
-increase his limits.)
+if he does this, his token is disabled (unless now has not parent) and his swap limits
+(see below) are reset to zero until its new parent wishes to increase his limits.)
 
 ## Token flow
 
 Anybody can swap a child token he holds for the same amount of its parent token.
+
+It is useful to build a hieararchical system of authorities with the root in M- token.  
 
 ## Security measures
 
@@ -113,13 +112,11 @@ reason he may write an email to the parent token owner asking to raise the limit
 I will use the word _theft_ to denote both malignant generation of tokens and generating
 too big number fo tokens by mistake.
 
-TODO: Test.
-
-Any authority token or issuer token can be disabled.
+Any authority token  can be disabled.
 
 Anyone upward in the tree can disable any of its descendants.
 
-Disabled authority cannot create credits, disabled issuer cannot retire credits.
+Disabled authority cannot create credits.
 
 Remark: A malignant or otherwise weird user may produce too long chain of descendants
 of some token, making it impossible to disable all the descendants because of gas
@@ -135,9 +132,9 @@ itself, because otherwise it can't enable itself back.
 
 See also https://ethereum.stackexchange.com/q/88235/36438
 
-In the case if a big enough theft is detected somewhere in the tree, the blamed entity
-and possibly several its ancestors should be disabled as soon as possible, while they
-did not yet swap their tokens to the upper levels.
+In the case if a big enough theft is detected somewhere in the tree of authorities, the
+blamed entity and possibly several its ancestors should be disabled as soon as possible,
+while they did not yet swap their tokens to the upper levels.
 
 After it is disabled, ones holding invalid tokens should be asked to burn them.
 
@@ -145,6 +142,8 @@ If enough tokens were burn and the reason of the theft was eliminated, the disab
 tokens should be enabled again.
 
 ## ERC-20 tokens
+
+TODO: Test.
 
 Our ERC-20 tokens wrap corresponding ERC-1155 so that the amounts on accounts of
 our ERC-20 and the corresponding ERC-1155 token are always equal. Transfer or approval
@@ -204,8 +203,8 @@ M+ token is the retired carbon credits.
 
 M- token is the non-retired carbon credits.
 
-Each issuer and each authority has also its own token for carbon credits that could be exchanged
-for the token of its upper level issuer and ultimately for the M+ or M- token.
+Each authority has also its own token for carbon credits that could be exchanged
+for the token of its upper level issuer and ultimately for the M- token.
 
 **There are both ERC-20 and ERC-1155 tokens. Which tokens should I use?**
 
@@ -216,14 +215,6 @@ of one of these two tokens automatically transfers or approves also the other on
 You should use ERC-1155 tokens if you can, because they are both more secure (there
 is a security bug in ERC-20 that affects for example crypto exchanges) and use less
 gas. But many legacy softwares don't support ERC-1155, in this case use ERC-20.
-
-**Can M+/M- tokens owner mint directly?**
-
-Non-retired (M-) tokens can be minted only through the authority mechanism.
-
-The current implementation allows to mint M+ tokens by the Global Community Fund.
-TODO: Probably this should be disabled (by changing the program source before the
-final release).
 
 ## Sum of Several Tokens
 
