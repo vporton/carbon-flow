@@ -7,7 +7,6 @@ import './BaseCarbon.sol';
 contract Carbon is BaseCarbon
 {
     struct Authority {
-        bool enabled;
         uint256 token;
         uint maxSerial;
     }
@@ -39,16 +38,15 @@ contract Carbon is BaseCarbon
         // require(msg.sender == globalCommunityFund;
         // Minting restricted because minting can happen only through createCredit().
         uint256 _token = _newToken(_parent, false, _name, _symbol, _uri);
-        Authority memory _authority = Authority({enabled: _parent == 0, maxSerial: 0, token: _token});
+        Authority memory _authority = Authority({maxSerial: 0, token: _token});
         authorities[_token] = _authority;
         emit AuthorityCreated(msg.sender, _token, _name, _symbol, _uri);
     }
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
     function createCredit(uint256 _token, uint256 _amount, address _owner, bytes32 _arweaveHash) external returns(uint256) {
-        require(tokenOwners[_token] == msg.sender);
+        require(tokenOwners[_token] == msg.sender && tokenFlow[_token].enabled);
         Authority storage _authority = authorities[_token];
-        require(_authority.enabled);
         CarbonCredit memory _credit = CarbonCredit({authority: msg.sender,
                                                     serial: ++_authority.maxSerial,
                                                     amount: _amount,
@@ -61,38 +59,11 @@ contract Carbon is BaseCarbon
         return maxCreditId;
     }
 
-    function setAuthorityEnabled(uint256 _token, bool _enabled) external {
-        Authority storage _authority = authorities[_token];
-
-        bool _found = false;
-        for(uint256 _id = tokenFlow[_authority.token].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
-            require(_id != _authority.token); // Prevent irrevocably disable itself, also save gas.
-            if(!authorities[_id].enabled) {
-                break; // A disabled entity cannot enable/disable other entities.
-            }
-            if(msg.sender == tokenOwners[_id]) {
-                _found = true;
-                break;
-            }
-        }
-        require(_found);
-
-        _authority.enabled = _enabled;
-        // TODO: event
-    }
-
     function _setTokenParent(uint256 _child, uint256 _parent) internal {
         // require(_child <= maxTokenId); // not needed
         require(msg.sender == tokenOwners[_child]);
 
         _setTokenParentNoCheck(_child, _parent);
-    }
-
-    function _setTokenParentNoCheck(uint256 _child, uint256 _parent) override internal {
-        super._setTokenParentNoCheck(_child, _parent);
-        if(_parent != 0) {
-            authorities[_child].enabled = false;
-        }
     }
 
     event AuthorityCreated(address owner, uint256 token, string name, string symbol, string uri);

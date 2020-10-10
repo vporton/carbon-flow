@@ -115,8 +115,7 @@ too big number fo tokens by mistake.
 
 TODO: Test.
 
-Any authority token or issuer token can be disabled. (Remark: functions used to disable
-an authority token and an issuer token are different.)
+Any authority token or issuer token can be disabled.
 
 Anyone upward in the tree can disable any of its descendants.
 

@@ -21,6 +21,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         uint lastSwapTime; // ignored when not in a swap credit
         uint256 remainingSwapCredit;
         bool enabled;
+        bool mintingEnabled;
     }
 
     uint256 public maxTokenId;
@@ -78,7 +79,6 @@ contract TokensFlow is ERC1155, IERC1155Views
         _setTokenParentNoCheck(_child, _parent);
     }
 
-    // FIXME: It turns an authority into being also an issuer if _enabled == true. Is this correct?
     function setEnabled(uint256 _child, bool _enabled) external {
         bool _found = false;
         for(uint256 _id = tokenFlow[_child].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
@@ -111,7 +111,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
         require(tokenOwners[_id] == msg.sender);
         // require(_id != 0);
-        require(tokenFlow[_id].enabled);
+        require(tokenFlow[_id].enabled && tokenFlow[_id].mintingEnabled); // TODO: don't query two times
 
         _doMint(_to, _id, _value, _data);
     }
@@ -139,7 +139,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 // Internal
 
     // Keep in sync with _newToken2
-    function _newToken(uint256 _parent, bool _mintingAllowed,
+    function _newToken(uint256 _parent, bool _mintingEnabled,
                        string calldata _name, string calldata _symbol, string calldata _uri)
         internal returns (uint256)
     {
@@ -149,9 +149,8 @@ contract TokensFlow is ERC1155, IERC1155Views
         symbolImpl[maxTokenId] = _symbol;
         uriImpl[maxTokenId] = _uri;
 
-        // TODO: inefficient: sets `.enabled` two times
         _setTokenParentNoCheck(maxTokenId, _parent);
-        tokenFlow[maxTokenId].enabled = _mintingAllowed;
+        tokenFlow[maxTokenId].mintingEnabled = _mintingEnabled;
 
         emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
 
@@ -159,7 +158,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // Keep in sync with _newToken
-    function _newToken2(uint256 _parent, bool _mintingAllowed,
+    function _newToken2(uint256 _parent, bool _mintingEnabled,
                         string memory _name, string memory _symbol, string memory _uri,
                         address _owner)
         internal returns (uint256)
@@ -170,9 +169,8 @@ contract TokensFlow is ERC1155, IERC1155Views
         symbolImpl[maxTokenId] = _symbol;
         uriImpl[maxTokenId] = _uri;
 
-        // TODO: inefficient: sets `.enabled` two times
         _setTokenParentNoCheck(maxTokenId, _parent);
-        tokenFlow[maxTokenId].enabled = _mintingAllowed;
+        tokenFlow[maxTokenId].mintingEnabled = _mintingEnabled;
 
         emit NewToken(maxTokenId, _owner, _name, _symbol, _uri);
 
@@ -217,7 +215,8 @@ contract TokensFlow is ERC1155, IERC1155Views
                                        timeEnteredSwapCredit: 0, // zero means not in a swap credit
                                        lastSwapTime: 0,
                                        remainingSwapCredit: 0,
-                                       enabled: false});
+                                       enabled: _parent == 0,
+                                       mintingEnabled: tokenFlow[_child].mintingEnabled});
     }
 
     function _currentTime() internal virtual view returns(uint256) {
