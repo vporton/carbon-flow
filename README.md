@@ -65,6 +65,12 @@ increase his limits.)
 
 Anybody can swap a child token he holds for the same amount of its parent token.
 
+## Security measures
+
+Among the usual Ethereum security measures like making tokens "owned" by someone
+restricting others' right for manipulation of the token, there are the following
+"special" security measures.
+
 ### Limiting token flow
 
 The amount of child tokens that can be swapped for a parent token is limited
@@ -102,7 +108,10 @@ TL;DR: The algorithm is as follows:
 In the case if somebody needs to exceed a swap credit amount for a legitimate
 reason he may write an email to the parent token owner asking to raise the limits.
 
-## Theft recovery procedure
+### Measures for theft recovery
+
+I will use the word _theft_ to denote both malignant generation of tokens and generating
+too big number fo tokens by mistake.
 
 TODO: Implement and test.
 
@@ -125,7 +134,7 @@ if then it changes the parent back.
 
 Disabled authority cannot create credits, disabled issuer cannot retire credits.
 
-### Actions
+#### Theft recovery procedure
 
 In the case if a big enough theft is detected somewhere in the tree, the blamed entity
 and possibly several its ancestors should be disabled as soon as possible, while they
