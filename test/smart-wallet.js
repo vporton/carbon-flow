@@ -23,7 +23,7 @@ describe("SmartWallet", function() {
     const [ deployer, owner ] = await ethers.getSigners();
 
     let walletOwners = [];
-    for(let i = 0; i < 10; ++i) {
+    for(let i = 0; i < 2; ++i) {
       const wallet0 = ethers.Wallet.createRandom();
       const wallet = wallet0.connect(ethers.provider);
       const tx = await owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('1')}); // provide gas
@@ -43,6 +43,34 @@ describe("SmartWallet", function() {
       const contract = new ethers.Contract(deployResult.address, deployResult.abi, walletOwners[i]);
       await smartWallet.init(contract);
       smartWallets.push(smartWallet);
+    }
+
+    // Transfer Ether owner -> smartWallets[0] -> smartWallets[1]:
+    {
+      const tx = await owner.sendTransaction({to: smartWallets[0].address(), value: ethers.utils.parseEther('0.01')});
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    {
+      const tx = await smartWallets[0].transfer(smartWallets[1].address(), ethers.utils.parseEther('0.01'));
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    {
+      const balance = await smartWallets[1].getBalance();
+      expect(balance).to.equal(ethers.utils.parseEther('0.01'));
+    }
+
+    // Transfer ERC-20 owner -> smartWallets[0] -> smartWallets[1]:
+    {
+      const tx = await erc20Contract.connect(owner).transfer(smartWallets[0].address(), ethers.utils.parseEther('1.5'));
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    {
+      const tx = await smartWallets[0].func('transfer', smartWallets[1].address(), ethers.utils.parseEther('1'));
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    {
+      const balance = await erc20Contract.balanceOf(smartWallets[1].address());
+      expect(balance).to.equal(ethers.utils.parseEther('1'));
     }
   });
 });
