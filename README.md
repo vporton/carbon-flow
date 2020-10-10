@@ -136,6 +136,8 @@ Disabled authority cannot create credits, disabled issuer cannot retire credits.
 
 #### Theft recovery procedure
 
+See also https://ethereum.stackexchange.com/q/88235/36438
+
 In the case if a big enough theft is detected somewhere in the tree, the blamed entity
 and possibly several its ancestors should be disabled as soon as possible, while they
 did not yet swap their tokens to the upper levels.
