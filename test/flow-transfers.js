@@ -19,6 +19,8 @@ describe("TokensFlow", function() {
   it("Checks correct transfers", async function() {
     this.timeout(60*1000*100);
 
+    let expectations = [];
+
     console.log("Initializing...");
 
     const [ deployer, owner ] = await ethers.getSigners();
@@ -178,7 +180,8 @@ describe("TokensFlow", function() {
             async function mycall() {
               await tokensFlow.connect(wallet).exchangeToParent(fromToken, amount, [], {gasLimit: 1000000});
             }
-            expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+            // FIXME: need to return expect() return value!
+            expectations.push(expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason"));
           }
           break;
         }
@@ -186,5 +189,7 @@ describe("TokensFlow", function() {
     }
 
     // TODO: Test batch mints and transfers.
+
+    return Promise.all(expectations);
   });
 });
