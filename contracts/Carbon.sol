@@ -20,7 +20,8 @@ contract Carbon is BaseCarbon
         bytes32 arweaveHash;
     }
 
-    mapping (token => Authority) public authorities;
+    // token => Authority
+    mapping (uint256 => Authority) public authorities;
 
     mapping (uint256 => CarbonCredit) public credits;
 
@@ -44,8 +45,9 @@ contract Carbon is BaseCarbon
     }
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
-    function createCredit(uint256 _amount, address _owner, bytes32 _arweaveHash) external returns(uint256) {
-        Authority storage _authority = authorities[tokenOwners[msg.sender]];
+    function createCredit(uint256 _token, uint256 _amount, address _owner, bytes32 _arweaveHash) external returns(uint256) {
+        require(tokenOwners[_token] == msg.sender);
+        Authority storage _authority = authorities[_token];
         require(_authority.enabled);
         CarbonCredit memory _credit = CarbonCredit({authority: msg.sender,
                                                     serial: ++_authority.maxSerial,
@@ -54,7 +56,7 @@ contract Carbon is BaseCarbon
                                                     arweaveHash: _arweaveHash});
         credits[++maxCreditId] = _credit;
         bytes memory _data = ""; // efficient?
-        _doMint(_owner, _authority.token, _amount, _data);
+        _doMint(_owner, _token, _amount, _data);
         // TODO: event?
         return maxCreditId;
     }
@@ -77,6 +79,14 @@ contract Carbon is BaseCarbon
 
         _authority.enabled = _enabled;
         // TODO: event
+    }
+
+    function _setTokenParent(uint256 _child, uint256 _parent) override internal {
+        // require(_child <= maxTokenId); // not needed
+        require(msg.sender == tokenOwners[_child]);
+
+        super._setTokenParent(_child, _parent);
+        authorities[_child].enabled = false;
     }
 
     event AuthorityCreated(address owner, uint256 parent, string name, string symbol, string uri);

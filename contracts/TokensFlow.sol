@@ -207,8 +207,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // Also resets swap credits, so use with caution.
-    // FIXME: This does not reset disability status of an authority!
-    function _setTokenParent(uint256 _child, uint256 _parent) internal {
+    function _setTokenParent(uint256 _child, uint256 _parent) virtual internal {
         // require(_parent <= maxTokenId); // TODO: against an unwise child
 
         tokenFlow[_child] = TokenFlow({parentToken: _parent,
