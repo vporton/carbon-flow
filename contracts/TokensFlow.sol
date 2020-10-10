@@ -141,10 +141,11 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     // Keep in sync with _newToken
     function _newToken2(uint256 _parent, bool _mintingAllowed,
-                        string memory _name, string memory _symbol, string memory _uri)
+                        string memory _name, string memory _symbol, string memory _uri,
+                        address _owner)
         internal returns (uint256)
     {
-        tokenOwners[++maxTokenId] = msg.sender;
+        tokenOwners[++maxTokenId] = _owner;
         mintingAllowed[maxTokenId] = _mintingAllowed;
 
         nameImpl[maxTokenId] = _name;
@@ -153,7 +154,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
         _setTokenParent(maxTokenId, _parent);
 
-        emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
+        emit NewToken(maxTokenId, _owner, _name, _symbol, _uri);
 
         return maxTokenId;
     }
