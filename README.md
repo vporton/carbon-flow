@@ -139,6 +139,8 @@ Documentation comments in contracts.
 
 See also `TODO` and `FIXME` comments in the source.
 
+Lint Solidity.
+
 ### Not doable things
 
 The bounty required
