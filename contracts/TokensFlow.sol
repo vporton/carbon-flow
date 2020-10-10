@@ -2,7 +2,7 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
-// import '@nomiclabs/buidler/console.sol';
+import '@nomiclabs/buidler/console.sol';
 
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
@@ -18,6 +18,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         uint256 maxSwapCredit;
         uint swapCreditPeriod;
         uint timeEnteredSwapCredit; // zero means not in a swap credit
+        uint lastSwapTime; // ignored when not in a swap credit
         uint256 remainingSwapCredit;
     }
 
@@ -85,7 +86,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
         _flow.maxSwapCredit = _maxSwapCredit;
         _flow.swapCreditPeriod = _swapCreditPeriod;
-        _flow.timeEnteredSwapCredit = block.timestamp; // TODO: Allow to set an arbitrary timestamp here.
+        _flow.timeEnteredSwapCredit = _currentTime(); // TODO: Allow to set an arbitrary timestamp here.
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
@@ -109,11 +110,12 @@ contract TokensFlow is ERC1155, IERC1155Views
         require(_amount <= _balance);
         _doBurn(msg.sender, _id, _amount);
         _doMint(msg.sender, _flow.parentToken, _amount, _data);
-        if(_inSwapCredit(_flow)) { // TODO: called second time here (TODO: Use `pure` in the interface?)
-            _flow.timeEnteredSwapCredit = block.timestamp;
-        } else {
-            _flow.remainingSwapCredit -= _amount; // no need for overflow checking
+        if(!_inSwapCredit(_flow)) { // TODO: called second time here (TODO: Use `pure` in the interface?)
+            _flow.timeEnteredSwapCredit = _currentTime();
+            _flow.remainingSwapCredit = _flow.maxSwapCredit;
         }
+        _flow.lastSwapTime = _currentTime();
+        _flow.remainingSwapCredit -= _amount; // no need for overflow checking
     }
 
 // Internal
@@ -192,6 +194,7 @@ contract TokensFlow is ERC1155, IERC1155Views
                                        maxSwapCredit: 0,
                                        swapCreditPeriod: 0,
                                        timeEnteredSwapCredit: 0, // zero means not in a swap credit
+                                       lastSwapTime: 0,
                                        remainingSwapCredit: 0});
     }
 
@@ -202,12 +205,24 @@ contract TokensFlow is ERC1155, IERC1155Views
     // TODO: additional arguments to the below functions to optimize them
 
     function _inSwapCredit(TokenFlow memory _flow) public view returns(bool) {
+        // console.log(_flow.timeEnteredSwapCredit, _currentTime(), _flow.timeEnteredSwapCredit, _flow.swapCreditPeriod);
         return _flow.timeEnteredSwapCredit != 0 &&
-               _currentTime() - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
+               int256(_currentTime()) - int256(_flow.timeEnteredSwapCredit) < int256(_flow.swapCreditPeriod);
     }
 
+    // TODO: external
     function _maxSwapAmount(TokenFlow memory _flow) public view returns(uint256) {
-        return _inSwapCredit(_flow) ? _flow.remainingSwapCredit : _flow.maxSwapCredit;
+        if(_inSwapCredit(_flow)) {
+            // TODO: Will it use less gas if store data in int256?
+            int256 passedTime = int256(_currentTime()) - int256(_flow.lastSwapTime);
+            int256 delta = passedTime * int256(_flow.maxSwapCredit) / int256(_flow.swapCreditPeriod);
+            int256 result = int256(_flow.remainingSwapCredit) - delta;
+            console.log(result < 0 ? 0 : uint256(result));
+            return result < 0 ? 0 : uint256(result); // TODO: slow
+        } else {
+            console.log(_flow.maxSwapCredit);
+            return _flow.maxSwapCredit;
+        }
     }
 
 // Events

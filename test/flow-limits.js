@@ -50,11 +50,6 @@ describe("TokensFlow (limits)", function() {
 
     console.log(`Checking minting and transferring...`); 
 
-    async function skipTime() { // move 10 sec forward in time
-      const tx = await tokensFlow.setCurrentTime(ethers.BigNumber.from(10).add(await tokensFlow.currentTime()));
-      await ethers.provider.getTransactionReceipt(tx.hash);
-    }
-
     {
       const tx = await tokensFlow.connect(wallet).mint(wallet.address, childToken, ethers.utils.parseEther('1000000'), [], {gasLimit: 1000000});
       await ethers.provider.getTransactionReceipt(tx.hash);
@@ -72,8 +67,47 @@ describe("TokensFlow (limits)", function() {
       await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
 
+    async function skipTime(seconds) {
+      const tx = await tokensFlow.setCurrentTime(ethers.BigNumber.from(seconds).add(await tokensFlow.currentTime()));
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+
+    // Test non-zero flow:
     {
-      const tx = await tokensFlow.connect(wallet).setTokenFlow(childToken, ethers.utils.parseEther('10000'), ethers.utils.parseEther('10000'), 10);
+      const tx = await tokensFlow.connect(wallet).setTokenFlow(childToken, ethers.utils.parseEther('1000'), ethers.utils.parseEther('1000'), 10);
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    {
+      async function mycall() {
+        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('1001'), [], {gasLimit: 1000000});
+      }
+      await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+    }
+    {
+      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('500'), []);
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    await skipTime(2);
+    {
+      async function mycall() {
+        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('401'), [], {gasLimit: 1000000});
+      }
+      await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+    }
+    await skipTime(8);
+    {
+      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('501'), []);
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    {
+      async function mycall() {
+        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('500'), [], {gasLimit: 1000000});
+      }
+      await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+    }
+    await skipTime(5);
+    {
+      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('200'), []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
   });
