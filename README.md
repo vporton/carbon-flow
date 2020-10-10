@@ -135,13 +135,9 @@ This bug probably could be fixed, but:
 
 ## TODO
 
-See also `TODO` and `FIXME` comments in the source.
-
-Test `TokensFlow` transfer limits.
-
-`buidler-deploy`.
-
 Documentation comments in contracts.
+
+See also `TODO` and `FIXME` comments in the source.
 
 ### Not doable things
 
