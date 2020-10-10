@@ -181,16 +181,14 @@ describe("Main test", function() {
       const diff = (await carbon.balanceOf(owner.address(), retiredToken)).sub(
         balance.mul(90).div(100)
       ).abs();
-      console.log(diff.toString());
-      expect(diff).to.be.below(ethers.BigNumber.from('100000')); // not yet swapped
+      expect(diff).to.be.below(ethers.BigNumber.from('1000')); // not yet swapped
     }
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.BigNumber.from('0')); // was retired
     {
       const diff = (await carbon.balanceOf(communityFundDAO.address(), retiredToken)).sub(
         ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))).mul(10).div(100)
       ).abs();
-      console.log(diff.toString());
-      expect(diff).to.be.below(ethers.BigNumber.from('100000'));
+      expect(diff).to.be.below(ethers.BigNumber.from('1000'));
     }
     // TODO: Also test revert retiring more M- that we have.
   });
