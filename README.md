@@ -184,6 +184,8 @@ Documentation comments in contracts.
 
 Indexed events.
 
+Should allow to allocate a swap credit once, not periodically?
+
 See also `TODO` and `FIXME` comments in the source.
 
 Lint Solidity.
