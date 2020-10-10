@@ -78,6 +78,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         _setTokenParentNoCheck(_child, _parent);
     }
 
+    // FIXME: It turns an authority into being also an issuer if _enabled == true. Is this correct?
     function setEnabled(uint256 _child, bool _enabled) external {
         bool _found = false;
         for(uint256 _id = tokenFlow[_child].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
