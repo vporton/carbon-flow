@@ -50,6 +50,8 @@ So, we have two trees (there may be more, see the next paragraph): the tree of c
 relationships between issuers and the tree of child/parent relationships between carbon credit
 authorities.
 
+Remark: In fact they are not trees but directed graphs.
+
 There may be token owners who are neither issuers not authorities (either tokens
 unrelated with our carbon counting project (That's fine, there is no reason to use my project only
 for carbon counting, it may be useful also for something other.) or token owners temporarily not having
@@ -99,6 +101,36 @@ TL;DR: The algorithm is as follows:
 
 In the case if somebody needs to exceed a swap credit amount for a legitimate
 reason he may write an email to the parent token owner asking to raise the limits.
+
+## Theft recovery procedure
+
+TODO: Implement and test.
+
+Any authority or issuer can be disabled (TODO: explain the difference between being
+disabled as an authority and as an issuer).
+
+Anyone upward in the tree can disable any of its children.
+
+FIXME: Make only one who disabled able to enable back!
+
+Remark: Because it is in reality a directed graph, not a tree, two tokens in the tree
+can be disabled by each other.
+
+TODO: Should an entity auto-enable if it changes its parent? Be careful in the case
+if then it changes the parent back.
+
+Disabled authority cannot create credits, disabled issuer cannot retire credits.
+
+### Actions
+
+In the case if a big enough theft is detected somewhere in the tree, the blamed entity
+and possibly several its ancestors should be disabled as soon as possible, while they
+did not yet swap their tokens to the upper levels.
+
+After it is disabled, ones holding invalid tokens should be asked to burn them.
+
+If enough tokens were burn and the reason of the theft was eliminated, the disabled
+tokens should be enabled again.
 
 ## ERC-20 tokens
 
