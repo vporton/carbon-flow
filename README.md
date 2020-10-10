@@ -266,7 +266,8 @@ errors.
 
 Some DAOs cannot be ERC-1155 smart wallets (because ERC-1155 smart wallet must implement
 certain functions that may be missing in a DAO). The trouble is solvable by making the DAO
-to control a separate contract acting as a ERC-1155 smart wallet.
+to control a separate contract acting as a ERC-1155 smart wallet. Another solution is to
+use my ERC-20 wrapper.
 
 ## See also
 
