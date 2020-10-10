@@ -81,11 +81,15 @@ contract Carbon is BaseCarbon
         // TODO: event
     }
 
-    function _setTokenParent(uint256 _child, uint256 _parent) override internal {
+    function _setTokenParent(uint256 _child, uint256 _parent) internal {
         // require(_child <= maxTokenId); // not needed
         require(msg.sender == tokenOwners[_child]);
 
-        super._setTokenParent(_child, _parent);
+        _setTokenParentNoCheck(_child, _parent);
+    }
+
+    function _setTokenParentNoCheck(uint256 _child, uint256 _parent) override internal {
+        super._setTokenParentNoCheck(_child, _parent);
         if(_parent != 0) {
             authorities[_child].enabled = false;
         }

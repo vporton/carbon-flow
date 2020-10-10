@@ -75,7 +75,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         // require(_child <= maxTokenId); // not needed
         require(msg.sender == tokenOwners[_child]);
 
-        _setTokenParent(_child, _parent);
+        _setTokenParentNoCheck(_child, _parent);
     }
 
     function setEnabled(uint256 _child, bool _enabled) external {
@@ -149,7 +149,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         uriImpl[maxTokenId] = _uri;
 
         // TODO: inefficient: sets `.enabled` two times
-        _setTokenParent(maxTokenId, _parent);
+        _setTokenParentNoCheck(maxTokenId, _parent);
         tokenFlow[maxTokenId].enabled = _mintingAllowed;
 
         emit NewToken(maxTokenId, msg.sender, _name, _symbol, _uri);
@@ -170,7 +170,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         uriImpl[maxTokenId] = _uri;
 
         // TODO: inefficient: sets `.enabled` two times
-        _setTokenParent(maxTokenId, _parent);
+        _setTokenParentNoCheck(maxTokenId, _parent);
         tokenFlow[maxTokenId].enabled = _mintingAllowed;
 
         emit NewToken(maxTokenId, _owner, _name, _symbol, _uri);
@@ -207,7 +207,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // Also resets swap credits, so use with caution.
-    function _setTokenParent(uint256 _child, uint256 _parent) virtual internal {
+    function _setTokenParentNoCheck(uint256 _child, uint256 _parent) virtual internal {
         // require(_parent <= maxTokenId); // TODO: against an unwise child
 
         tokenFlow[_child] = TokenFlow({parentToken: _parent,
