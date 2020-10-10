@@ -21,7 +21,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         uint lastSwapTime; // ignored when not in a swap credit
         uint256 remainingSwapCredit;
         bool enabled;
-        bool mintingAllowed;
+        bool mintingAllowed; // useful only for derived contracts
     }
 
     uint256 public maxTokenId;
