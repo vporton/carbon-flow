@@ -384,6 +384,14 @@ certain functions that may be missing in a DAO). The trouble is solvable by maki
 to control a separate contract acting as a ERC-1155 smart wallet. Another solution is to
 use my ERC-20 wrapper.
 
+## Advice
+
+Quadratic voting anti-sybill can be done by using Fuse.io network (not the main Ethereum
+network where gas is far too costly anyway) and GoodDollar private keys as the keys for voting.
+A user of GoodDollar would not give to somebody other his private key easily because the key
+costs money. So it is a good anti-sybill. As a consequence, we should think of deploying our
+entire system on Fuse. Another alternative would be Matic.
+
 ## See also
 
 `doc/` folder. Use LibreOffice to read these files.
