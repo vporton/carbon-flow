@@ -182,7 +182,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     // Allow this even if `!enabled` and set `enabled` to `true` if no parent,
     // as otherwise impossible to enable it again.
     function _setTokenParentNoCheck(uint256 _child, uint256 _parent) virtual internal {
-        require(_parent != 0 && _parent <= maxTokenId);
+        require(_parent <= maxTokenId);
 
         tokenFlow[_child] = TokenFlow({parentToken: _parent,
                                        maxSwapCredit: 0,
