@@ -42,6 +42,7 @@ module.exports = {
       gasLimit: 6000000000,
       defaultBalanceEther: 100,
       url: "http://localhost:8545",
+      live: false,
       saveDeployment: false,
     },
     ropsten: {
