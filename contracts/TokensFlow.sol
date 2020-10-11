@@ -70,7 +70,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     // We don't check for circularities.
     function setTokenParent(uint256 _child, uint256 _parent) external {
-        // require(_child <= maxTokenId); // not needed
+        // require(_child != 0 && _child <= maxTokenId); // not needed
         require(msg.sender == tokenOwners[_child]);
 
         _setTokenParentNoCheck(_child, _parent);
@@ -182,7 +182,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     // Allow this even if `!enabled` and set `enabled` to `true` if no parent,
     // as otherwise impossible to enable it again.
     function _setTokenParentNoCheck(uint256 _child, uint256 _parent) virtual internal {
-        // require(_parent <= maxTokenId); // TODO: against an unwise child
+        require(_parent != 0 && _parent <= maxTokenId);
 
         tokenFlow[_child] = TokenFlow({parentToken: _parent,
                                        maxSwapCredit: 0,

@@ -61,7 +61,7 @@ contract Carbon is BaseCarbon
     }
 
     function _setTokenParent(uint256 _child, uint256 _parent) internal {
-        // require(_child <= maxTokenId); // not needed
+        // require(_child != 0 && _child <= maxTokenId); // not needed
         require(msg.sender == tokenOwners[_child]);
 
         _setTokenParentNoCheck(_child, _parent);
