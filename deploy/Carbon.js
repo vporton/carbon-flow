@@ -7,6 +7,8 @@ module.exports = async ({
   const { deploy, log } = deployments;
   const { deployer, globalCommunityFund } = await getNamedAccounts();
 
+  const globalCommunityFund = process.env.GLOBAL_COMMUNITY_FUND;
+
   const deployResult = await deploy("Carbon", { from: deployer, args: [
       globalCommunityFund,
       "Retired carbon credits", "M+", "https://example.com/retired",

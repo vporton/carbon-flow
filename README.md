@@ -16,7 +16,7 @@ Prerequisites: Node.js, yarn, GNU make.
 To install contracts:
 ```sh
 yarn install
-npx buidler deploy --network NETWORK
+GLOBAL_COMMUNITY_FUND=0x<THE-DAO-ADDRESS> npx buidler deploy --network NETWORK
 ```
 (replace `NETWORK` by `mainnet` (or another network we will choose later) when doing
 the real deployment, for testing you can use `--network buidlerevm`).
