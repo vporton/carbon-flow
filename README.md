@@ -223,6 +223,8 @@ This bug probably could be fixed, but:
 
 ## TODO
 
+Conform to the "51 private keys" requirement.
+
 Documentation comments in contracts.
 
 Indexed events.
