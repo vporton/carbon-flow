@@ -9,21 +9,40 @@ The discrepancy is easily solvable by creating a ERC-1155/ERC-20 bridge.
 
 ## Installation
 
-Prerequisites: Node.js, yarn.
+Prerequisites: Node.js, yarn, GNU make.
 
-To install:
+To install contracts:
 ```sh
 yarn install
 npx buidler deploy --network NETWORK
 ```
-(replace `NETWORK` by `mainnet` when doing the real deployment, for testing you can
-use `--network buidlerevm`).
+(replace `NETWORK` by `mainnet` (or another network we will choose later) when doing
+the real deployment, for testing you can use `--network buidlerevm`).
 
 To test:
 ```sh
 yarn install
 npx buidler test
 ```
+
+For testing in a toy blockchain Ganache run
+```sh
+npx ganache-cli -d
+```
+(This command should be kept running during the entire test!)
+
+Then you can use `--network ganache`.
+
+To install the Web application (dApp):
+```sh
+yarn install
+npx buidler deploy --network NETWORK
+make
+```
+
+Then copy the folder `out/ui/` to a Web server and run the app in that folder.
+
+Configure your crypto Web browser to use `localhost:8545` if testing with Ganache.
 
 ## Kinds of tokens
 
