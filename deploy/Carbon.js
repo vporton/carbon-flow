@@ -13,6 +13,7 @@ module.exports = async ({
       "Non-retired carbon credits", "M-", "https://example.com/nonretired"] });
   log(`contract Carbon was deployed at ${deployResult.address} using ${deployResult.receipt.gasUsed} gas`);
   log(`Global Community Fund controlling account: ${globalCommunityFund}`);
+  log(`Write ABI and addresses...`)
   fs.writeFileSync("out/artifacts/Carbon.abi", JSON.stringify(deployResult.abi));
   fs.writeFileSync("out/artifacts/addresses.js", `const carbonAddress = '${deployResult.address}';\n`);
 };
