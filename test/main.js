@@ -93,32 +93,6 @@ describe("Main test", function() {
       authorityIndexes[await authoritityOwner.getAddress()] = i;
     }
 
-    console.log("Creating the M+ issuers...");
-
-    let issuers = [];
-    let issuerTokens = [];
-    for(let i = 0; i < 1; ++i) { // TODO: Test more that one issuer.
-      // In reality should be controlled by a DAO
-      const issuerOwner0 = ethers.Wallet.createRandom();
-      const issuerOwner = issuerOwner0.connect(ethers.provider);
-      const tx = await owner.sendTransaction({to: issuerOwner.address, value: ethers.utils.parseEther('15')}); // provide gas
-      await ethers.provider.getTransactionReceipt(tx.hash);
-
-      const tx2 = await carbon.connect(issuerOwner).createAuthority(retiredToken, `Issuer ${i}`, `ISU${i}`, "https://example.com/issuer");
-      const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
-      const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
-      const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', [token], true);
-      await ethers.provider.getTransactionReceipt(tx3.hash);
-
-      const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
-      const tx4 = await communityFundDAO.invoke(carbon, '0', 'setTokenFlow', token, veryBigAmount, veryBigAmount, 10, await carbon.currentTime());
-      await ethers.provider.getTransactionReceipt(tx4.hash);  
-
-      issuers.push(issuerOwner);
-      issuerTokens.push(token);
-      // issuerIndexes[await issuerOwner.getAddress()] = i;
-    }
-
     console.log("Creating the zero pledgers...");
 
     let walletOwners = [];
