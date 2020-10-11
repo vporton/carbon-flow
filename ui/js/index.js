@@ -1,5 +1,7 @@
 "strict";
 
+// TODO: Support multiple networks, warn on an unsupported network.
+
 const retiredCreditsToken = 1; // M+ token
 const nonRetiredCreditsToken = 2; // M- token
 
