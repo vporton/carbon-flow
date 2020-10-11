@@ -56,8 +56,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Administrativia
 
-    function newToken(uint256 _parent,
-                      string calldata _name, string calldata _symbol, string calldata _uri)
+    function newToken(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)
         external returns (uint256)
     {
         return _newToken(_parent, _name, _symbol, _uri, msg.sender);
