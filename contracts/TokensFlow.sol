@@ -13,7 +13,7 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     struct TokenFlow {
         uint256 parentToken;
-        int256 maxSwapCredit; // TODO: Should be uint256
+        int256 maxSwapCredit;
         int swapCreditPeriod;
         int timeEnteredSwapCredit; // zero means not in a swap credit
         int lastSwapTime; // ignored when not in a swap credit
