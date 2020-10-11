@@ -309,35 +309,10 @@
     bech32 "1.1.4"
     ws "7.2.3"
 
-"@ethersproject/providers@5.0.12":
+"@ethersproject/providers@5.0.12", "@ethersproject/providers@^5.0.5":
   version "5.0.12"
   resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.0.12.tgz#de05e865e130709ea1e0870511eb892bda7d41cb"
   integrity sha512-bRUEVNth+wGlm2Q0cQprVlixBWumfP9anrgAc3V2CbIh+GKvCwisVO8uRLrZOfOvTNSy6PUJi/Z4D5L+k3NAog==
-  dependencies:
-    "@ethersproject/abstract-provider" "^5.0.4"
-    "@ethersproject/abstract-signer" "^5.0.4"
-    "@ethersproject/address" "^5.0.4"
-    "@ethersproject/basex" "^5.0.3"
-    "@ethersproject/bignumber" "^5.0.7"
-    "@ethersproject/bytes" "^5.0.4"
-    "@ethersproject/constants" "^5.0.4"
-    "@ethersproject/hash" "^5.0.4"
-    "@ethersproject/logger" "^5.0.5"
-    "@ethersproject/networks" "^5.0.3"
-    "@ethersproject/properties" "^5.0.3"
-    "@ethersproject/random" "^5.0.3"
-    "@ethersproject/rlp" "^5.0.3"
-    "@ethersproject/sha2" "^5.0.3"
-    "@ethersproject/strings" "^5.0.4"
-    "@ethersproject/transactions" "^5.0.5"
-    "@ethersproject/web" "^5.0.6"
-    bech32 "1.1.4"
-    ws "7.2.3"
-
-"@ethersproject/providers@^5.0.5":
-  version "5.0.11"
-  resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.0.11.tgz#55488881452624a59b38436f81d74948d93783f9"
-  integrity sha512-SD82AMgUpDgqvSPJxjVgSqMBde9LsIAfroS3YcK2dE/VUuVeJQFWtjFbkFRF4pjTd2u+qYXh0eo1gq7LU7B1YQ==
   dependencies:
     "@ethersproject/abstract-provider" "^5.0.4"
     "@ethersproject/abstract-signer" "^5.0.4"
