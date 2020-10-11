@@ -249,7 +249,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         bytes32 _childAddr = userTokens[_from][_id];
 
-        uint256 _remainingValue; // how much not succeeded to transfer (TODO: better explanation)
+        uint256 _remainingValue; // how much not succeeded to transfer (need better explanation)
         if(_oldBalance >= _value) {
             balances[_id][_from] -= _value;
             _updateUserTokens(_to, _id, _value);
