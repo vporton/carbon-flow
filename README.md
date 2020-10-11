@@ -76,6 +76,8 @@ Note that I also don't directly support storing IDs of the "authorized signers" 
 carbon credit record, as required in the tech specification. Instead I allow to pass a hash of
 an Arweave file. This file should contain additional data, including the IDs of these signers.
 The data format can be decided later, but it may be JSON and may contain IDs of authorized signers.
+If it is necessary to store these "signers" in an Ethereum chain, it is easy to modify my contract
+before the final release.
 
 ## Kinds of tokens
 
