@@ -109,25 +109,34 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Flow
 
-    // TODO: Several exchanges in one call.
-    function exchangeToParent(uint256 _id, uint256 _amount, bytes calldata _data) external {
+    // TODO: Test for `_levels != 1`.
+    function exchangeToParent(uint256 _id, uint256 _amount, uint _levels, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
-        TokenFlow storage _flow = tokenFlow[_id];
-        int _currentTimeResult = _currentTime();
-        bool _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
-        uint256 _maxAllowedFlow = _maxSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
-        require(_amount <= _maxAllowedFlow);
-        uint256 _balance = balances[_id][msg.sender];
-        require(_amount <= _balance);
+        if(_levels == 0) {
+            return;
+        }
+        uint256 _currentId = _id;
+        TokenFlow storage _flow;
+        for(uint i = 0; i < _levels; ++i) {
+            _flow = tokenFlow[_currentId];
+            int _currentTimeResult = _currentTime();
+            bool _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
+            uint256 _maxAllowedFlow = _maxSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
+            require(_amount <= _maxAllowedFlow);
+            uint256 _balance = balances[_currentId][msg.sender];
+            require(_amount <= _balance);
+            if(!_inSwapCreditResult) {
+                _flow.timeEnteredSwapCredit = _currentTimeResult;
+                _flow.remainingSwapCredit = _flow.maxSwapCredit;
+            }
+            _flow.lastSwapTime = _currentTimeResult;
+            require(_amount < 1<<128);
+            _flow.remainingSwapCredit -= int256(_amount);
+            _currentId = tokenFlow[_currentId].parentToken;
+        }
+        // if(_id == _flow.parentToken) return; // not necessary
         _doBurn(msg.sender, _id, _amount);
         _doMint(msg.sender, _flow.parentToken, _amount, _data);
-        if(!_inSwapCreditResult) {
-            _flow.timeEnteredSwapCredit = _currentTimeResult;
-            _flow.remainingSwapCredit = _flow.maxSwapCredit;
-        }
-        _flow.lastSwapTime = _currentTimeResult;
-        require(_amount < 1<<128);
-        _flow.remainingSwapCredit -= int256(_amount);
     }
 
 // Internal

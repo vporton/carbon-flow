@@ -172,7 +172,7 @@ describe("Main test", function() {
     for(let i = 0; i < credits.length; ++i) {
       const token = authorityTokens[authorityIndexes[credits[i].authority]];
       const wallet = smartWallets[smartWalletsIndexes[credits[i].owner]];
-      const tx = await wallet.invoke(carbon, '0', 'exchangeToParent', token, credits[i].amount, []);
+      const tx = await wallet.invoke(carbon, '0', 'exchangeToParent', token, credits[i].amount, 1, []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))));

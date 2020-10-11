@@ -154,7 +154,7 @@ describe("TokensFlow", function() {
             : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
           await skipTime();
           if(oldFromBalance.gte(amount)) {
-            await tokensFlow.connect(wallet).exchangeToParent(fromToken, amount, [], {gasLimit: 1000000});
+            await tokensFlow.connect(wallet).exchangeToParent(fromToken, amount, 1, [], {gasLimit: 1000000});
             await ethers.provider.getTransactionReceipt(tx.hash);
             const newFromBalance = await tokensFlow.balanceOf(wallet.address, fromToken);
             const newFromTotal = await tokensFlow.totalSupply(fromToken);
@@ -178,7 +178,7 @@ describe("TokensFlow", function() {
             }
           } else {
             async function mycall() {
-              await tokensFlow.connect(wallet).exchangeToParent(fromToken, amount, [], {gasLimit: 1000000});
+              await tokensFlow.connect(wallet).exchangeToParent(fromToken, amount, 1, [], {gasLimit: 1000000});
             }
             await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
           }

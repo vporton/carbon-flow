@@ -57,7 +57,7 @@ describe("TokensFlow (limits)", function() {
 
     // Test initial zero flow:
     {
-      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('0'), []);
+      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('0'), 1, 1, []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
@@ -79,36 +79,36 @@ describe("TokensFlow (limits)", function() {
     }
     {
       async function mycall() {
-        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('1001'), [], {gasLimit: 1000000});
+        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('1001'), 1, [], {gasLimit: 1000000});
       }
       await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
     {
-      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('500'), []);
+      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('500'), 1, []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     await skipTime(2);
     {
       async function mycall() {
-        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('401'), [], {gasLimit: 1000000});
+        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('401'), 1, [], {gasLimit: 1000000});
       }
       await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
     await skipTime(8);
     // Start new swap credit period here.
     {
-      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('501'), []);
+      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('501'), 1, []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
       async function mycall() {
-        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('500'), [], {gasLimit: 1000000});
+        await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('500'), 1, [], {gasLimit: 1000000});
       }
       await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
     await skipTime(2);
     {
-      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('100'), []);
+      const tx = await tokensFlow.connect(wallet).exchangeToParent(childToken, ethers.utils.parseEther('100'), 1, []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
   });
