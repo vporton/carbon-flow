@@ -56,6 +56,8 @@ describe("TokensFlow", function() {
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
       tokens.push(token);
+      const tx3 = await tokensFlow.connect(wallets[0]).setEnabled([token], true);
+      await ethers.provider.getTransactionReceipt(tx3.hash);
       const tx2 = await tokensFlow.connect(wallets[0]).setTokenFlow(token, ethers.utils.parseEther('10000'), ethers.utils.parseEther('10000'), 10, await tokensFlow.currentTime());
       await ethers.provider.getTransactionReceipt(tx2.hash);
       tree[token] = rootToken;

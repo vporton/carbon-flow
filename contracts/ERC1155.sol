@@ -66,23 +66,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
     */
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external virtual override {
-
-        require(_to != address(0x0), "_to must be non-zero.");
-        require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value);
-
-        // SafeMath will throw with insuficient funds _from
-        // or if _id is not valid (balance will be 0)
-        balances[_id][_from] = balances[_id][_from].sub(_value);
-        balances[_id][_to]   = _value.add(balances[_id][_to]);
-
-        // MUST emit event
-        emit TransferSingle(msg.sender, _from, _to, _id, _value);
-
-        // Now that the balance is updated and the event was emitted,
-        // call onERC1155Received if the destination is a contract.
-        if (_to.isContract()) {
-            _doSafeTransferAcceptanceCheck(msg.sender, _from, _to, _id, _value, _data);
-        }
+        _safeTransferFrom(_from, _to, _id, _value, _data);
     }
 
     /**
@@ -102,39 +86,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `_to`
     */
     function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external virtual override {
-
-        // MUST Throw on errors
-        require(_to != address(0x0), "destination address must be non-zero.");
-        require(_ids.length == _values.length, "_ids and _values array length must match.");
-        if(_from != msg.sender) {
-            for (uint256 i = 0; i < _ids.length; ++i) {
-                require(_allowance(_ids[i], _from, msg.sender) >= _values[i]);
-            }
-        }
-
-        for (uint256 i = 0; i < _ids.length; ++i) {
-            uint256 id = _ids[i];
-            uint256 value = _values[i];
-
-            // SafeMath will throw with insuficient funds _from
-            // or if _id is not valid (balance will be 0)
-            balances[id][_from] = balances[id][_from].sub(value);
-            balances[id][_to]   = value.add(balances[id][_to]);
-        }
-
-        // Note: instead of the below batch versions of event and acceptance check you MAY have emitted a TransferSingle
-        // event and a subsequent call to _doSafeTransferAcceptanceCheck in above loop for each balance change instead.
-        // Or emitted a TransferSingle event for each in the loop and then the single _doSafeBatchTransferAcceptanceCheck below.
-        // However it is implemented the balance changes and events MUST match when a check (i.e. calling an external contract) is done.
-
-        // MUST emit event
-        emit TransferBatch(msg.sender, _from, _to, _ids, _values);
-
-        // Now that the balances are updated and the events are emitted,
-        // call onERC1155BatchReceived if the destination is a contract.
-        if (_to.isContract()) {
-            _doSafeBatchTransferAcceptanceCheck(msg.sender, _from, _to, _ids, _values, _data);
-        }
+        _safeBatchTransferFrom(_from, _to, _ids, _values, _data);
     }
 
     /**
@@ -220,5 +172,59 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         // Note: if the below reverts in the onERC1155BatchReceived function of the _to address you will have an undefined revert reason returned rather than the one in the require test.
         // If you want predictable revert reasons consider using low level _to.call() style instead so the revert does not bubble up and you can revert yourself on the ERC1155_BATCH_ACCEPTED test.
         require(ERC1155TokenReceiver(_to).onERC1155BatchReceived(_operator, _from, _ids, _values, _data) == ERC1155_BATCH_ACCEPTED, "contract returned an unknown value from onERC1155BatchReceived");
+    }
+
+    function _safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) internal virtual {
+        require(_to != address(0x0), "_to must be non-zero.");
+        require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value);
+
+        // SafeMath will throw with insuficient funds _from
+        // or if _id is not valid (balance will be 0)
+        balances[_id][_from] = balances[_id][_from].sub(_value);
+        balances[_id][_to]   = _value.add(balances[_id][_to]);
+
+        // MUST emit event
+        emit TransferSingle(msg.sender, _from, _to, _id, _value);
+
+        // Now that the balance is updated and the event was emitted,
+        // call onERC1155Received if the destination is a contract.
+        if (_to.isContract()) {
+            _doSafeTransferAcceptanceCheck(msg.sender, _from, _to, _id, _value, _data);
+        }
+    }
+
+    function _safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) internal virtual {
+        // MUST Throw on errors
+        require(_to != address(0x0), "destination address must be non-zero.");
+        require(_ids.length == _values.length, "_ids and _values array length must match.");
+        if(_from != msg.sender) {
+            for (uint256 i = 0; i < _ids.length; ++i) {
+                require(_allowance(_ids[i], _from, msg.sender) >= _values[i]);
+            }
+        }
+
+        for (uint256 i = 0; i < _ids.length; ++i) {
+            uint256 id = _ids[i];
+            uint256 value = _values[i];
+
+            // SafeMath will throw with insuficient funds _from
+            // or if _id is not valid (balance will be 0)
+            balances[id][_from] = balances[id][_from].sub(value);
+            balances[id][_to]   = value.add(balances[id][_to]);
+        }
+
+        // Note: instead of the below batch versions of event and acceptance check you MAY have emitted a TransferSingle
+        // event and a subsequent call to _doSafeTransferAcceptanceCheck in above loop for each balance change instead.
+        // Or emitted a TransferSingle event for each in the loop and then the single _doSafeBatchTransferAcceptanceCheck below.
+        // However it is implemented the balance changes and events MUST match when a check (i.e. calling an external contract) is done.
+
+        // MUST emit event
+        emit TransferBatch(msg.sender, _from, _to, _ids, _values);
+
+        // Now that the balances are updated and the events are emitted,
+        // call onERC1155BatchReceived if the destination is a contract.
+        if (_to.isContract()) {
+            _doSafeBatchTransferAcceptanceCheck(msg.sender, _from, _to, _ids, _values, _data);
+        }
     }
 }

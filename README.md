@@ -116,7 +116,7 @@ Any authority token  can be disabled.
 
 Anyone upward in the tree can disable any of its descendants.
 
-Disabled authority cannot create credits.
+Disabled authority cannot create credits, disabled token cannot be transferred.
 
 Remark: A malignant or otherwise weird user may produce too long chain of descendants
 of some token, making it impossible to disable all the descendants because of gas
@@ -143,7 +143,7 @@ tokens should be enabled again.
 
 ## ERC-20 tokens
 
-TODO: Test.
+TODO: More tests.
 
 Our ERC-20 tokens wrap corresponding ERC-1155 so that the amounts on accounts of
 our ERC-20 and the corresponding ERC-1155 token are always equal. Transfer or approval
@@ -181,9 +181,9 @@ Documentation comments in contracts.
 
 Indexed events.
 
-Should allow to allocate a swap credit once, not periodically?
+Test batch transfers.
 
-Lock also transfers of disabled tokens? Allow parents to burn child tokens?
+Should allow to allocate a swap credit once, not periodically?
 
 See also `TODO` and `FIXME` comments in the source.
 
