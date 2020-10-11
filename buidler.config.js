@@ -1,5 +1,6 @@
 usePlugin("@nomiclabs/buidler-waffle");
 usePlugin('buidler-deploy');
+usePlugin("@nomiclabs/buidler-ethers");
 
 // This is a sample Buidler task. To learn how to create your own go to
 // https://buidler.dev/guides/create-task.html
@@ -44,7 +45,7 @@ module.exports = {
     },
     ropsten: {
       url: "https://ropsten.infura.io/v3/1d0c278301fc40f3a8f40f25ae3bd328",
-      accounts: process.env.RINKEBY_PRIVATE_KEY ? [process.env.RINKEBY_PRIVATE_KEY, process.env.RINKEBY_PRIVATE_KEY] : [],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY, process.env.PRIVATE_KEY] : [],
     },
   },
   namedAccounts: {

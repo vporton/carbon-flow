@@ -19,30 +19,46 @@ npx buidler deploy --network NETWORK
 (replace `NETWORK` by `mainnet` (or another network we will choose later) when doing
 the real deployment, for testing you can use `--network buidlerevm`).
 
-To test:
+## Testing
+
+### Testing smart contracts
+
 ```sh
 yarn install
 npx buidler test
 ```
 
-For testing in a toy blockchain Ganache run
+### Testing the Web app
+
+Run Ganache (a blockchain for testing)
 ```sh
 npx ganache-cli -d
 ```
 (This command should be kept running during the entire test!)
 
-Then you can use `--network ganache`.
+Notice the private key `(1)` (it is `0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1`,
+a private key to be used only for testing).
 
-To install the Web application (dApp):
+To install the Web application (dApp) with this test blockchain:
 ```sh
 yarn install
-npx buidler deploy --network NETWORK
+npx buidler deploy --network ganache
 make
 ```
 
 Then copy the folder `out/ui/` to a Web server and run the app in that folder.
 
 Configure your crypto Web browser to use `localhost:8545` if testing with Ganache.
+
+You will see zero tokens at your account.
+
+Run
+```sh
+PRIVATE_KEY=0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1 RECIPIENT=<YOUR-ADDRESS> AMOUNT=100 npx buidler run scripts/mint-nonretired.js --network ganache
+```
+(Replace `<YOUR-ADDRESS>` by the Ethereum address you use in the browser.)
+
+This will add 100 M- tokens to this address. Reload the app page and now you can retire tokens.
 
 ## Kinds of tokens
 
