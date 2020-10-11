@@ -60,6 +60,14 @@ PRIVATE_KEY=0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1 R
 
 This will add 100 M- tokens to this address. Reload the app page and now you can retire tokens.
 
+Note that the above testing procedure does not show a real method of producing M- tokens
+(though this test script could be used to mint real tokens for real authorities,
+it is not convenient and error prone). This is intentional, as the procedure of registering
+carbon credits can be done _only_ in conjunction with
+"Design And Implementation Of M+C Community Fund Management Platform" (another bounty), because
+the procedure of registering tokens needs to be a part of a DAO to be developed as a part of
+that bounty.
+
 ## Kinds of tokens
 
 See `doc/tree.odg`.
