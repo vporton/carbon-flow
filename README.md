@@ -1,5 +1,7 @@
 # Carbon Flow
 
+See also https://youtu.be/Pv7k7FiUbKM
+
 It is a solution of
 https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty
 (work in progress!)
