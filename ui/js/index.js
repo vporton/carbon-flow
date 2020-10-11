@@ -14,7 +14,6 @@ function carbonJsonInterface() {
 }
 
 async function onLoad() {
-    console.log('index', web3.version);
     await defaultAccountPromise();
     document.getElementById('account').textContent = defaultAccount;
     web3.eth.net.getNetworkType()
@@ -26,6 +25,34 @@ async function onLoad() {
     carbon.methods.balanceOf(defaultAccount, nonRetiredCreditsToken).call().then(value => {
         document.getElementById('nonretired').textContent = web3.utils.fromWei(value);
     });
+}
+
+async function retire() {
+    const amountStr = document.getElementById('amount').value;
+    const amount = web3.utils.toWei(amountStr.replace(/^ *| *$/g, ''));
+    await doRetire(amount);
+}
+
+async function doRetire(amount) {
+    const carbon = new web3.eth.Contract(await carbonJsonInterface(), carbonAddress);
+    await mySend(carbon, carbon.methods.retireCredit, [amount])
+        .catch(e => {
+            if(!(e.code === 4001)) {
+                alert("Error: Do you have sufficient M- tokens for this operation?");
+            }
+        });
+    // TODO: Display current operations
+}
+
+function validateAmount() {
+    const elt = document.getElementById('amount');
+    if(/^[0-9]+(\.[0-9]+)?$/.test(elt.value)) {
+        elt.className = "valid";
+        document.getElementById('retire').disabled = false;
+    } else {
+        elt.className = "invalid";
+        document.getElementById('retire').disabled = true;
+    }
 }
 
 window.addEventListener('load', onLoad);

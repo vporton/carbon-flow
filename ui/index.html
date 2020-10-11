@@ -10,7 +10,7 @@
         <script src="js/index.js"></script>
         <style>
             body { margin: 0; }
-            #container { padding: 4px }
+            #container { padding: 4px; }
             #noWeb3NetWarning {
                 display: none;
                 background: red;
@@ -18,6 +18,8 @@
                 width: 100%;
                 padding: 4px;
             }
+            .valid { background: white; color: black; }
+            .invalid { background: #f99; color: white; }
         </style>
     </head>
     <body>
@@ -31,8 +33,10 @@
                 on the network <code id="network">(loading&mldr;)</code> you have:</p>
             <ul>
                 <li><span id="nonretired">(loading&mldr;)</span> M- (non-retired) carbon tokens</li>
-                <li><span id="retired">(loading&mldr;)</span> M+ (non-retired) carbon tokens</li>
+                <li><span id="retired">(loading&mldr;)</span> M+ (retired) carbon tokens</li>
             </ul>
+            <p>Retire <input type="text" id="amount" size="10" class="invalid" oninput="validateAmount()"/> M- tokens
+                <input id="retire" type="button" value="Do it!" onclick="retire()" disabled="disabled"/></p>
         </div>
     </body>
 </html>
