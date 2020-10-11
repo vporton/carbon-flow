@@ -50,7 +50,7 @@ describe("Main test", function() {
       "Retired carbon credits", "M+", "https://example.com/retired",
       "Non-retired carbon credits", "M-", "https://example.com/nonretired"] });
     const carbon = new ethers.Contract(carbonDeployResult.address, carbonDeployResult.abi, ethers.provider);
-    const communityFund = new ethers.Contract(communityFundDAO.address(), carbonDeployResult.abi, communityFundDAOVoter);
+    // const communityFund = new ethers.Contract(communityFundDAO.address(), carbonDeployResult.abi, communityFundDAOVoter);
 
     const retiredToken = 1; // await carbon.retiredCreditsToken();
     const nonRetiredToken = 2; // await carbon.nonRetiredCreditsToken();
@@ -117,7 +117,7 @@ describe("Main test", function() {
 
     const numberOfCredits = 100; // TODO: Should be 10000 accordingly to the tech specification
 
-    console.log("Creating carbon credits...");
+    console.log("Creating carbon credits and local tokens...");
 
     let credits = [];
     for(let i = 0; i < numberOfCredits; ++i) {
@@ -144,11 +144,14 @@ describe("Main test", function() {
 
     skipTime(1000);
 
-    for(let i = 0; i < credits.length; ++i) {
-      const token = authorityTokens[authorityIndexes[credits[i].authority]];
-      const wallet = smartWallets[smartWalletsIndexes[credits[i].owner]];
-      const tx = await wallet.invoke(carbon, '0', 'exchangeToParent', token, credits[i].amount, ethers.BigNumber.from(1), []);
-      await ethers.provider.getTransactionReceipt(tx.hash);
+    for(let owner of smartWallets) { // TODO: more tests
+      for(let token of authorityTokens) {
+        const balance = await carbon.balanceOf(owner.address(), token);
+        if(!balance.eq(ethers.BigNumber.from(0))) {
+          const tx = await owner.invoke(carbon, '0', 'exchangeToParent', token, balance, ethers.BigNumber.from(1), []);
+          await ethers.provider.getTransactionReceipt(tx.hash);
+        }
+      }
     }
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))));
 
