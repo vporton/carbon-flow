@@ -110,4 +110,5 @@ cache
 artifacts
 
 out/
+deployments/
 .~lock.*
