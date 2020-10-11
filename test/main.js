@@ -190,7 +190,7 @@ describe("Main test", function() {
       const balance = await carbon.balanceOf(owner.address(), nonRetiredToken);
       expect(await nonRetiredERC20.balanceOf(owner.address())).to.be.equal(balance);
       const tx = await owner.invoke(carbon, '0', 'retireCredit', balance);
-        ethers.provider.getTransactionReceipt(tx.hash);
+      await ethers.provider.getTransactionReceipt(tx.hash);
       const retiredBalance = await carbon.balanceOf(owner.address(), retiredToken);
       const diff = retiredBalance.sub(balance.mul(90).div(100)).abs();
       expect(diff).to.be.below(ethers.BigNumber.from('1000')); // not yet swapped
