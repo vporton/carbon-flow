@@ -14,10 +14,6 @@ chai.use(chaiAsPromised);
 
 // random.use(seedrandom('rftg'));
 
-// function range(size, startAt = 0) {
-//   return [...Array(size).keys()].map(i => i + startAt);
-// }
-
 describe("Main test", function() {
   // beforeEach(async () => {
   //   console.log("Deploy the official contracts...");
