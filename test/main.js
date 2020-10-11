@@ -59,6 +59,11 @@ describe("Main test", function() {
     const nonRetiredToken = await carbon.nonRetiredCreditsToken();
     const retiredToken = await carbon.retiredCreditsToken();
 
+    const nonRetiredDeployResult = await deploy("ERC20OverERC1155", { from: await deployer.getAddress(), contractName: "NonRetiredERC20", args: [ carbon.address, nonRetiredToken ] });
+    const nonRetiredERC20 = new ethers.Contract(nonRetiredDeployResult.address, nonRetiredDeployResult.abi, ethers.provider);
+    const retiredDeployResult = await deploy("ERC20OverERC1155", { from: await deployer.getAddress(), contractName: "RetiredERC20", args: [ carbon.address, retiredToken ] });
+    const retiredERC20 = new ethers.Contract(retiredDeployResult.address, nonRetiredDeployResult.abi, ethers.provider);
+
     console.log("Creating the carbon authorities...");
 
     const authoritiesData = [
@@ -183,16 +188,18 @@ describe("Main test", function() {
     for(let i = 0; i < smartWallets.length; ++i) { // TODO: more tests
       const owner = smartWallets[i];
       const balance = await carbon.balanceOf(owner.address(), nonRetiredToken);
+      expect(await nonRetiredERC20.balanceOf(owner.address())).to.be.equal(balance);
       const tx = await owner.invoke(carbon, '0', 'retireCredit', balance);
-       ethers.provider.getTransactionReceipt(tx.hash);
-      const diff = (await carbon.balanceOf(owner.address(), retiredToken)).sub(
-        balance.mul(90).div(100)
-      ).abs();
+        ethers.provider.getTransactionReceipt(tx.hash);
+      const retiredBalance = await carbon.balanceOf(owner.address(), retiredToken);
+      const diff = retiredBalance.sub(balance.mul(90).div(100)).abs();
       expect(diff).to.be.below(ethers.BigNumber.from('1000')); // not yet swapped
     }
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.BigNumber.from('0')); // was retired
     {
-      const diff = (await carbon.balanceOf(communityFundDAO.address(), retiredToken)).sub(
+      const retiredBalance = await carbon.balanceOf(communityFundDAO.address(), retiredToken);
+      expect(await retiredERC20.balanceOf(communityFundDAO.address())).to.be.equal(retiredBalance);
+      const diff = retiredBalance.sub(
         ethers.utils.parseEther('200').mul(ethers.BigNumber.from(String(numberOfCredits))).mul(10).div(100)
       ).abs();
       expect(diff).to.be.below(ethers.BigNumber.from('1000'));

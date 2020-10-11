@@ -7,6 +7,7 @@ import "./IERC20.sol";
 
 interface IMyERC1155 is IERC1155, IERC1155Views { }
 
+// TODO: Test it.
 // This contract has a bug: It does not emit ERC-20 events.
 contract ERC20OverERC1155 is IERC20
 {
