@@ -254,6 +254,15 @@ Lint Solidity.
 
 ### Things intentionally not done or done differently
 
+### Marker for retired carbon credit serial numbers
+
+The bounty required
+_Create 10.000 carbon credit serial numbers, including a marker to identify them as “retired”_.
+That's a nonsense, because a carbon credit may be retired partially, so it makes no sense to
+mark it either as retired or non-retired.
+
+### Manual approval process
+
 The specification says:
 
 > Create that protocol as a) manual approval process by an authorized member of the M+ governance team, and b) as an automatically executing smart contract.
@@ -290,13 +299,6 @@ So, accordingly the above paragraph consider that task done (that pargraph is th
 process"):
 
 > Create that protocol as a) manual approval process by an authorized member of the M+ governance team, and b) as an automatically executing smart contract.
-
-### Not doable things
-
-The bounty required
-_Create 10.000 carbon credit serial numbers, including a marker to identify them as “retired”_.
-That's a nonsense, because a carbon credit may be retired partially, so it makes no sense to
-mark it either as retired or non-retired.
 
 ## FAQ
 
