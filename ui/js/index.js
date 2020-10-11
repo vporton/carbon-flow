@@ -15,15 +15,7 @@ function carbonJsonInterface() {
     });
 }
 
-async function onConnect() {
-    if(!window.web3) return;
-
-    await defaultAccountPromise();
-    document.getElementById('account').textContent = defaultAccount;
-    if(web3.eth.net) {
-        web3.eth.net.getNetworkType()
-            .then(network => { document.getElementById('network').textContent = network; });
-    }
+async function loadNumbers() {
     const carbon = new web3.eth.Contract(await carbonJsonInterface(), carbonAddress);
     carbon.methods.balanceOf(defaultAccount, retiredCreditsToken).call()
         .then(value => {
@@ -43,6 +35,18 @@ async function onConnect() {
         .then(value => {
             document.getElementById('tax').textContent = value !== null ? value / 2**64 * 100 :  "(cannot load)";
         });
+}
+
+async function onConnect() {
+    if(!window.web3) return;
+
+    await defaultAccountPromise();
+    document.getElementById('account').textContent = defaultAccount;
+    if(web3.eth.net) {
+        web3.eth.net.getNetworkType()
+            .then(network => { document.getElementById('network').textContent = network; });
+    }
+    await loadNumbers();
 }
 
 async function retire() {
@@ -67,12 +71,15 @@ async function doRetire(amountStr) {
     document.querySelector(`#${id} .tokens`).textContent = amountStr;
     li.style.display = 'block';
 
-    tx.then((receipt, error) => {
+    tx.then(async (receipt, error) => {
         const li = document.getElementById(id);
         li.className = receipt && receipt.status ? 'transaction confirmed' : 'transaction failed';
         document.querySelector(`#${id} .status`).textContent = !receipt ? 'rejected' : receipt.status ? 'confirmed' : 'failed';
         if(receipt) {
             document.querySelector(`#${id} .hash`).textContent = receipt.transactionHash;
+        }
+        if(receipt && receipt.status) {
+            await loadNumbers();
         }
     });
 }
