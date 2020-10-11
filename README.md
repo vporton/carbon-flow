@@ -254,8 +254,6 @@ This bug probably could be fixed, but:
 
 Create 10000 credit records at a public testnet?
 
-Reload the sums on every confirmation.
-
 Documentation comments in contracts.
 
 Indexed events.
