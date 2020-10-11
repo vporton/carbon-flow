@@ -33,6 +33,22 @@ yarn install
 npx buidler test
 ```
 
+### Creating 10000 credit records
+
+First run
+```sh
+yarn install
+```
+
+The requested 10000 credit records can be created by first running
+```sh
+npx ganache-cli -d
+```
+and then (without exiting from `ganache-cli`) running
+```sh
+npx buidler run scripts/create-10000-credits.js
+```
+
 ### Testing the Web app
 
 Run Ganache (a blockchain for testing)
@@ -236,7 +252,7 @@ This bug probably could be fixed, but:
 
 ## TODO
 
-Conform to the "51 private keys" requirement.
+Create 10000 credit records at a public testnet?
 
 Reload the sums on every confirmation.
 
