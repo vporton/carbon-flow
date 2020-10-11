@@ -5,8 +5,6 @@ const chai = require("chai");
 const chaiAsPromised = require('chai-as-promised');
 const mainTest = require('../lib/main-test.js');;
 
-chai.use(chaiAsPromised);
-
 describe("Main test", function() {
   // beforeEach(async () => {
   //   console.log("Deploy the official contracts...");
