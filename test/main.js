@@ -78,7 +78,7 @@ describe("Main test", function() {
       // In reality should be controlled by a DAO
       const authoritityOwner0 = ethers.Wallet.createRandom();
       const authoritityOwner = authoritityOwner0.connect(ethers.provider);
-      const tx = await owner.sendTransaction({to: authoritityOwner.address, value: ethers.utils.parseEther('20')}); // provide gas
+      const tx = await owner.sendTransaction({to: authoritityOwner.address, value: ethers.utils.parseEther('15')}); // provide gas
       await ethers.provider.getTransactionReceipt(tx.hash);
 
       const info = authoritiesData[i];
@@ -105,7 +105,7 @@ describe("Main test", function() {
       // In reality should be controlled by a DAO
       const issuerOwner0 = ethers.Wallet.createRandom();
       const issuerOwner = issuerOwner0.connect(ethers.provider);
-      const tx = await owner.sendTransaction({to: issuerOwner.address, value: ethers.utils.parseEther('20')}); // provide gas
+      const tx = await owner.sendTransaction({to: issuerOwner.address, value: ethers.utils.parseEther('15')}); // provide gas
       await ethers.provider.getTransactionReceipt(tx.hash);
 
       const tx2 = await carbon.connect(issuerOwner).createAuthority(retiredToken, `Issuer ${i}`, `ISU${i}`, "https://example.com/issuer");
@@ -129,7 +129,7 @@ describe("Main test", function() {
     for(let i = 0; i < 50; ++i) {
       const wallet0 = ethers.Wallet.createRandom();
       const wallet = wallet0.connect(ethers.provider);
-      const tx = await owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('1')}); // provide gas
+      const tx = await owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('0.1')}); // provide gas
       await ethers.provider.getTransactionReceipt(tx.hash);
       walletOwners.push(wallet);
     }

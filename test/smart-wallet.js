@@ -73,5 +73,6 @@ describe("SmartWallet", function() {
       const balance = await erc20Contract.balanceOf(smartWallets[1].address());
       expect(balance).to.equal(ethers.utils.parseEther('1'));
     }
+    return;
   });
 });
