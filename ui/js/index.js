@@ -33,7 +33,7 @@ async function onLoad() {
 }
 
 async function retire() {
-    const amountStr = document.getElementById('amount').value;
+    const amountStr = document.getElementById('amount').value.replace(/^ *| *$/g, '');
     await doRetire(amountStr);
 }
 
@@ -66,7 +66,7 @@ async function doRetire(amountStr) {
 
 function validateAmount() {
     const elt = document.getElementById('amount');
-    if(/^[0-9]+(\.[0-9]+)?$/.test(elt.value)) {
+    if(/^ *[0-9]+(\.[0-9]+)? *$/.test(elt.value)) {
         elt.className = "valid";
         document.getElementById('retire').disabled = false;
     } else {
