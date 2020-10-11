@@ -1,7 +1,8 @@
 # Carbon Flow
 
 See also https://youtu.be/Pv7k7FiUbKM (remark: the installation procedure
-changed a little since recoding this video).
+changed a little since recoding this video, also now the numbers update
+automatically after confirmed transactions).
 
 It is a solution of
 https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty
