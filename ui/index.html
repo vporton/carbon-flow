@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Retire your M- carbon tokens</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.0/web3.min.js"></script>
+        <script src="js/web3modal/index.js"></script>
+        <script type="text/javascript" src="artifacts/mewconnect.js"></script>
+        <script src="js/common.js"></script>
+        <script src="js/index.js"></script>
+        <style>
+            body { margin: 0; }
+            #container { padding: 4px }
+            #noWeb3NetWarning {
+                display: none;
+                background: red;
+                color: white;
+                width: 100%;
+                padding: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="noWeb3NetWarning">
+            Install a <a target="_blank" href="https://brave.com/dfu684">crypto browser</a> or
+            <a href="https://metamask.io"></a>MetaMask browser extention</a>.
+        </p>
+        <div id="container">
+            <h1>Retire your M- carbon tokens</h1>
+            <p>In your Ethereum wallet <code id="account">(loading&mldr;)</code>
+                on the network <code id="network">(loading&mldr;)</code> you have:</p>
+            <ul>
+                <li><span id="nonretired">(loading&mldr;)</span> M- (non-retired) carbon tokens</li>
+                <li><span id="retired">(loading&mldr;)</span> M+ (non-retired) carbon tokens</li>
+            </ul>
+        </div>
+    </body>
+</html>
