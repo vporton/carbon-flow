@@ -5,7 +5,7 @@ module.exports = async ({
   deployments,
 }) => {
   const { deploy, log } = deployments;
-  const { deployer, globalCommunityFund } = await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
 
   const globalCommunityFund = process.env.GLOBAL_COMMUNITY_FUND;
 
