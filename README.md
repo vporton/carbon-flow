@@ -199,8 +199,6 @@ This bug probably could be fixed, but:
 
 ## TODO
 
-Reload on Web3 network change.
-
 Documentation comments in contracts.
 
 Indexed events.

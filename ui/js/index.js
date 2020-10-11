@@ -10,7 +10,7 @@ let carbonJsonInterfaceCache = null;
 function carbonJsonInterface() {
     return new Promise((resolve) => {
         if(carbonJsonInterfaceCache) resolve(carbonJsonInterfaceCache);
-        fetch("artifacts/Carbon.abi") // FIXME
+        fetch("artifacts/Carbon.abi")
             .then(response => resolve(carbonJsonInterfaceCache = response.json()));
     });
 }
