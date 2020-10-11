@@ -42,6 +42,7 @@ module.exports = {
       gasLimit: 6000000000,
       defaultBalanceEther: 100,
       url: "http://localhost:8545",
+      saveDeployment: false,
     },
     ropsten: {
       url: "https://ropsten.infura.io/v3/1d0c278301fc40f3a8f40f25ae3bd328",
