@@ -252,6 +252,37 @@ Ethereum provider selection does not work on Firefox (but you still can use Meta
 
 Lint Solidity.
 
+### Things intentionally not done
+
+The specification says:
+
+> Create that protocol as a) manual approval process by an authorized member of the M+ governance team, and b) as an automatically executing smart contract.
+
+This makes no sense in my system: The only way to check if M- tokens belong to a certain owner is
+to check if he has them on its Ethereum account. But if he has Ethereum account (and intends to use
+the resulting M+ tokens) then he has a private key, an Ethereum wallet and can trigger the M- -> M+
+swap procedure himself, it just makes no sense to ask a member of M+ governance team to do it for him.
+
+Well, it makes a little sense: It may be useful for owners of Ethereum wallets not supporting smart
+contract calls. So, if you request me to add this feature I _will_ do it, but again it makes quite
+little sense.
+
+It could be implemented by having two kinds of authority tokens: M- tree issuers and retirers.
+M- tree issuers would do the same as authorities do now, and retirers would instead do retirement
+on behalf of users (net reducers). Before doing the swap on behalf of a user, need to check in
+the smart contract that this retirer is a descendant of a certain token (any token can be choosen,
+e.g. M- or M+; note that the amounts of these tokens on any wallets would be always zero) and all
+its ancestors are not disabled before doing the retirement operation. The amount of retirement would
+be restricted by rules like limiting tokens flow above.
+
+Anyway, if somebody wants to operate in the system without having an Ethereum account, an authority
+may arrange for him for somebody to hold a wallet with private key (or a smart wallet) for him and
+issue for him M- and M+ tokens to this wallet instead of his own wallet.
+
+So, accordingly the above paragraph consider that task done:
+
+> Create that protocol as a) manual approval process by an authorized member of the M+ governance team, and b) as an automatically executing smart contract.
+
 ### Not doable things
 
 The bounty required
