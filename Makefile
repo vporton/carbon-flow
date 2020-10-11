@@ -1,8 +1,8 @@
 #!/usr/bin/make -f
 
-.PHONY: all ui ui-quick browserify compile
+.PHONY: all ui ui-quick browserify compile doc
 
-all: ui
+all: ui doc
 
 ui: ui-quick compile
 	make out/ui/artifacts/mewconnect.js
@@ -23,3 +23,8 @@ out/artifacts/mewconnect.js: node_modules/@myetherwallet/mewconnect-web-client/d
 out/ui/artifacts/%: out/artifacts/%
 	mkdir -p out/ui/artifacts
 	cp $< $@
+
+doc: doc/tree.pdf
+
+%.pdf: %.odg
+	libreoffice --convert-to pdf --outdir $(dir $<) $<

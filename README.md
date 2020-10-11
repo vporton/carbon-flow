@@ -81,7 +81,7 @@ before the final release.
 
 ## Kinds of tokens
 
-See `doc/tree.odg`.
+See `doc/tree.odg` or `doc/tree.pdf`.
 
 There are basically two kinds of tokens:
 
