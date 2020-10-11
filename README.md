@@ -276,9 +276,11 @@ its ancestors are not disabled before doing the retirement operation. The amount
 be restricted by rules like limiting tokens flow above.
 
 Anyway, if somebody wants to operate in the system without having an Ethereum account, an authority
-may arrange for him for somebody to hold a wallet with a private key (or a smart wallet) for him and
+may arrange for him for somebody to hold a wallet with a private key (or a smart wallet, e.g. a DAO
+if the money hold a big to be sure not one M+ representative is in control of that account) for him and
 issue for him M- and M+ tokens to this wallet instead of his own wallet (and do trade/exchange
-operations for him instead of himsefl).
+operations for him instead of himself). The amount of transfers/swaps may be restricted by using a
+smart wallet as such a "bank account".
 
 So, accordingly the above paragraph consider that task done (that pargraph is the "manual approval
 process"):
