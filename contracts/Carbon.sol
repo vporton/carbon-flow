@@ -50,10 +50,10 @@ contract Carbon is BaseCarbon
         require(tokenOwners[_token] == msg.sender && tokenFlow[_token].enabled);
         Authority storage _authority = authorities[_token];
         CarbonCreditsRecord memory _credit = CarbonCreditsRecord({authority: msg.sender,
-                                                    serial: ++_authority.maxSerial,
-                                                    amount: _amount,
-                                                    owner: _owner,
-                                                    arweaveHash: _arweaveHash});
+                                                                  serial: ++_authority.maxSerial,
+                                                                  amount: _amount,
+                                                                  owner: _owner,
+                                                                  arweaveHash: _arweaveHash});
         credits[++maxCreditId] = _credit;
         bytes memory _data = ""; // efficient?
         _doMint(_owner, _token, _amount, _data);
