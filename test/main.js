@@ -49,7 +49,7 @@ describe("Main test", function() {
     const communityFundDAO = new SmartWallet();
     await communityFundDAO.init(cfDAOContract);
 
-    const carbonDeployResult = await deploy("Carbon", { from: await deployer.getAddress(), args: [
+    const carbonDeployResult = await deploy("CarbonTest", { from: await deployer.getAddress(), args: [
       communityFundDAO.address(),
       "Retired carbon credits", "M+", "https://example.com/retired",
       "Non-retired carbon credits", "M-", "https://example.com/nonretired"] });
@@ -161,6 +161,13 @@ describe("Main test", function() {
     expect(await carbon.totalSupply(nonRetiredToken)).to.equal(ethers.BigNumber.from('0')); // not yet swapped
 
     console.log("Exchanging to M-...");
+
+    async function skipTime(seconds) {
+      const tx = await carbon.connect(owner).setCurrentTime(ethers.BigNumber.from(seconds).add(await carbon.currentTime()));
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+
+    skipTime(1000);
 
     for(let i = 0; i < credits.length; ++i) {
       const token = authorityTokens[authorityIndexes[credits[i].authority]];
