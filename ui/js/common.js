@@ -22,16 +22,33 @@ async function defaultAccountPromise() {
 let myWeb3 = null;
 
 function getNetworkName() {
-    console.log('getNetworkName', web3.version);
     return new Promise((resolve) => {
-        web3.eth.net.getNetworkType()
-            .then(async network => {
-                resolve(new Web3Modal({
-                    network: await getNetwork(), // FIXME
-                    cacheProvider: true,
-                    providerOptions
-                }));
-            });
+        if(web3.eth.net) {
+            web3.eth.net.getNetworkType()
+                .then(async network => {
+                    resolve(new Web3Modal({
+                        network: await getNetwork(), // FIXME
+                        cacheProvider: true,
+                        providerOptions
+                    }));
+                });
+        } else {
+            resolve(web3.version.getNetwork((err, netId) => {
+                switch (netId) {
+                  case "1":
+                    resolve('mainnet')
+                    break
+                  case "2":
+                    resolve('Morden')
+                    break
+                  case "3":
+                    resolve('ropsten')
+                    break
+                  default:
+                    resolve('unknown')
+                }
+            }));
+        }
     });
 }
 
