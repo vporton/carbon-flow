@@ -1,6 +1,7 @@
 # Carbon Flow
 
-See also https://youtu.be/Pv7k7FiUbKM
+See also https://youtu.be/Pv7k7FiUbKM (remark: the installation procedure
+changed a little since recoding this video).
 
 It is a solution of
 https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty
