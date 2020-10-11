@@ -5,9 +5,11 @@ if(window.ethereum) {
 
     // TODO: Don't reload everything.
     ethereum.on('chainChanged', () => {
-        document.location.reload()
+        document.location.reload();
     });
 }
+
+const MewConnect = require('mewconnect');
 
 // TODO
 // $(document).ajaxError(function( event, request, settings ) {
@@ -32,50 +34,53 @@ let myWeb3 = null;
 
 function getNetworkName() {
     return new Promise((resolve) => {
-        if(web3.eth.net) {
+        if(web3.eth.net && web3.eth.net.getNetworkType) {
             web3.eth.net.getNetworkType()
-                .then(async network => {
-                    resolve(new Web3Modal({
-                        network: await getNetwork(), // FIXME
-                        cacheProvider: true,
-                        providerOptions
-                    }));
+                .then(network => {
+                    
+                    resolve(network);
                 });
         } else {
-            resolve(web3.version.getNetwork((err, netId) => {
-                switch (netId) {
-                  case "1":
-                    resolve('mainnet')
-                    break
-                  case "2":
-                    resolve('Morden')
-                    break
-                  case "3":
-                    resolve('ropsten')
-                    break
-                  default:
-                    resolve('unknown')
-                }
-            }));
+            if(web3.version.getNetwork) {
+                web3.version.getNetwork((err, netId) => {
+                    switch (netId) {
+                      case "1":
+                        resolve('mainnet')
+                        break
+                      case "2":
+                        resolve('Morden')
+                        break
+                      case "3":
+                        resolve('ropsten')
+                        break
+                      default:
+                        resolve('unknown')
+                    }
+                });
+            } else {
+                resolve('mainnet'); // TODO: hack
+            }
         }
     });
 }
 
-function myWeb3Modal() {
+async function myWeb3Modal() {
     const MewConnect = require('mewconnect');
 
     const Web3Modal = window.Web3Modal.default;
-    const providerOptions = {
-        mewconnect: {
+    const networkName = await getNetworkName();
+    let providerOptions = {};
+    if(networkName !== 'private') {
+        providerOptions.mewconnect = {
             package: MewConnect, // required
             options: {
-                infuraId: "1d0c278301fc40f3a8f40f25ae3bd328" // required
-            }
-          }
+                infuraId: "1d0c278301fc40f3a8f40f25ae3bd328" // required (FIXME)
+            },
+        };
     };
 
     return new Web3Modal({
-        network: getNetworkName(),
+        network: networkName == 'main' ? 'mainnet' : networkName,
         cacheProvider: true,
         providerOptions
     });
@@ -112,9 +117,10 @@ async function connectWeb3() {
 }
 
 async function reconnectWeb3() {
+    if(!window.web3) return;
     if(myWeb3Provider.close)
         await myWeb3Provider.close();
-    const web3Modal = myWeb3Modal();
+    const web3Modal = await myWeb3Modal();
     await web3Modal.clearCachedProvider();
     myWeb3 = null;
     await connectWeb3();
@@ -128,6 +134,7 @@ async function onLoad() {
     } else {
         await connectWeb3();
     }
+    onConnect(); // hack
 }
 
 //window.addEventListener('load', onLoad); // window.web3.currentProvider.chainId is sometimes undefined (https://github.com/brave/brave-browser/issues/10854)

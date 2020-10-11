@@ -15,13 +15,15 @@ function carbonJsonInterface() {
     });
 }
 
-async function onLoad() {
+async function onConnect() {
     if(!window.web3) return;
 
     await defaultAccountPromise();
     document.getElementById('account').textContent = defaultAccount;
-    web3.eth.net.getNetworkType()
-        .then(network => { document.getElementById('network').textContent = network; });
+    if(web3.eth.net) {
+        web3.eth.net.getNetworkType()
+            .then(network => { document.getElementById('network').textContent = network; });
+    }
     const carbon = new web3.eth.Contract(await carbonJsonInterface(), carbonAddress);
     carbon.methods.balanceOf(defaultAccount, retiredCreditsToken).call()
         .then(value => {
@@ -86,4 +88,4 @@ function validateAmount() {
     }
 }
 
-window.addEventListener('load', onLoad);
+// window.addEventListener('load', onLoad);
