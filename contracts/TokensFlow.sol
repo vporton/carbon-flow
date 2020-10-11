@@ -11,7 +11,6 @@ contract TokensFlow is ERC1155, IERC1155Views
     using SafeMath for uint256;
     using Address for address;
 
-    // TODO: rename variables
     struct TokenFlow {
         uint256 parentToken;
         uint256 maxSwapCredit;
@@ -95,15 +94,15 @@ contract TokensFlow is ERC1155, IERC1155Views
         tokenFlow[_child].enabled = _enabled;
     }
 
-    function setTokenFlow(uint256 _child, uint256 _maxSwapCredit, uint256 _remainingSwapCredit, uint _swapCreditPeriod) external {
+    function setTokenFlow(uint256 _child, uint256 _maxSwapCredit, uint256 _remainingSwapCredit, uint _swapCreditPeriod, uint timeEnteredSwapCredit) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
-        require(_remainingSwapCredit <= _maxSwapCredit); // TODO: We could do well enough without this check...
+        // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
         _flow.maxSwapCredit = _maxSwapCredit;
         _flow.swapCreditPeriod = _swapCreditPeriod;
-        _flow.timeEnteredSwapCredit = _currentTime(); // TODO: Allow to set an arbitrary timestamp here.
+        _flow.timeEnteredSwapCredit = timeEnteredSwapCredit;
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 

@@ -84,7 +84,7 @@ describe("Main test", function() {
       await ethers.provider.getTransactionReceipt(tx3.hash);
 
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
-      const tx4 = await communityFundDAO.invoke(carbon, '0', 'setTokenFlow', token, veryBigAmount, veryBigAmount, 10);
+      const tx4 = await communityFundDAO.invoke(carbon, '0', 'setTokenFlow', token, veryBigAmount, veryBigAmount, 10, await carbon.currentTime());
       await ethers.provider.getTransactionReceipt(tx4.hash);  
 
       authorities.push(authoritityOwner);
@@ -110,7 +110,7 @@ describe("Main test", function() {
       await ethers.provider.getTransactionReceipt(tx3.hash);
 
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
-      const tx4 = await communityFundDAO.invoke(carbon, '0', 'setTokenFlow', token, veryBigAmount, veryBigAmount, 10);
+      const tx4 = await communityFundDAO.invoke(carbon, '0', 'setTokenFlow', token, veryBigAmount, veryBigAmount, 10, await carbon.currentTime());
       await ethers.provider.getTransactionReceipt(tx4.hash);  
 
       issuers.push(issuerOwner);

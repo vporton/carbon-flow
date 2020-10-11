@@ -176,13 +176,11 @@ contract SumOfTokens is ERC1155, IERC1155Views
     // It does not matter that this function is inefficient:
     // It is called either from an external view or once per tokens tree change.
     function _balanceOf(address _owner, uint256 _id) internal view returns (uint256 _balance) {
-        // TODO: userTokensObjects[_childAddr] accessed twice.
+        bytes32 _childAddr = userTokens[_owner][_id];
+        UserToken storage _tObj = userTokensObjects[_childAddr];
         _balance = balances[_id][_owner];
-        for (bytes32 _childAddr = userTokens[_owner][_id];
-             _childAddr != 0;
-             _childAddr = userTokensObjects[_childAddr].next)
-        {
-            uint256 _childId = userTokensObjects[_childAddr].token;
+        for(; _childAddr != 0; _childAddr = _tObj.next) {
+            uint256 _childId = _tObj.token;
             uint256 _childBalance = _balanceOf(_owner, _childId); // recursion
             assert(_childBalance != 0); // We don't keep zero-value tokens in the linked list.
             _balance += _childBalance;
