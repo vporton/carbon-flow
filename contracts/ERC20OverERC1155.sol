@@ -24,7 +24,7 @@ contract ERC20OverERC1155 is IERC20
     }
 
     function balanceOf(address account) external override view returns (uint256) {
-        erc1155.balanceOf(account, tokenId);
+        return erc1155.balanceOf(account, tokenId);
     }
 
     function transfer(address recipient, uint256 amount) external override returns (bool) {
