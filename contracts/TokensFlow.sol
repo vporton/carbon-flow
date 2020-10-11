@@ -154,7 +154,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         require(_to != address(0), "_to must be non-zero.");
 
         if(_value != 0) {
-            totalSupplyImpl[_id] = _value.add(totalSupplyImpl[_id]); // TODO: Should increase on transfer to 0x0?
+            totalSupplyImpl[_id] = _value.add(totalSupplyImpl[_id]);
             balances[_id][_to] += _value; // no need to check for overflow due to the previous line
         }
 
@@ -172,7 +172,7 @@ contract TokensFlow is ERC1155, IERC1155Views
         // require(_from != address(0), "_from must be non-zero.");
 
         balances[_id][_from] = balances[_id][_from].sub(_value);
-        totalSupplyImpl[_id] -= _value; // no need to check for overflow due to the previous line // TODO: Should decrease on transfer to 0x0?
+        totalSupplyImpl[_id] -= _value; // no need to check for overflow due to the previous line
 
         // MUST emit event
         emit TransferSingle(msg.sender, _from, address(0), _id, _value);
