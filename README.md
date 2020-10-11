@@ -267,6 +267,10 @@ Well, it makes a little sense: It may be useful for owners of Ethereum wallets n
 contract calls. So, if you request me to add this feature I _will_ do it, but again it makes quite
 little sense.
 
+Oh, also it makes sense in the case if the account owner lost his private key and wants an
+authorized member of the M+ governance team to restore his funds, but that thing is against the
+Ethereum philosopy (however see the alternative solution of this problem below).
+
 It could be implemented by having two kinds of authority tokens: M- tree issuers and retirers.
 M- tree issuers would do the same as authorities do now, and retirers would instead do retirement
 on behalf of users (net reducers). Before doing the swap on behalf of a user, need to check in
