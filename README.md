@@ -276,10 +276,12 @@ its ancestors are not disabled before doing the retirement operation. The amount
 be restricted by rules like limiting tokens flow above.
 
 Anyway, if somebody wants to operate in the system without having an Ethereum account, an authority
-may arrange for him for somebody to hold a wallet with private key (or a smart wallet) for him and
-issue for him M- and M+ tokens to this wallet instead of his own wallet.
+may arrange for him for somebody to hold a wallet with a private key (or a smart wallet) for him and
+issue for him M- and M+ tokens to this wallet instead of his own wallet (and do trade/exchange
+operations for him instead of himsefl).
 
-So, accordingly the above paragraph consider that task done:
+So, accordingly the above paragraph consider that task done (that pargraph is the "manual approval
+process"):
 
 > Create that protocol as a) manual approval process by an authorized member of the M+ governance team, and b) as an automatically executing smart contract.
 
