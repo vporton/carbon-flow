@@ -153,9 +153,6 @@ _Our ERC-20 tokens have a bug (do not fully conform to the ERC-20 standard):_
 the system is not notified of ERC-1155 transfers and other events by the corresponding
 ERC-20 events.
 
-TODO: Should completely remove all events from the ERC-20 wrapper, because they
-don't happen reliably anyway (happen but not on every transfer)?
-
 The practical implications of the bug are as follows:
 
 - A user may be not notified (e.g. by email sent by EtherScan.io) about a transfer

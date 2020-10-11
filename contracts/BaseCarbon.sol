@@ -56,6 +56,6 @@ contract BaseCarbon is TokensFlow
         bytes memory _data = ""; // efficient?
         _doMint(globalCommunityFund, retiredCreditsToken, _taxAmount, _data);
         _doMint(msg.sender, retiredCreditsToken, _amount - _taxAmount, _data);
-        // emit CreditRetired(creditId); // TODO
+        // emit CreditRetired(creditId); // not needed as _doBurn() emits a suitable event
     }
 }
