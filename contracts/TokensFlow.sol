@@ -13,11 +13,11 @@ contract TokensFlow is ERC1155, IERC1155Views
 
     struct TokenFlow {
         uint256 parentToken;
-        uint256 maxSwapCredit;
-        uint swapCreditPeriod;
-        uint timeEnteredSwapCredit; // zero means not in a swap credit
-        uint lastSwapTime; // ignored when not in a swap credit
-        uint256 remainingSwapCredit;
+        int256 maxSwapCredit; // TODO: Should be uint256
+        int swapCreditPeriod;
+        int timeEnteredSwapCredit; // zero means not in a swap credit
+        int lastSwapTime; // ignored when not in a swap credit
+        int256 remainingSwapCredit;
         bool enabled;
     }
 
@@ -94,7 +94,8 @@ contract TokensFlow is ERC1155, IERC1155Views
         tokenFlow[_child].enabled = _enabled;
     }
 
-    function setTokenFlow(uint256 _child, uint256 _maxSwapCredit, uint256 _remainingSwapCredit, uint _swapCreditPeriod, uint timeEnteredSwapCredit) external {
+    // User can set negative values. It is a nonsense but does not harm.
+    function setTokenFlow(uint256 _child, int256 _maxSwapCredit, int256 _remainingSwapCredit, int _swapCreditPeriod, int timeEnteredSwapCredit) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
@@ -112,7 +113,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     function exchangeToParent(uint256 _id, uint256 _amount, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
         TokenFlow storage _flow = tokenFlow[_id];
-        uint _currentTimeResult = _currentTime();
+        int _currentTimeResult = _currentTime();
         bool _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
         uint256 _maxAllowedFlow = _maxSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
         require(_amount <= _maxAllowedFlow);
@@ -125,7 +126,8 @@ contract TokensFlow is ERC1155, IERC1155Views
             _flow.remainingSwapCredit = _flow.maxSwapCredit;
         }
         _flow.lastSwapTime = _currentTimeResult;
-        _flow.remainingSwapCredit -= _amount; // no need for overflow checking
+        require(_amount < 1<<128);
+        _flow.remainingSwapCredit -= int256(_amount);
     }
 
 // Internal
@@ -191,26 +193,26 @@ contract TokensFlow is ERC1155, IERC1155Views
                                        enabled: _parent == 0});
     }
 
-    function _currentTime() internal virtual view returns(uint256) {
-        return block.timestamp;
+    function _currentTime() internal virtual view returns(int) {
+        return int(block.timestamp);
     }
 
-    function _inSwapCredit(TokenFlow memory _flow, uint _currentTimeResult) public view returns(bool) {
+    function _inSwapCredit(TokenFlow memory _flow, int _currentTimeResult) public pure returns(bool) {
         return _flow.timeEnteredSwapCredit != 0 &&
-               int256(_currentTimeResult) - int256(_flow.timeEnteredSwapCredit) < int256(_flow.swapCreditPeriod);
+               _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
     }
 
     // TODO: external
-    function _maxSwapAmount(TokenFlow memory _flow, uint _currentTimeResult, bool _inSwapCreditResult) public view returns(uint256) {
+    function _maxSwapAmount(TokenFlow memory _flow, int _currentTimeResult, bool _inSwapCreditResult) public pure returns(uint256) {
+        int256 result;
         if(_inSwapCreditResult) {
-            // TODO: Will it use less gas if store data in int256?
-            int256 passedTime = int256(_currentTimeResult) - int256(_flow.lastSwapTime);
-            int256 delta = int256(_flow.maxSwapCredit) * passedTime / int256(_flow.swapCreditPeriod);
-            int256 result = int256(_flow.remainingSwapCredit) - delta;
-            return result < 0 ? 0 : uint256(result); // TODO: slow
+            int256 passedTime = _currentTimeResult - _flow.lastSwapTime;
+            int256 delta = _flow.maxSwapCredit * passedTime / _flow.swapCreditPeriod;
+            result = _flow.remainingSwapCredit - delta;
         } else {
-            return _flow.maxSwapCredit;
+            result = _flow.maxSwapCredit;
         }
+        return result < 0 ? 0 : uint256(result);
     }
 
 // Events

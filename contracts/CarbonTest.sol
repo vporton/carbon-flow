@@ -8,7 +8,7 @@ import "./Carbon.sol";
 
 contract CarbonTest is Carbon
 {
-    uint timestamp = 10000; // an arbitrary value for testing
+    int timestamp = 10000; // an arbitrary value for testing
 
     constructor(address _globalCommunityFund,
                 string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
@@ -17,15 +17,15 @@ contract CarbonTest is Carbon
                _retiredName, _retiredSymbol, _retiredUri, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri)
     { }
 
-    function _currentTime() internal override view returns(uint256) {
+    function _currentTime() internal override view returns(int) {
         return timestamp;
     }
 
-    function currentTime() external view returns(uint256) {
+    function currentTime() external view returns(int) {
         return _currentTime();
     }
 
-    function setCurrentTime(uint256 _timestamp) external {
+    function setCurrentTime(int _timestamp) external {
         require(_timestamp >= timestamp);
         timestamp = _timestamp;
     }
