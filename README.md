@@ -68,7 +68,8 @@ it is not convenient and error prone). This is intentional, as the procedure of 
 carbon credits can be done _only_ in conjunction with
 "Design And Implementation Of M+C Community Fund Management Platform" (another bounty), because
 the procedure of registering tokens needs to be a part of a DAO to be developed as a part of
-that bounty.
+that bounty. However, I created the necessary smart contract methods for accomplishment of that
+bounty.
 
 ## Kinds of tokens
 
