@@ -80,7 +80,7 @@ describe("Main test", function() {
       const tx2 = await carbon.connect(authoritityOwner).createAuthority(nonRetiredToken, info.name, info.symbol, info.url);
       const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
       const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
-      const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', token, true);
+      const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', [token], true);
       await ethers.provider.getTransactionReceipt(tx3.hash);
 
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
@@ -106,7 +106,7 @@ describe("Main test", function() {
       const tx2 = await carbon.connect(issuerOwner).createAuthority(retiredToken, `Issuer ${i}`, `ISU${i}`, "https://example.com/issuer");
       const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
       const token = createTokenEventIface.parseLog(receipt2.logs[0]).args.id; // TODO: check this carefully
-      const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', token, true);
+      const tx3 = await communityFundDAO.invoke(carbon, '0', 'setEnabled', [token], true);
       await ethers.provider.getTransactionReceipt(tx3.hash);
 
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');

@@ -76,22 +76,25 @@ contract TokensFlow is ERC1155, IERC1155Views
         _setTokenParentNoCheck(_child, _parent);
     }
 
-    // TODO: Enable/disable multiple childs in one call.
-    function setEnabled(uint256 _child, bool _enabled) external {
-        bool _found = false;
-        for(uint256 _id = tokenFlow[_child].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
-            require(_id != _child); // Prevent irrevocably disable itself, also save gas.
-            if(!tokenFlow[_id].enabled) {
-                break; // A disabled entity cannot enable/disable other entities.
+    // TODO: Maybe be more efficient to require that each _child is a child of the next one.
+    function setEnabled(uint256[] calldata _childs, bool _enabled) external {
+        for(uint i = 0; i < _childs.length; ++i) {
+            uint256 _child = _childs[i];
+            bool _found = false;
+            for(uint256 _id = tokenFlow[_child].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
+                require(_id != _child); // Prevent irrevocably disable itself, also save gas.
+                if(!tokenFlow[_id].enabled) {
+                    break; // A disabled entity cannot enable/disable other entities.
+                }
+                if(msg.sender == tokenOwners[_id]) {
+                    _found = true;
+                    break;
+                }
             }
-            if(msg.sender == tokenOwners[_id]) {
-                _found = true;
-                break;
-            }
-        }
-        require(_found);
+            require(_found);
 
-        tokenFlow[_child].enabled = _enabled;
+            tokenFlow[_child].enabled = _enabled;
+        }
     }
 
     // User can set negative values. It is a nonsense but does not harm.
