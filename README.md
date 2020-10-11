@@ -227,6 +227,8 @@ This bug probably could be fixed, but:
 
 Conform to the "51 private keys" requirement.
 
+Reload the sums on every confirmation.
+
 Documentation comments in contracts.
 
 Indexed events.
