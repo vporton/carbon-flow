@@ -217,7 +217,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
     }
 
     function _doMint(address _to, uint256 _id, uint256 _value, bytes calldata _data) public {
-        // TODO: Limit the _value from above.
+        // Should limit the _value from above.
 
         require(_to != address(0), "_to must be non-zero.");
 
