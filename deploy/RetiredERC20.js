@@ -1,3 +1,5 @@
+const retiredCreditsToken = 1;
+
 module.exports = async ({
   getNamedAccounts,
   deployments,
@@ -8,7 +10,7 @@ module.exports = async ({
   const Carbon = await deployments.get("Carbon");
   const carbon = new ethers.Contract(Carbon.address, Carbon.abi, deployer);
   const deployResult = await deploy("ERC20OverERC1155", {
-    from: await deployer.getAddress(), contractName: "RetiredERC20", args: [carbon.address, await carbon.retiredCreditsToken()]
+    from: await deployer.getAddress(), contractName: "RetiredERC20", args: [carbon.address, retiredCreditsToken]
   });
   log(`contract RetiredERC20 was deployed at ${deployResult.address} using ${deployResult.receipt.gasUsed} gas`);
 };

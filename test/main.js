@@ -56,8 +56,8 @@ describe("Main test", function() {
     const carbon = new ethers.Contract(carbonDeployResult.address, carbonDeployResult.abi, ethers.provider);
     const communityFund = new ethers.Contract(communityFundDAO.address(), carbonDeployResult.abi, communityFundDAOVoter);
 
-    const nonRetiredToken = await carbon.nonRetiredCreditsToken();
-    const retiredToken = await carbon.retiredCreditsToken();
+    const retiredToken = 1; // await carbon.retiredCreditsToken();
+    const nonRetiredToken = 2; // await carbon.nonRetiredCreditsToken();
 
     const nonRetiredDeployResult = await deploy("ERC20OverERC1155", { from: await deployer.getAddress(), contractName: "NonRetiredERC20", args: [ carbon.address, nonRetiredToken ] });
     const nonRetiredERC20 = new ethers.Contract(nonRetiredDeployResult.address, nonRetiredDeployResult.abi, ethers.provider);

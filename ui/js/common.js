@@ -19,34 +19,10 @@ async function defaultAccountPromise() {
     return web3 && web3.currentProvider ? (await getWeb3()).eth.getAccounts() : null;
 }
 
-let carbonJsonInterfaceCache = null;
-
-function carbonJsonInterface() {
-    return new Promise((resolve) => {
-        if(carbonJsonInterfaceCache) resolve(carbonJsonInterfaceCache);
-        fetch("artifacts/Carbon.abi") // FIXME
-            .then(response => resolve(carbonJsonInterfaceCache = response.json()));
-    });
-}
-
-// let addressesFile = null;
-
-// function getAddressesFile() {
-//     return new Promise((resolve) => {
-//         if(addressesFile) resolve(addressesFile);
-//         const networkName = getEthereumNetworkName();
-//         fetch(`artifacts/${networkName}.addresses`)
-//             .then(response => resolve(addressesFile = response.json()));
-//     });
-// }
-
-// async function getAddress(name) {
-//     return (await getAddressesFile())[name];
-// }
-
 let myWeb3 = null;
 
 function getNetworkName() {
+    console.log('getNetworkName', web3.version);
     return new Promise((resolve) => {
         web3.eth.net.getNetworkType()
             .then(async network => {
