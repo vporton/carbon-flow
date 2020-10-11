@@ -5,8 +5,11 @@ changed a little since recoding this video, also now the numbers update
 automatically after confirmed transactions).
 
 It is a solution of
-https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty
-(work in progress!)
+https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty.
+The bounty is fulfilled except of creating 10000 carbon credits records
+(in fact I did it on my local blockchain and explained how to repeat it, but not
+yet did it on a public blockchain because it is costly and time consuming). I will
+keep fixing bugs after bounty submission.
 
 ![Screenshot](https://raw.githubusercontent.com/vporton/carbon-flow/main/doc/screenshot.png "Screenshot")
 
