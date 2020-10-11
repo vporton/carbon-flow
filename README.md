@@ -227,6 +227,8 @@ This bug probably could be fixed, but:
 
 ## TODO
 
+Allow to change the Web3 provider with the modal.
+
 Conform to the "51 private keys" requirement.
 
 Reload the sums on every confirmation.

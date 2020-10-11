@@ -1,11 +1,13 @@
 "strict";
 
-ethereum.autoRefreshOnNetworkChange = false;
+if(window.ethereum) {
+    ethereum.autoRefreshOnNetworkChange = false;
 
-// TODO: Don't reload everything.
-ethereum.on('chainChanged', () => {
-    document.location.reload()
-}); 
+    // TODO: Don't reload everything.
+    ethereum.on('chainChanged', () => {
+        document.location.reload()
+    });
+}
 
 // TODO
 // $(document).ajaxError(function( event, request, settings ) {
@@ -123,9 +125,9 @@ async function onLoad() {
 
     if(!window.web3 || !window.web3.currentProvider) {
         document.getElementById("noWeb3NetWarning").style.display = 'block';
+    } else {
+        await connectWeb3();
     }
-
-    await connectWeb3();
 }
 
 //window.addEventListener('load', onLoad); // window.web3.currentProvider.chainId is sometimes undefined (https://github.com/brave/brave-browser/issues/10854)

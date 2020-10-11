@@ -16,6 +16,8 @@ function carbonJsonInterface() {
 }
 
 async function onLoad() {
+    if(!window.web3) return;
+
     await defaultAccountPromise();
     document.getElementById('account').textContent = defaultAccount;
     web3.eth.net.getNetworkType()
