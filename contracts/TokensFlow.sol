@@ -202,7 +202,6 @@ contract TokensFlow is ERC1155, IERC1155Views
                _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
     }
 
-    // TODO: external
     function _maxSwapAmount(TokenFlow memory _flow, int _currentTimeResult, bool _inSwapCreditResult) public pure returns(uint256) {
         int256 result;
         if(_inSwapCreditResult) {
