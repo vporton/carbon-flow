@@ -42,7 +42,12 @@ contract ERC20OverERC1155 is IERC20
 
     function approve(address spender, uint256 amount) external override returns (bool) {
         uint256 _currentValue = erc1155.allowance(tokenId, msg.sender, spender); // insecure hack, cannot be made better
-        erc1155.approve(spender, tokenId, _currentValue, amount);
+        try erc1155.approve(spender, tokenId, _currentValue, amount) {
+            return true;
+        }
+        catch Error(string memory /*reason*/) {
+            return false;
+        }
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) external override returns (bool) {
