@@ -76,25 +76,27 @@ contract TokensFlow is ERC1155, IERC1155Views
         _setTokenParentNoCheck(_child, _parent);
     }
 
-    // TODO: Maybe be more efficient to require that each _child is a child of the next one.
+    // Each element of `_childs` list must be a child of the next one.
+    // TODO: Test.
     function setEnabled(uint256[] calldata _childs, bool _enabled) external {
-        for(uint i = 0; i < _childs.length; ++i) {
-            uint256 _child = _childs[i];
-            bool _found = false;
-            for(uint256 _id = tokenFlow[_child].parentToken; _id != 0; _id = tokenFlow[_id].parentToken) {
-                require(_id != _child); // Prevent irrevocably disable itself, also save gas.
-                if(!tokenFlow[_id].enabled) {
-                    break; // A disabled entity cannot enable/disable other entities.
-                }
-                if(msg.sender == tokenOwners[_id]) {
-                    _found = true;
-                    break;
-                }
-            }
-            require(_found);
+        uint256 _firstChild = _childs[0]; // asserts on `_childs.length == 0`.
+        uint256 _parent;
+        bool _hasRight = false;
+        for(uint256 i = 0; i != _childs.length; ++i) {
+            uint256 _id = _childs[i];
+            require(i == 0 || (_id != _firstChild && _id == _parent)); // Prevent irrevocably disable itself, also save gas.
 
-            tokenFlow[_child].enabled = _enabled;
+            _parent = tokenFlow[_id].parentToken;
+            if(!tokenFlow[_parent].enabled) {
+                break; // A disabled entity cannot enable/disable other entities.
+            }
+            if(msg.sender == tokenOwners[_parent]) {
+                _hasRight = true;
+            }
+
+            tokenFlow[_id].enabled = _enabled;
         }
+        require(_hasRight);
     }
 
     // User can set negative values. It is a nonsense but does not harm.
