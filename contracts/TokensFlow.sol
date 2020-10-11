@@ -112,17 +112,19 @@ contract TokensFlow is ERC1155, IERC1155Views
     function exchangeToParent(uint256 _id, uint256 _amount, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
         TokenFlow storage _flow = tokenFlow[_id];
-        uint256 _maxAllowedFlow = _maxSwapAmount(_flow);
+        uint _currentTimeResult = _currentTime();
+        bool _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
+        uint256 _maxAllowedFlow = _maxSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
         require(_amount <= _maxAllowedFlow);
         uint256 _balance = balances[_id][msg.sender];
         require(_amount <= _balance);
         _doBurn(msg.sender, _id, _amount);
         _doMint(msg.sender, _flow.parentToken, _amount, _data);
-        if(!_inSwapCredit(_flow)) { // TODO: called second time here (TODO: Use `pure` in the interface?)
-            _flow.timeEnteredSwapCredit = _currentTime();
+        if(!_inSwapCreditResult) {
+            _flow.timeEnteredSwapCredit = _currentTimeResult;
             _flow.remainingSwapCredit = _flow.maxSwapCredit;
         }
-        _flow.lastSwapTime = _currentTime();
+        _flow.lastSwapTime = _currentTimeResult;
         _flow.remainingSwapCredit -= _amount; // no need for overflow checking
     }
 
@@ -193,18 +195,16 @@ contract TokensFlow is ERC1155, IERC1155Views
         return block.timestamp;
     }
 
-    // TODO: additional arguments to the below functions to optimize them
-
-    function _inSwapCredit(TokenFlow memory _flow) public view returns(bool) {
+    function _inSwapCredit(TokenFlow memory _flow, uint _currentTimeResult) public view returns(bool) {
         return _flow.timeEnteredSwapCredit != 0 &&
-               int256(_currentTime()) - int256(_flow.timeEnteredSwapCredit) < int256(_flow.swapCreditPeriod);
+               int256(_currentTimeResult) - int256(_flow.timeEnteredSwapCredit) < int256(_flow.swapCreditPeriod);
     }
 
     // TODO: external
-    function _maxSwapAmount(TokenFlow memory _flow) public view returns(uint256) {
-        if(_inSwapCredit(_flow)) {
+    function _maxSwapAmount(TokenFlow memory _flow, uint _currentTimeResult, bool _inSwapCreditResult) public view returns(uint256) {
+        if(_inSwapCreditResult) {
             // TODO: Will it use less gas if store data in int256?
-            int256 passedTime = int256(_currentTime()) - int256(_flow.lastSwapTime);
+            int256 passedTime = int256(_currentTimeResult) - int256(_flow.lastSwapTime);
             int256 delta = int256(_flow.maxSwapCredit) * passedTime / int256(_flow.swapCreditPeriod);
             int256 result = int256(_flow.remainingSwapCredit) - delta;
             return result < 0 ? 0 : uint256(result); // TODO: slow
