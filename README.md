@@ -241,6 +241,8 @@ Should allow to allocate a swap credit once, not periodically?
 
 See also `TODO` and `FIXME` comments in the source.
 
+Ethereum provider selection does not work on Firefox (but you still can use MetaMask).
+
 Lint Solidity.
 
 ### Not doable things
