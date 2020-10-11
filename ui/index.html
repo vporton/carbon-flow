@@ -5,6 +5,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.0/web3.min.js"></script>
         <script src="js/web3modal/index.js"></script>
         <script type="text/javascript" src="artifacts/mewconnect.js"></script>
+        <script src="js/wait-mined.js"></script>
         <script src="js/common.js"></script>
         <script src="artifacts/addresses.js"></script>
         <script src="js/index.js"></script>
@@ -20,6 +21,11 @@
             }
             .valid { background: white; color: black; }
             .invalid { background: #f99; color: white; }
+            #transactions { display: block; margin: 0; padding: 0; }
+            #transactions li { display: block; margin: 1; padding: 5px; }
+            .transaction.pending { background: gray; color: white; }
+            .transaction.failed { background: red; color: white; }
+            .transaction.confirmed { background: green; color: white; }
         </style>
     </head>
     <body>
@@ -37,6 +43,15 @@
             </ul>
             <p>Retire <input type="text" id="amount" size="10" class="invalid" oninput="validateAmount()"/> M- tokens
                 <input id="retire" type="button" value="Do it!" onclick="retire()" disabled="disabled"/></p>
+            <p>Remark <span id="tax">(loading&mldr;)</span>% of your sale goes to Global Community Fund.</p>
+            <h2>Transactions</h2>
+            <ul id="transactions">
+                <li id="transactionTmpl" class="transaction pending" style="display: none;">
+                    <span class="tokens"></span> M+ tokens sold.
+                    Status: <span class="status">pending...</span>
+                    Hash: <code class="hash">unknown</code>
+                </li>
+            </ul>
         </div>
     </body>
 </html>
