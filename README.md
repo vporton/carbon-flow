@@ -63,7 +63,7 @@ a private key to be used only for testing).
 To install the Web application (dApp) with this test blockchain:
 ```sh
 yarn install
-npx buidler deploy --network ganache
+GLOBAL_COMMUNITY_FUND=0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0 npx buidler deploy --network ganache
 make
 ```
 
