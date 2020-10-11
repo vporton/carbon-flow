@@ -9699,3 +9699,8 @@ yeast@0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/yeast/-/yeast-0.1.2.tgz#008e06d8094320c372dbc2f8ed76a0ca6c8ac419"
   integrity sha1-AI4G2AlDIMNy28L47XagymyKxBk=
+
+yesno@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/yesno/-/yesno-0.3.1.tgz#3b2150158ee9b3f192a42313dd189c439f26c0ba"
+  integrity sha512-7RbCXegyu6DykWPWU0YEtW8gFJH8KBL2d5l2fqB0XpkH0Y9rk59YSSWpzEv7yNJBGAouPc67h3kkq0CZkpBdFw==
