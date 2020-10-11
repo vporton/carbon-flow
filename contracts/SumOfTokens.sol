@@ -224,7 +224,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         if(_value != 0) {
             _updateUserTokens(_to, _id, _value);
             do {
-                totalSupplyImpl[_id] += _value; // TODO: Should decrease on transfer to 0x0? // FIXME: overflow checking
+                totalSupplyImpl[_id] += _value; // No need to overflow check, as _updateUserTokens() warrants it.
                 _id = parentToken[_id];
             } while(_id != 0);
         }
