@@ -65,7 +65,7 @@ function getNetworkName() {
 }
 
 async function myWeb3Modal() {
-    const MewConnect = require('mewconnect');
+    // const MewConnect = require('mewconnect');
 
     const Web3Modal = window.Web3Modal.default;
     const networkName = await getNetworkName();
