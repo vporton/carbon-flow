@@ -141,6 +141,9 @@ After it is disabled, ones holding invalid tokens should be asked to burn them.
 If enough tokens were burn and the reason of the theft was eliminated, the disabled
 tokens should be enabled again.
 
+Should we allow authorities (e.g. GCF) to burn child tokens (also their own tokens?)
+It is a notable dilemma between democracy and personal freedom.
+
 ## ERC-20 tokens
 
 TODO: More tests.
