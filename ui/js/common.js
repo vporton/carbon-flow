@@ -1,5 +1,12 @@
 "strict";
 
+ethereum.autoRefreshOnNetworkChange = false;
+
+// TODO: Don't reload everything.
+ethereum.on('chainChanged', () => {
+    document.location.reload()
+}); 
+
 // TODO
 // $(document).ajaxError(function( event, request, settings ) {
 //     alert("Error: " + request.status);
