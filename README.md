@@ -252,7 +252,7 @@ Ethereum provider selection does not work on Firefox (but you still can use Meta
 
 Lint Solidity.
 
-### Things intentionally not done
+### Things intentionally not done or done differently
 
 The specification says:
 
