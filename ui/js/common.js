@@ -11,11 +11,6 @@ if(window.ethereum) {
 
 const MewConnect = require('mewconnect');
 
-// TODO
-// $(document).ajaxError(function( event, request, settings ) {
-//     alert("Error: " + request.status);
-// });
-
 function safe_tags(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
