@@ -100,6 +100,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // User can set negative values. It is a nonsense but does not harm.
+    // TODO: Separate functions for recurring and non-recurring flows.
     function setTokenFlow(uint256 _child, int256 _maxSwapCredit, int256 _remainingSwapCredit, int _swapCreditPeriod, int _timeEnteredSwapCredit, bool _recurring) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
