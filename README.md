@@ -262,8 +262,6 @@ Documentation comments in contracts.
 
 Test batch transfers.
 
-Should allow to allocate a swap credit once, not periodically?
-
 See also `TODO` and `FIXME` comments in the source.
 
 Lint Solidity.
