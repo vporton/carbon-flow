@@ -46,6 +46,9 @@ async function onConnect() {
         web3.eth.net.getNetworkType()
             .then(network => { document.getElementById('network').textContent = network; });
     }
+    const carbon = new web3.eth.Contract(await carbonJsonInterface(), carbonAddress);
+    carbon.events.TransferSingle({filter: {_to: defaultAccount}}, loadNumbers);
+    carbon.events.TransferBatch({filter: {_to: defaultAccount}}, loadNumbers);
     await loadNumbers();
 }
 
@@ -78,9 +81,9 @@ async function doRetire(amountStr) {
         if(receipt) {
             document.querySelector(`#${id} .hash`).textContent = receipt.transactionHash;
         }
-        if(receipt && receipt.status) {
-            await loadNumbers();
-        }
+        // if(receipt && receipt.status) {
+        //     await loadNumbers();
+        // }
     });
 }
 
