@@ -180,6 +180,9 @@ TL;DR: The algorithm is as follows:
 - We exit from swap credit as soon as P seconds passes since last entering
   swap credit.
 
+There is also possible to set a single (not recurring) flow limit, that just decreases
+with every eligible transfer.
+
 In the case if somebody needs to exceed a swap credit amount for a legitimate
 reason he may write an email to the parent token owner asking to raise the limits.
 
