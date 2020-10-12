@@ -3,10 +3,9 @@ pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 // import '@nomiclabs/buidler/console.sol';
-import './BaseCarbon.sol';
+import "./BaseCarbon.sol";
 
-contract Carbon is BaseCarbon
-{
+contract Carbon is BaseCarbon {
     struct Authority {
         uint256 token;
         uint maxSerial;
@@ -25,15 +24,18 @@ contract Carbon is BaseCarbon
 
     mapping (uint256 => CarbonCreditsRecord) public credits;
 
-    uint256 maxCreditId;
+    uint256 public maxCreditId;
 
+    // solhint-disable bracket-align
     constructor(address _globalCommunityFund,
                 string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
                 string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
+        public
         BaseCarbon(
             _globalCommunityFund,
             _retiredName, _retiredSymbol, _retiredUri, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri)
     { }
+    // solhint-enable bracket-align
 
     // Anybody can create an authority, but its parent decides if its tokens can be swapped.
     function createAuthority(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)

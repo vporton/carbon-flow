@@ -2,12 +2,11 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
-import '@nomiclabs/buidler/console.sol';
-import './TokensFlow.sol';
-import './ABDKMath64x64.sol';
+import "@nomiclabs/buidler/console.sol";
+import "./TokensFlow.sol";
+import "./ABDKMath64x64.sol";
 
-contract BaseCarbon is TokensFlow
-{
+contract BaseCarbon is TokensFlow {
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
 
@@ -18,14 +17,17 @@ contract BaseCarbon is TokensFlow
 
 // Admin
 
+    // solhint-disable bracket-align
     constructor(address _globalCommunityFund,
                 string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
                 string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
+        public
     {
         globalCommunityFund = _globalCommunityFund;
         _newToken(0, _retiredName, _retiredSymbol, _retiredUri, _globalCommunityFund); // 1
         _newToken(0, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri, _globalCommunityFund); // 2
     }
+    // solhint-enable bracket-align
 
     function setGlobalCommunityFundAddress(address _globalCommunityFund) external {
         require(msg.sender == globalCommunityFund);
@@ -60,11 +62,11 @@ contract BaseCarbon is TokensFlow
 
 // Internal
 
-    function _retiredCreditsToken() pure internal returns(uint256) {
+    function _retiredCreditsToken() internal pure returns(uint256) {
         return 1; // M+ token
     }
 
-    function _nonRetiredCreditsToken() pure internal returns(uint256) {
+    function _nonRetiredCreditsToken() internal pure returns(uint256) {
         return 2;
     }
 

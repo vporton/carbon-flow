@@ -6,9 +6,8 @@ pragma experimental ABIEncoderV2;
 
 import "./TokensFlow.sol";
 
-contract TokensFlowTest is TokensFlow
-{
-    int timestamp = 10000; // an arbitrary value for testing
+contract TokensFlowTest is TokensFlow {
+    int private timestamp = 10000; // an arbitrary value for testing
 
     function mint(address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
         require(tokenOwners[_id] == msg.sender);

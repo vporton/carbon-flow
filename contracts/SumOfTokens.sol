@@ -6,8 +6,7 @@ pragma solidity ^0.7.1;
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
 
-contract SumOfTokens is ERC1155, IERC1155Views
-{
+contract SumOfTokens is ERC1155, IERC1155Views {
     using SafeMath for uint256;
     using Address for address;
 
@@ -27,11 +26,11 @@ contract SumOfTokens is ERC1155, IERC1155Views
     mapping (uint256 => uint256) public parentToken;
 
     // user => (parent => obj)
-    mapping (address => mapping (uint256 => bytes32)) userTokens;
+    mapping (address => mapping (uint256 => bytes32)) public userTokens;
 
     mapping (bytes32 => UserToken) public userTokensObjects;
 
-    constructor(address _owner) {
+    constructor(address _owner) public {
         owner = _owner;
     }
 
@@ -64,8 +63,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
         require(_to != address(0), "_to must be non-zero.");
         require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value, "Not appoved to transfer");
 
-        if(_value != 0) {
-            if(_from == _to) {
+        if (_value != 0) {
+            if (_from == _to) {
                 require(_balanceOf(_from, _id) >= _value);
             } else {
                 (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
@@ -93,7 +92,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         // MUST Throw on errors
         require(_to != address(0), "destination address must be non-zero.");
         require(_ids.length == _values.length, "_ids and _values array length must match.");
-        if(_from != msg.sender) {
+        if (_from != msg.sender) {
             for (uint256 i = 0; i < _ids.length; ++i) {
                 require(_allowance(_ids[i], _from, msg.sender) >= _values[i], "Not appoved to transfer");
             }
@@ -104,8 +103,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
             require(_id != 0, "non-existing token.");
             uint256 _value = _values[i];
 
-            if(_value != 0) {
-                if(_from == _to) {
+            if (_value != 0) {
+                if (_from == _to) {
                     require(_balanceOf(_from, _id) >= _value);
                 } else {
                     (uint256 _transferred,) = _doTransferFrom(_from, _to, _id, _value);
@@ -193,7 +192,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         bytes32 _childAddr = userTokens[_owner][_id];
         UserToken storage _tObj = userTokensObjects[_childAddr];
         _balance = balances[_id][_owner];
-        for(; _childAddr != 0; _childAddr = _tObj.next) {
+        for (; _childAddr != 0; _childAddr = _tObj.next) {
             uint256 _childId = _tObj.token;
             uint256 _childBalance = _balanceOf(_owner, _childId); // recursion
             assert(_childBalance != 0); // We don't keep zero-value tokens in the linked list.
@@ -212,18 +211,18 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         balances[_id][_to] = _value.add(_oldToBalance);
 
-        if(_oldToBalance != 0) return; // Token already present in the list.
+        if (_oldToBalance != 0) return; // Token already present in the list.
 
         uint256 _parent = parentToken[_id];
 
         // User received a new token:
-        if(_parent != 0) {
+        if (_parent != 0) {
             // Insert into the beginning of the double linked list:
             bytes32 _nextAddr = userTokens[_to][_parent];
             UserToken memory _userToken = UserToken({token: _id, next: _nextAddr, prev: 0});
             bytes32 _userTokenAddr = _userTokenAddress(_to, _parent, _id);
             userTokensObjects[_userTokenAddr] = _userToken;
-            if(_nextAddr != 0) {
+            if (_nextAddr != 0) {
                 userTokensObjects[_nextAddr].prev = _userTokenAddr;
             }
             userTokens[_to][_parent] = _userTokenAddr;
@@ -235,12 +234,12 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         require(_to != address(0), "_to must be non-zero.");
 
-        if(_value != 0) {
+        if (_value != 0) {
             _updateUserTokens(_to, _id, _value);
             do {
                 totalSupplyImpl[_id] += _value; // No need to overflow check, as _updateUserTokens() warrants it.
                 _id = parentToken[_id];
-            } while(_id != 0);
+            } while (_id != 0);
         }
 
         // MUST emit event
@@ -264,7 +263,7 @@ contract SumOfTokens is ERC1155, IERC1155Views
         bytes32 _childAddr = userTokens[_from][_id];
 
         uint256 _remainingValue; // how much not succeeded to transfer (need better explanation)
-        if(_oldBalance >= _value) {
+        if (_oldBalance >= _value) {
             balances[_id][_from] -= _value;
             _updateUserTokens(_to, _id, _value);
             _transferred = _value;
@@ -272,19 +271,19 @@ contract SumOfTokens is ERC1155, IERC1155Views
             _remained = _oldBalance != _value;
         } else {
             balances[_id][_from] = 0;
-            if(_oldBalance != 0) {
+            if (_oldBalance != 0) {
                 _updateUserTokens(_to, _id, _oldBalance);
             }
 
             _remainingValue = _value - _oldBalance;
             bytes32 _prevAddr = 0;
             _remained = false;
-            while(_childAddr != 0 && _remainingValue != 0) {
+            while (_childAddr != 0 && _remainingValue != 0) {
                 UserToken storage _childToken = userTokensObjects[_childAddr];
 
                 (uint256 _childTransferred, bool _childRemained) =
                     _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
-                if(_childRemained) {
+                if (_childRemained) {
                     _remained = true;
                 }
                 _remainingValue -= _childTransferred;
@@ -293,18 +292,18 @@ contract SumOfTokens is ERC1155, IERC1155Views
                 _childAddr = _childToken.next;
             }
         }
-        if(!_remained) {
+        if (!_remained) {
             // Remove from user's list
             uint256 _parent = parentToken[_id];
-            if(_parent != 0) {
+            if (_parent != 0) {
                 bytes32 _ourAddr = _userTokenAddress(_from, _parent, _id);
                 UserToken storage _token = userTokensObjects[_ourAddr];
-                if(_token.prev != 0) {
+                if (_token.prev != 0) {
                     userTokensObjects[_token.prev].next = _token.next;
                 } else {
                     userTokens[_from][_parent] = _token.next;
                 }
-                if(_token.next != 0) {
+                if (_token.next != 0) {
                     userTokensObjects[_token.next].prev = _token.prev;
                 }
             }

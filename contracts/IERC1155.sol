@@ -4,6 +4,7 @@ pragma solidity ^0.7.1;
 import "./ERC165.sol";
 
 // solhint-disable max-line-length
+// solhint-disable bracket-align
 
 /**
     @title ERC-1155 Multi Token Standard

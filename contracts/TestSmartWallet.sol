@@ -4,13 +4,12 @@
 pragma solidity ^0.7.1;
 
 // import '@nomiclabs/buidler/console.sol';
-import './IERC1155TokenReceiver.sol';
+import "./IERC1155TokenReceiver.sol";
 
-contract TestSmartWallet is ERC1155TokenReceiver
-{
+contract TestSmartWallet is ERC1155TokenReceiver {
     address payable public owner;
 
-    constructor(address payable _owner) payable {
+    constructor(address payable _owner) public payable {
         owner = _owner;
     }
 
@@ -25,18 +24,21 @@ contract TestSmartWallet is ERC1155TokenReceiver
      * @param _value The value of the transaction.
      * @param _data The data of the transaction.
      */
+    // solhint-disable no-unused-vars
     function invoke(address _target, uint _value, bytes calldata _data)
         external ownerOnly returns (bytes memory _result)
     {
-        require (msg.sender == owner);
+        require(msg.sender == owner);
 
         // solhint-disable indent
+        // solhint-disable bracket-align
         (bool success, bytes memory result) = _target.call{value: _value}(_data);
-        require (success, string (result));
+        require(success, string(result));
         // emit Invoked(msg.sender, _target, _value, _data);
         return result;
     }
 
+    // solhint-disable-next-line state-visibility
     receive() external payable {
     }
 

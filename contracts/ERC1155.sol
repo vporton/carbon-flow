@@ -9,6 +9,8 @@ import "./IERC1155.sol";
 
 // solhint-disable max-line-length
 // solhint-disable indent
+// solhint-disable expression-indent
+// solhint-disable bracket-align
 
 // A sample implementation of core ERC1155 function.
 contract ERC1155 is IERC1155, ERC165, CommonConstants
@@ -200,7 +202,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         // MUST Throw on errors
         require(_to != address(0x0), "destination address must be non-zero.");
         require(_ids.length == _values.length, "_ids and _values array length must match.");
-        if(_from != msg.sender) {
+        if (_from != msg.sender) {
             for (uint256 i = 0; i < _ids.length; ++i) {
                 require(_allowance(_ids[i], _from, msg.sender) >= _values[i]);
             }

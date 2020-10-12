@@ -13,10 +13,10 @@ contract SimpleERC20 is IERC20 {
     address public owner;
  
     // Balances for each account
-    mapping(address => uint256) balances;
+    mapping(address => uint256) private balances;
  
     // Owner of account approves the transfer of an amount to another account
-    mapping(address => mapping (address => uint256)) allowed;
+    mapping(address => mapping (address => uint256)) private allowed;
  
     // Functions with this modifier can only be executed by the owner
     modifier onlyOwner() {
@@ -25,7 +25,7 @@ contract SimpleERC20 is IERC20 {
     }
  
     // Constructor
-    constructor(string memory _symbol, string memory _name, uint8 _decimals, uint256 _initialBalance) {
+    constructor(string memory _symbol, string memory _name, uint8 _decimals, uint256 _initialBalance) public {
         owner = msg.sender;
         symbol = _symbol;
         name = _name;
@@ -41,9 +41,7 @@ contract SimpleERC20 is IERC20 {
  
     // Transfer the balance from owner's account to another account
     function transfer(address _to, uint256 _amount) external override returns (bool success) {
-        if (balances[msg.sender] >= _amount 
-            && balances[_to] + _amount > balances[_to])
-        {
+        if (balances[msg.sender] >= _amount && balances[_to] + _amount > balances[_to]) {
             balances[msg.sender] -= _amount;
             balances[_to] += _amount;
             Transfer(msg.sender, _to, _amount);
@@ -60,6 +58,7 @@ contract SimpleERC20 is IERC20 {
     // deliberately authorized the sender of the message via some mechanism; we propose
     // these standardized APIs for approval:
     function transferFrom(address _from, address _to, uint256 _amount) external override returns (bool success) {
+        // solhint-disable bracket-align
         if (balances[_from] >= _amount
             && allowed[_from][msg.sender] >= _amount
             && balances[_to] + _amount > balances[_to])
@@ -72,6 +71,7 @@ contract SimpleERC20 is IERC20 {
         } else {
             return false;
         }
+        // solhint-enable bracket-align
     }
  
     // Allow _spender to withdraw from your account, multiple times, up to the _value amount.
