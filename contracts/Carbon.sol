@@ -11,7 +11,7 @@ contract Carbon is BaseCarbon {
         uint maxSerial;
     }
 
-    struct CarbonCreditsRecord {
+    struct MintRecord {
         address authority;
         uint serial;
         uint256 amount;
@@ -22,7 +22,7 @@ contract Carbon is BaseCarbon {
     // token => Authority
     mapping (uint256 => Authority) public authorities;
 
-    mapping (uint256 => CarbonCreditsRecord) public credits;
+    mapping (uint256 => MintRecord) public credits;
 
     uint256 public maxCreditId;
 
@@ -57,7 +57,7 @@ contract Carbon is BaseCarbon {
     {
         require(tokenOwners[_token] == msg.sender && tokenFlow[_token].enabled);
         Authority storage _authority = authorities[_token];
-        CarbonCreditsRecord memory _credit = CarbonCreditsRecord({
+        MintRecord memory _credit = MintRecord({
             authority: msg.sender,
             serial: ++_authority.maxSerial,
             amount: _amount,
