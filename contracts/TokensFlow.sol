@@ -62,6 +62,12 @@ contract TokensFlow is ERC1155, IERC1155Views {
         return _newToken(_parent, _name, _symbol, _uri, msg.sender);
     }
 
+    function setTokenOwner(uint256 _id, address _newOwner) external {
+        require(msg.sender == tokenOwners[_id]);
+
+        tokenOwners[_id] = _newOwner;
+    }
+
     // Intentially no setTokenName() and setTokenSymbol()
     function setTokenUri(uint256 _id, string calldata _uri) external {
         require(msg.sender == tokenOwners[_id]);
