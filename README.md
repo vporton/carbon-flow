@@ -131,7 +131,7 @@ for carbon counting, it may be useful also for something other.) or token owners
 M+ or M- as the ultimate ancestor).
 
 A token owner can change its parent at any moment of time by its own will. (But
-if he does this, his token is disabled (unless now has not parent) and his swap limits
+if he does this, his token is disabled (unless now has no parent) and his swap limits
 (see below) are reset to zero until its new parent wishes to increase his limits.)
 
 ## Token flow
