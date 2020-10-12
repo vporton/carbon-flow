@@ -170,9 +170,14 @@ contract TokensFlow is ERC1155, IERC1155Views {
         for (uint i = 0; i < _levels; ++i) {
             _flow = tokenFlow[_currentId];
             int _currentTimeResult = _currentTime();
-            // TODO: no need to calculate _inSwapCreditResult if !_flow.recurring
-            bool _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
-            uint256 _maxAllowedFlow = _maxSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
+            uint256 _maxAllowedFlow;
+            bool _inSwapCreditResult;
+            if (_flow.recurring) {
+                _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
+                _maxAllowedFlow = _maxRecurringSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
+            } else {
+                _maxAllowedFlow = _flow.remainingSwapCredit < 0 ? 0 : uint256(_flow.remainingSwapCredit);
+            }
             require(_amount <= _maxAllowedFlow);
             uint256 _balance = balances[_currentId][msg.sender];
             require(_amount <= _balance);
@@ -266,13 +271,11 @@ contract TokensFlow is ERC1155, IERC1155Views {
             _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
     }
 
-    function _maxSwapAmount(TokenFlow memory _flow, int _currentTimeResult, bool _inSwapCreditResult)
+    function _maxRecurringSwapAmount(TokenFlow memory _flow, int _currentTimeResult, bool _inSwapCreditResult)
         public pure returns(uint256)
     {
         int256 result;
-        if (!_flow.recurring) {
-            result = _flow.remainingSwapCredit;
-        } else if (_inSwapCreditResult) {
+        if (_inSwapCreditResult) {
             int256 passedTime = _currentTimeResult - _flow.lastSwapTime;
             int256 delta = _flow.maxSwapCredit * passedTime / _flow.swapCreditPeriod;
             result = _flow.remainingSwapCredit - delta;
