@@ -68,6 +68,6 @@ contract Carbon is BaseCarbon
         _setTokenParentNoCheck(_child, _parent);
     }
 
-    event AuthorityCreated(address owner, uint256 token, string name, string symbol, string uri);
-    event CreditCreated(uint256 id, address authority, uint serial, uint256 amount, address owner, bytes32 arweaveHash);
+    event AuthorityCreated(address indexed owner, uint256 indexed token, string name, string symbol, string uri);
+    event CreditCreated(uint256 indexed id, address indexed authority, uint indexed serial, uint256 amount, address owner, bytes32 arweaveHash);
 }

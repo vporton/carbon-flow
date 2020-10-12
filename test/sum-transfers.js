@@ -1,10 +1,12 @@
 "strict";
 
 const chai = require("chai");
-const { expect, assert } = chai;
 const chaiAsPromised = require('chai-as-promised');
+const fs = require('fs');
 const random = require('random');
 const seedrandom = require('seedrandom');
+
+const { expect, assert } = chai;
 
 chai.use(chaiAsPromised);
 
@@ -29,7 +31,7 @@ describe("SumOfTokens", function() {
 
     await sumOfTokens.deployed();
 
-    const createTokenEventAbi = [ "event NewToken(uint256 id, string name, string symbol, string uri)" ];
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/TokensFlowTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     async function execAndWait(contract, method, ...args) {

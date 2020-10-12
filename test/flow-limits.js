@@ -1,10 +1,12 @@
 "strict";
 
 const chai = require("chai");
-const { expect, assert } = chai;
+const fs = require('fs');
 const chaiAsPromised = require('chai-as-promised');
 const random = require('random');
 const seedrandom = require('seedrandom');
+
+const { expect, assert } = chai;
 
 chai.use(chaiAsPromised);
 
@@ -23,7 +25,7 @@ describe("TokensFlow (limits)", function() {
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = [ "event NewToken(uint256 id, address owner, string name, string symbol, string uri)" ];
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/TokensFlowTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     const wallet0 = ethers.Wallet.createRandom();
@@ -124,7 +126,7 @@ describe("TokensFlow (limits)", function() {
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = [ "event NewToken(uint256 id, address owner, string name, string symbol, string uri)" ];
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/TokensFlowTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     const wallet0 = ethers.Wallet.createRandom();

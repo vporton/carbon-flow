@@ -260,5 +260,5 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // Events
 
-    event NewToken(uint256 id, address owner, string name, string symbol, string uri);
+    event NewToken(uint256 indexed id, address indexed owner, string name, string symbol, string uri);
 }

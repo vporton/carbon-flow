@@ -302,5 +302,5 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
 // Events
 
-    event NewToken(uint256 id, string name, string symbol, string uri);
+    event NewToken(uint256 indexed id, string name, string symbol, string uri);
 }

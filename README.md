@@ -260,8 +260,6 @@ Create 10000 credit records at a public testnet?
 
 Documentation comments in contracts.
 
-Indexed events.
-
 Test batch transfers.
 
 Should allow to allocate a swap credit once, not periodically?
