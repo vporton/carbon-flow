@@ -25,9 +25,12 @@ contract TestSmartWallet is ERC1155TokenReceiver
      * @param _value The value of the transaction.
      * @param _data The data of the transaction.
      */
-    function invoke(address _target, uint _value, bytes calldata _data) external ownerOnly returns (bytes memory _result) {
+    function invoke(address _target, uint _value, bytes calldata _data)
+        external ownerOnly returns (bytes memory _result)
+    {
         require (msg.sender == owner);
 
+        // solhint-disable indent
         (bool success, bytes memory result) = _target.call{value: _value}(_data);
         require (success, string (result));
         // emit Invoked(msg.sender, _target, _value, _data);
@@ -37,11 +40,23 @@ contract TestSmartWallet is ERC1155TokenReceiver
     receive() external payable {
     }
 
-    function onERC1155Received(address /*_operator*/, address /*_from*/, uint256 /*_id*/, uint256 /*_value*/, bytes calldata /*_data*/) external pure override returns(bytes4) {
+    function onERC1155Received(
+        address /*_operator*/,
+        address /*_from*/,
+        uint256 /*_id*/,
+        uint256 /*_value*/,
+        bytes calldata /*_data*/) external pure override returns(bytes4)
+    {
         return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
     }
 
-    function onERC1155BatchReceived(address /*_operator*/, address /*_from*/, uint256[] calldata /*_ids*/, uint256[] calldata /*_values*/, bytes calldata /*_data*/) external pure override returns(bytes4) {
+    function onERC1155BatchReceived(
+        address /*_operator*/,
+        address /*_from*/,
+        uint256[] calldata /*_ids*/,
+        uint256[] calldata /*_values*/,
+        bytes calldata /*_data*/) external pure override returns(bytes4)
+    {
         return bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"));
     }
 

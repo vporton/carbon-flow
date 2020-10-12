@@ -41,7 +41,9 @@ contract SumOfTokens is ERC1155, IERC1155Views
         return _balanceOf(_owner, _id);
     }
 
-    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view override returns (uint256[] memory) {
+    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids)
+        external view override returns (uint256[] memory)
+        {
         require(_owners.length == _ids.length);
         uint256[] memory _balances = new uint256[](_owners.length);
         for (uint256 i = 0; i < _owners.length; ++i) {
@@ -50,7 +52,13 @@ contract SumOfTokens is ERC1155, IERC1155Views
         return _balances;
     }
 
-    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external override {
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data) external override
+    {
         require(_id != 0, "non-existing token.");
 
         require(_to != address(0), "_to must be non-zero.");
@@ -75,8 +83,13 @@ contract SumOfTokens is ERC1155, IERC1155Views
         }
     }
 
-    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external override {
-
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data) external override
+    {
         // MUST Throw on errors
         require(_to != address(0), "destination address must be non-zero.");
         require(_ids.length == _values.length, "_ids and _values array length must match.");
@@ -103,8 +116,9 @@ contract SumOfTokens is ERC1155, IERC1155Views
 
         // Note: instead of the below batch versions of event and acceptance check you MAY have emitted a TransferSingle
         // event and a subsequent call to _doSafeTransferAcceptanceCheck in above loop for each balance change instead.
-        // Or emitted a TransferSingle event for each in the loop and then the single _doSafeBatchTransferAcceptanceCheck below.
-        // However it is implemented the balance changes and events MUST match when a check (i.e. calling an external contract) is done.
+        // Or emitted a TransferSingle event for each in the loop and then the single
+        // _doSafeBatchTransferAcceptanceCheck below. However it is implemented the balance changes and events MUST
+        // match when a check (i.e. calling an external contract) is done.
 
         // MUST emit event
         emit TransferBatch(msg.sender, _from, _to, _ids, _values);
@@ -268,7 +282,8 @@ contract SumOfTokens is ERC1155, IERC1155Views
             while(_childAddr != 0 && _remainingValue != 0) {
                 UserToken storage _childToken = userTokensObjects[_childAddr];
 
-                (uint256 _childTransferred, bool _childRemained) = _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
+                (uint256 _childTransferred, bool _childRemained) =
+                    _doTransferFrom(_from, _to, _childToken.token, _remainingValue); // recursion
                 if(_childRemained) {
                     _remained = true;
                 }

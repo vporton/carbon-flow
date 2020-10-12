@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-4-Clause	
 
+// solhint-disable indent
+
 /*
  * ABDK Math 64.64 Smart Contract Library.  Copyright © 2019 by ABDK Consulting.
  * Author: Mikhail Vladimirov <mikhail.vladimirov@gmail.com>

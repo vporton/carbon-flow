@@ -84,7 +84,9 @@ contract TokensFlow is ERC1155, IERC1155Views
         bool _hasRight = false;
         for(uint256 i = 0; i != _childs.length; ++i) {
             uint256 _id = _childs[i];
-            require(i == 0 || (_id != _firstChild && _id == _parent)); // Prevent irrevocably disable itself, also save gas.
+
+            // Prevent irrevocably disable itself, also save gas.
+            require(i == 0 || (_id != _firstChild && _id == _parent));
 
             _parent = tokenFlow[_id].parentToken;
             if(!tokenFlow[_parent].enabled) {
@@ -100,7 +102,12 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // User can set negative values. It is a nonsense but does not harm.
-    function setRecurringFlow(uint256 _child, int256 _maxSwapCredit, int256 _remainingSwapCredit, int _swapCreditPeriod, int _timeEnteredSwapCredit) external {
+    function setRecurringFlow(
+        uint256 _child,
+        int256 _maxSwapCredit,
+        int256 _remainingSwapCredit,
+        int _swapCreditPeriod, int _timeEnteredSwapCredit) external
+    {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
@@ -126,12 +133,24 @@ contract TokensFlow is ERC1155, IERC1155Views
 
 // ERC-1155
 
-    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external virtual override {
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data) external virtual override
+    {
         require(tokenFlow[_id].enabled);
         super._safeTransferFrom(_from, _to, _id, _value, _data);
     }
 
-    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external virtual override {
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data) external virtual override
+    {
         for(uint i = 0; i < _ids.length; ++i) {
             require(tokenFlow[_ids[i]].enabled);
         }
@@ -152,7 +171,8 @@ contract TokensFlow is ERC1155, IERC1155Views
         for(uint i = 0; i < _levels; ++i) {
             _flow = tokenFlow[_currentId];
             int _currentTimeResult = _currentTime();
-            bool _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult); // TODO: no need to calculate if !_flow.recurring
+            // TODO: no need to calculate _inSwapCreditResult if !_flow.recurring
+            bool _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
             uint256 _maxAllowedFlow = _maxSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
             require(_amount <= _maxAllowedFlow);
             uint256 _balance = balances[_currentId][msg.sender];
@@ -225,14 +245,16 @@ contract TokensFlow is ERC1155, IERC1155Views
     function _setTokenParentNoCheck(uint256 _child, uint256 _parent) virtual internal {
         require(_parent <= maxTokenId);
 
-        tokenFlow[_child] = TokenFlow({parentToken: _parent,
-                                       maxSwapCredit: 0,
-                                       swapCreditPeriod: 0,
-                                       timeEnteredSwapCredit: 0, // zero means not in a swap credit
-                                       lastSwapTime: 0,
-                                       remainingSwapCredit: 0,
-                                       enabled: _parent == 0,
-                                       recurring: false});
+        tokenFlow[_child] = TokenFlow({
+            parentToken: _parent,
+            maxSwapCredit: 0,
+            swapCreditPeriod: 0,
+            timeEnteredSwapCredit: 0, // zero means not in a swap credit
+            lastSwapTime: 0,
+            remainingSwapCredit: 0,
+            enabled: _parent == 0,
+            recurring: false
+        });
     }
 
     function _currentTime() internal virtual view returns(int) {
@@ -240,11 +262,14 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     function _inSwapCredit(TokenFlow memory _flow, int _currentTimeResult) public pure returns(bool) {
+        // solhint-disable indent
         return _flow.timeEnteredSwapCredit != 0 &&
-               _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
+            _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
     }
 
-    function _maxSwapAmount(TokenFlow memory _flow, int _currentTimeResult, bool _inSwapCreditResult) public pure returns(uint256) {
+    function _maxSwapAmount(TokenFlow memory _flow, int _currentTimeResult, bool _inSwapCreditResult)
+        public pure returns(uint256)
+    {
         int256 result;
         if(!_flow.recurring) {
             result = _flow.remainingSwapCredit;

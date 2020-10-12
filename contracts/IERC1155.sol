@@ -3,6 +3,8 @@ pragma solidity ^0.7.1;
 
 import "./ERC165.sol";
 
+// solhint-disable max-line-length
+
 /**
     @title ERC-1155 Multi Token Standard
     @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1155.md
