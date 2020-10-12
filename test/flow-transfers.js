@@ -59,7 +59,7 @@ describe("TokensFlow", function() {
       const tx3 = await tokensFlow.connect(wallets[0]).setEnabled([token], true);
       await ethers.provider.getTransactionReceipt(tx3.hash);
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
-      const tx2 = await tokensFlow.connect(wallets[0]).setTokenFlow(token, veryBigAmount, veryBigAmount, 10, await tokensFlow.currentTime(), false);
+      const tx2 = await tokensFlow.connect(wallets[0]).setNonRecurringFlow(token, veryBigAmount);
       await ethers.provider.getTransactionReceipt(tx2.hash);
       tree[token] = rootToken;
     }

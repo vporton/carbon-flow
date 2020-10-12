@@ -74,7 +74,7 @@ describe("TokensFlow (limits)", function() {
 
     // Test non-zero flow:
     {
-      const tx = await tokensFlow.connect(wallet).setTokenFlow(childToken, ethers.utils.parseEther('1000'), ethers.utils.parseEther('1000'), 10, await tokensFlow.currentTime(), true);
+      const tx = await tokensFlow.connect(wallet).setRecurringFlow(childToken, ethers.utils.parseEther('1000'), ethers.utils.parseEther('1000'), 10, await tokensFlow.currentTime());
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
@@ -176,7 +176,7 @@ describe("TokensFlow (limits)", function() {
     // Test non-zero flow:
     {
       // Set time to the future
-      const tx = await tokensFlow.connect(wallet).setTokenFlow(childToken, ethers.utils.parseEther('1000'), ethers.utils.parseEther('1000'), 10, (await tokensFlow.currentTime()).add(ethers.BigNumber.from(1)), false);
+      const tx = await tokensFlow.connect(wallet).setNonRecurringFlow(childToken, ethers.utils.parseEther('1000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {

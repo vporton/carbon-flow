@@ -100,8 +100,7 @@ contract TokensFlow is ERC1155, IERC1155Views
     }
 
     // User can set negative values. It is a nonsense but does not harm.
-    // TODO: Separate functions for recurring and non-recurring flows.
-    function setTokenFlow(uint256 _child, int256 _maxSwapCredit, int256 _remainingSwapCredit, int _swapCreditPeriod, int _timeEnteredSwapCredit, bool _recurring) external {
+    function setRecurringFlow(uint256 _child, int256 _maxSwapCredit, int256 _remainingSwapCredit, int _swapCreditPeriod, int _timeEnteredSwapCredit) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
@@ -111,7 +110,18 @@ contract TokensFlow is ERC1155, IERC1155Views
         _flow.swapCreditPeriod = _swapCreditPeriod;
         _flow.timeEnteredSwapCredit = _timeEnteredSwapCredit;
         _flow.remainingSwapCredit = _remainingSwapCredit;
-        _flow.recurring = _recurring;
+        _flow.recurring = true;
+    }
+
+    // User can set negative values. It is a nonsense but does not harm.
+    function setNonRecurringFlow(uint256 _child, int256 _remainingSwapCredit) external {
+        TokenFlow storage _flow = tokenFlow[_child];
+
+        require(msg.sender == tokenOwners[_flow.parentToken]);
+        // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
+
+        _flow.remainingSwapCredit = _remainingSwapCredit;
+        _flow.recurring = false;
     }
 
 // ERC-1155
