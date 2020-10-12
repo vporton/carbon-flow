@@ -264,8 +264,6 @@ Test batch transfers.
 
 See also `TODO` and `FIXME` comments in the source.
 
-Lint Solidity.
-
 ### Things intentionally not done or done differently
 
 ### Marker for retired carbon credit serial numbers
