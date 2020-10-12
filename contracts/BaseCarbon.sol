@@ -17,17 +17,18 @@ contract BaseCarbon is TokensFlow {
 
 // Admin
 
+    // solhint-disable func-visibility
     // solhint-disable bracket-align
     constructor(address _globalCommunityFund,
                 string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
                 string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
-        public
     {
         globalCommunityFund = _globalCommunityFund;
         _newToken(0, _retiredName, _retiredSymbol, _retiredUri, _globalCommunityFund); // 1
         _newToken(0, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri, _globalCommunityFund); // 2
     }
     // solhint-enable bracket-align
+    // solhint-enable func-visibility
 
     function setGlobalCommunityFundAddress(address _globalCommunityFund) external {
         require(msg.sender == globalCommunityFund);

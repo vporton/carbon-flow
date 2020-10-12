@@ -24,8 +24,8 @@ contract SimpleERC20 is IERC20 {
         _;
     }
  
-    // Constructor
-    constructor(string memory _symbol, string memory _name, uint8 _decimals, uint256 _initialBalance) public {
+    // solhint-disable func-visibility
+    constructor(string memory _symbol, string memory _name, uint8 _decimals, uint256 _initialBalance) {
         owner = msg.sender;
         symbol = _symbol;
         name = _name;
@@ -33,6 +33,7 @@ contract SimpleERC20 is IERC20 {
         balances[owner] = _initialBalance;
         totalSupply = _initialBalance;
     }
+    // solhint-enable func-visibility
 
     // What is the balance of a particular account?
     function balanceOf(address _owner) external view override returns (uint256 balance) {

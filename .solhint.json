@@ -6,6 +6,7 @@
     "mark-callable-contracts": "off",
     "space-after-comma": "off",
     "no-empty-blocks": "off",
-    "no-inline-assembly": "off"
+    "no-inline-assembly": "off",
+    "func-visibility": ["error",{"ignoreConstructors":true}]
   }
 }

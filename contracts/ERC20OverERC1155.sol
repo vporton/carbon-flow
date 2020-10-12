@@ -13,10 +13,12 @@ contract ERC20OverERC1155 is IERC20 {
     IMyERC1155 public erc1155;
     uint256 public tokenId;
 
-    constructor(IMyERC1155 _erc1155, uint256 _tokenId) public {
+    // solhint-disable func-visibility
+    constructor(IMyERC1155 _erc1155, uint256 _tokenId) {
         erc1155 = _erc1155;
         tokenId = _tokenId;
     }
+    // solhint-enable func-visibility
 
     function totalSupply() external override view returns (uint256) {
         return erc1155.totalSupply(tokenId);

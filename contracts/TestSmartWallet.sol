@@ -9,9 +9,11 @@ import "./IERC1155TokenReceiver.sol";
 contract TestSmartWallet is ERC1155TokenReceiver {
     address payable public owner;
 
-    constructor(address payable _owner) public payable {
+    // solhint-disable func-visibility
+    constructor(address payable _owner) payable {
         owner = _owner;
     }
+    // solhint-enable func-visibility
 
     modifier ownerOnly {
         require(msg.sender == owner, "You are not the owner of the smart wallet");

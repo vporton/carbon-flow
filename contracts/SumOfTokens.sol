@@ -30,9 +30,11 @@ contract SumOfTokens is ERC1155, IERC1155Views {
 
     mapping (bytes32 => UserToken) public userTokensObjects;
 
-    constructor(address _owner) public {
+    // solhint-disable func-visibility
+    constructor(address _owner) {
         owner = _owner;
     }
+    // solhint-enable func-visibility
 
 // ERC-1155
 
