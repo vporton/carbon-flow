@@ -269,6 +269,8 @@ See also `TODO` and `FIXME` comments in the source.
 
 Improve solhint rules.
 
+Add freely mintable tokens. It is useless for carbon, but useful for other applications.
+
 ### Things intentionally not done or done differently
 
 ### Marker for retired carbon credit serial numbers
