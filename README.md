@@ -1,5 +1,7 @@
 # Carbon Flow
 
+See also [this repository](https://github.com/vporton/courts) for the frontend UI.
+
 See also https://youtu.be/Pv7k7FiUbKM (remark: the installation procedure
 changed a little since recoding this video, also now the numbers update
 automatically after confirmed transactions).
@@ -24,7 +26,7 @@ Prerequisites: Node.js, yarn, GNU make.
 To install contracts:
 ```sh
 yarn install
-GLOBAL_COMMUNITY_FUND=0x<THE-DAO-ADDRESS> npx buidler deploy --network NETWORK
+GLOBAL_COMMUNITY_FUND=0x<THE-DAO-CONTRACT-ADDRESS> npx buidler deploy --network NETWORK
 ```
 (replace `NETWORK` by `mainnet` (or another network we will choose later) when doing
 the real deployment, for testing you can use `--network buidlerevm`).
