@@ -207,7 +207,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
             _flow.lastSwapTime = _currentTimeResult; // TODO: no strictly necessary if !_flow.recurring
             require(_amount < 1<<128);
             _flow.remainingSwapCredit -= int256(_amount);
-            _currentId = tokenFlow[_currentId].parentToken;
+            _currentId = tokenFlow[_currentId].parentToken; // FIXME: check that _currentId != 0
         }
         // if (_id == _flow.parentToken) return; // not necessary
         _doBurn(msg.sender, _id, _amount);
