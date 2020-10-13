@@ -15,6 +15,7 @@ keep fixing bugs after bounty submission.
 
 The task was formulated to produce an ERC-20 token, but I do a ERC-1155 token.
 The discrepancy is easily solvable by creating a ERC-1155/ERC-20 bridge.
+I produced _two_ different ERC-20 bridges: `ERC20OverERC1155.sol` and `ERC20LockedERC1155.sol`.
 
 ## Installation
 
@@ -226,6 +227,16 @@ It is a notable dilemma between democracy and personal freedom.
 ## ERC-20 tokens
 
 TODO: More tests.
+
+There are two brdiges built on different principles. `ERC20OverERC1155.sol` has a bug
+but `ERC20LockedERC1155.sol` doesn't (so I recommend to use it).
+
+`ERC20LockedERC1155.sol`
+
+It converts tokens from ERC-1155 to ERC-20 and back with special contract calls.
+In fact it is a simple DEX.
+
+`ERC20OverERC1155.sol`
 
 Our ERC-20 tokens wrap corresponding ERC-1155 so that the amounts on accounts of
 our ERC-20 and the corresponding ERC-1155 token are always equal. Transfer or approval

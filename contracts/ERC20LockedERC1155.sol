@@ -8,16 +8,28 @@ import "./ERC20.sol";
 interface IMyERC1155 is IERC1155, IERC1155Views { }
 
 // TODO: Test it.
-// FIXME: non-abstract
-abstract contract ERC20LockedERC1155 is ERC20 {
+contract ERC20LockedERC1155 is ERC20 {
     IMyERC1155 public erc1155;
     uint256 public tokenId;
 
     // solhint-disable func-visibility
-    // FIXME: more args
-    constructor(IMyERC1155 _erc1155, uint256 _tokenId) {
+    constructor(IMyERC1155 _erc1155, uint256 _tokenId, string memory _name, string memory _symbol)
+        ERC20(_name, _symbol)
+    {
         erc1155 = _erc1155;
         tokenId = _tokenId;
     }
     // solhint-enable func-visibility
+
+    function borrowERC1155(uint256 _amount, address _to) external {
+        bytes memory _data = ""; // efficient?
+        erc1155.safeTransferFrom(msg.sender, address(this), tokenId, _amount, _data);
+        _mint(_to, _amount);
+    }
+
+    function returnToERC1155(uint256 _amount, address _to) external {
+        bytes memory _data = ""; // efficient?
+        erc1155.safeTransferFrom(address(this), _to, tokenId, _amount, _data);
+        _burn(msg.sender, _amount);
+    }
 }
