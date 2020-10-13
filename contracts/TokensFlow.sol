@@ -94,34 +94,27 @@ contract TokensFlow is ERC1155, IERC1155Views {
     // TODO: Test.
     function setEnabled(uint256[] calldata _childs, bool _enabled) external {
         uint256 _firstChild = _childs[0]; // asserts on `_childs.length == 0`.
+        bool _hasRight = false; // if msg.sender is an ancestor
+
+        // Note that if in the below loops we disable ourtselves, then it will be detected by a require
+
+        uint i = 0;
         uint256 _parent;
-        bool _hasRight = false;
-        for (uint256 i = 0; i != _childs.length; ++i) {
-            uint256 _id = _childs[i];
-
-            // FIXME: Does not prevent to disable if a part of the path is a cycle
-            // Prevent irrevocably disable itself, also save gas.
-            require(i == 0 || (_id != _firstChild && _id == _parent));
-
+        for (uint256 _id = _firstChild; _id != 0; _id = _parent) {
             _parent = tokenFlow[_id].parentToken;
-            if (!tokenFlow[_parent].enabled) {
-                break; // A disabled entity cannot enable/disable other entities.
+            if (i < _childs.length - 1) {
+                require(_parent == _childs[i + 1]);
             }
-            tokenFlow[_id].enabled = _enabled;
-            if (msg.sender == tokenOwners[_parent]) {
-                require(i == _childs.length - 1);
-                return;
+            if (msg.sender == tokenOwners[_id]) {
+                require(tokenFlow[_id].enabled);
+                _hasRight = true;
+                break;
             }
+            // We are not msg.sender
+            tokenFlow[_id].enabled = _enabled; // cannot enable for msg.sender
+            ++i;
         }
 
-        // FIXME: Does not prevent to disable if a part of the path is a cycle
-        // _parent != _firstChild prevents irrevocably disable itself, also save gas.
-        for ( ; !_hasRight && _parent != 0 && _parent != _firstChild; _parent = tokenFlow[_parent].parentToken) {
-            if (msg.sender == tokenOwners[_parent]) { // FIXME: Check that this entity is enabled
-                _hasRight = true;
-                reak;
-            }
-        }
         require(_hasRight);
     }
 
