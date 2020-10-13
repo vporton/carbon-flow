@@ -99,6 +99,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         for (uint256 i = 0; i != _childs.length; ++i) {
             uint256 _id = _childs[i];
 
+            // FIXME: Does not prevent to disable if a part of the path is a cycle
             // Prevent irrevocably disable itself, also save gas.
             require(i == 0 || (_id != _firstChild && _id == _parent));
 
@@ -106,11 +107,20 @@ contract TokensFlow is ERC1155, IERC1155Views {
             if (!tokenFlow[_parent].enabled) {
                 break; // A disabled entity cannot enable/disable other entities.
             }
+            tokenFlow[_id].enabled = _enabled;
+            if (msg.sender == tokenOwners[_parent]) {
+                require(i == _childs.length - 1);
+                return;
+            }
+        }
+
+        // FIXME: Does not prevent to disable if a part of the path is a cycle
+        // _parent != _firstChild prevents irrevocably disable itself, also save gas.
+        for ( ; !_hasRight && _parent != 0 && _parent != _firstChild; _parent = tokenFlow[_parent].parentToken) {
             if (msg.sender == tokenOwners[_parent]) {
                 _hasRight = true;
+                break;
             }
-
-            tokenFlow[_id].enabled = _enabled;
         }
         require(_hasRight);
     }
