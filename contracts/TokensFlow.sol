@@ -69,7 +69,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         tokenOwners[_id] = _newOwner;
     }
 
-    function removeTokenOwner(uint256 _id, address _newOwner) external {
+    function removeTokenOwner(uint256 _id) external {
         require(msg.sender == tokenOwners[_id]);
 
         tokenOwners[_id] = address(0);
