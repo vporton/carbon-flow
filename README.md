@@ -270,6 +270,9 @@ This bug probably could be fixed, but:
 
 ## TODO
 
+Both `setNonRecurringFlow()` and `setRecurringFlow()` have the same bug as `approve()`
+in ERC-20.
+
 Create 10000 credit records at a public testnet?
 
 Documentation comments in contracts.
