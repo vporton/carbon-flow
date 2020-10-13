@@ -91,28 +91,30 @@ contract TokensFlow is ERC1155, IERC1155Views {
     }
 
     // Each element of `_childs` list must be a child of the next one.
-    // TODO: Test.
-    // FIXME: Should be able to disable a chain at a "distance" from msg.sender
+    // TODO: Test. Especially test the case if the last child has no parent.
     function setEnabled(uint256[] calldata _childs, bool _enabled) external {
         uint256 _firstChild = _childs[0]; // asserts on `_childs.length == 0`.
+        bool _hasRight = false; // if msg.sender is an ancestor
+
+        // Note that if in the below loops we disable ourselves, then it will be detected by a require
+
+        uint i = 0;
         uint256 _parent;
-        bool _hasRight = false;
-        for (uint256 i = 0; i != _childs.length; ++i) {
-            uint256 _id = _childs[i];
-
-            // Prevent irrevocably disable itself, also save gas.
-            require(i == 0 || (_id != _firstChild && _id == _parent));
-
+        for (uint256 _id = _firstChild; _id != 0; _id = _parent) {
             _parent = tokenFlow[_id].parentToken;
-            if (!tokenFlow[_parent].enabled) {
-                break; // A disabled entity cannot enable/disable other entities.
+            if (i < _childs.length - 1) {
+                require(_parent == _childs[i + 1]);
             }
-            if (msg.sender == tokenOwners[_parent]) {
+            if (msg.sender == tokenOwners[_id]) {
+                require(tokenFlow[_id].enabled);
                 _hasRight = true;
+                break;
             }
-
-            tokenFlow[_id].enabled = _enabled;
+            // We are not msg.sender
+            tokenFlow[_id].enabled = _enabled; // cannot enable for msg.sender
+            ++i;
         }
+
         require(_hasRight);
     }
 
