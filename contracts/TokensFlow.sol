@@ -178,6 +178,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
 // Flow
 
     // TODO: Test for `_levels != 1`.
+    // TODO: `_levels` is unreliable. Provide instead an array of a chain of parents?
     function exchangeToParent(uint256 _id, uint256 _amount, uint _levels, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
         if (_levels == 0) {
