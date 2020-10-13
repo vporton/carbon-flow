@@ -1,5 +1,7 @@
 # Carbon Flow
 
+See also [this repository](https://github.com/vporton/courts) for the frontend UI.
+
 See also https://youtu.be/Pv7k7FiUbKM (remark: the installation procedure
 changed a little since recoding this video, also now the numbers update
 automatically after confirmed transactions).
