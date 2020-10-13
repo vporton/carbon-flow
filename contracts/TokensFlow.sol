@@ -117,9 +117,9 @@ contract TokensFlow is ERC1155, IERC1155Views {
         // FIXME: Does not prevent to disable if a part of the path is a cycle
         // _parent != _firstChild prevents irrevocably disable itself, also save gas.
         for ( ; !_hasRight && _parent != 0 && _parent != _firstChild; _parent = tokenFlow[_parent].parentToken) {
-            if (msg.sender == tokenOwners[_parent]) {
+            if (msg.sender == tokenOwners[_parent]) { // FIXME: Check that this entity is enabled
                 _hasRight = true;
-                break;
+                reak;
             }
         }
         require(_hasRight);
