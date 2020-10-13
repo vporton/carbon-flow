@@ -181,7 +181,10 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
 
     function _safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) internal virtual {
         require(_to != address(0x0), "_to must be non-zero.");
-        require(_from == msg.sender || _allowance(_id, _from, msg.sender) >= _value);
+        if(_from != msg.sender) {
+            allowanceImpl[_id][_from][msg.sender] = allowanceImpl[_id][_from][msg.sender].sub(_value);
+        }
+        
 
         // SafeMath will throw with insuficient funds _from
         // or if _id is not valid (balance will be 0)
@@ -204,7 +207,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         require(_ids.length == _values.length, "_ids and _values array length must match.");
         if (_from != msg.sender) {
             for (uint256 i = 0; i < _ids.length; ++i) {
-                require(_allowance(_ids[i], _from, msg.sender) >= _values[i]);
+                allowanceImpl[_ids[i]][_from][msg.sender] = allowanceImpl[_ids[i]][_from][msg.sender].sub(_values[i]);
             }
         }
 
