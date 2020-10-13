@@ -412,6 +412,18 @@ this solution has a deciency: With quadratic voting it becomes possible for spoo
 little amounts of M+ to many of their friends and ask them to vote for them. Maybe we should give
 up quadratic voting and use old-school linear voting?
 
+If you set your swap limit to N and later make it M, then (surprise!) a hacker sometimes
+[can send](https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM/edit)
+N+M tokens. This is a hard to deal with trouble. So, I just recommend the following: Set new swap
+limit only when the previous one has almost emptied or expired, and do only set a new swap limit
+when a recurring swap limit (if now the limit is recurring) is near to expiration (but no too near
+because otherwise the new period may start before your transaction to set the new swap limit
+confirms). Alternatively, you can set your swap limit to (non-recurring) zero before setting the
+actual new value for a swap limit (this however creates an inconvenience for users, as during some
+time they will be unable to swap). A radical solution would be to set swap limit to be calculated
+as a sum of several (e.g. two) values that could be set independently. But that would harden
+the system somehow.
+
 ## Advice
 
 Quadratic voting anti-sybill can be done by using Fuse.io network (not the main Ethereum
