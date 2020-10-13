@@ -147,7 +147,6 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         // TODO: emit (which event)?
     }
 
-
     function allowance(uint256 _id, address _owner, address _spender) external override view returns (uint256) {
         return _allowance(_id, _owner, _spender);
     }
