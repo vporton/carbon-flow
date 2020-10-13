@@ -91,7 +91,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
     }
 
     // Each element of `_childs` list must be a child of the next one.
-    // TODO: Test. Especially test the case if the last child has no parent.
+    // TODO: Test. Especially test the case if the last child has no parent. Also test if a child is zero.
     function setEnabled(uint256[] calldata _childs, bool _enabled) external {
         uint256 _firstChild = _childs[0]; // asserts on `_childs.length == 0`.
         bool _hasRight = false; // if msg.sender is an ancestor
