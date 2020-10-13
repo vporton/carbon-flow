@@ -398,7 +398,17 @@ errors.
 Some DAOs cannot be ERC-1155 smart wallets (because ERC-1155 smart wallet must implement
 certain functions that may be missing in a DAO). The trouble is solvable by making the DAO
 to control a separate contract acting as a ERC-1155 smart wallet. Another solution is to
-use my ERC-20 wrapper.
+use (one of the two of) my ERC-20 wrapper.
+
+Voting with balance my tokens is impossible: Somebody could vote, transfer to another account
+and vote again (many times). It could be made by storing the token balance (as in MiniMeToken)
+at the beginning of the vote period, but that requires complex code and rather much gas
+(electricity, carbon) usage on every transfer of M+. As a cheaper and easier alternative
+solution I propose to vote not with balances of M+ tokens but instead transfer the voted
+amount of M+ to the fund's account (as a side effect, we get more donations). Note also that
+this solution has a deciency: With quadratic voting it becomes possible for spoofers to transfer
+little amounts of M+ to many of their friends and ask them to vote for them. Maybe we should give
+up quadratic voting and use old-school linear voting?
 
 ## Advice
 
