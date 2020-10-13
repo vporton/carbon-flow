@@ -96,7 +96,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         uint256 _firstChild = _childs[0]; // asserts on `_childs.length == 0`.
         bool _hasRight = false; // if msg.sender is an ancestor
 
-        // Note that if in the below loops we disable ourtselves, then it will be detected by a require
+        // Note that if in the below loops we disable ourselves, then it will be detected by a require
 
         uint i = 0;
         uint256 _parent;
