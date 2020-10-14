@@ -17,6 +17,5 @@ module.exports = async ({
   log(`Global Community Fund controlling account: ${globalCommunityFund}`);
   log(`Write ABI and addresses...`)
   fs.writeFileSync("out/artifacts/Carbon.abi", JSON.stringify(deployResult.abi));
-  fs.writeFileSync("out/artifacts/addresses.js", `const carbonAddress = '${deployResult.address}';\n`);
 };
 module.exports.tags = ["Carbon"];

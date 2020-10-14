@@ -67,4 +67,12 @@ contract ERC20OverERC1155 is IERC20 {
         // solhint-enable no-unused-vars
         // solhint-enable indent
     }
+
+    function name() external view returns(string memory) {
+        return erc1155.name(tokenId);
+    }
+
+    function symbol() external view returns(string memory) {
+        return erc1155.symbol(tokenId);
+    }
 }
