@@ -272,6 +272,8 @@ This bug probably could be fixed, but:
 
 ## TODO
 
+Swapping back from parent to child tokens.
+
 Both `setNonRecurringFlow()` and `setRecurringFlow()` have the same bug as `approve()`
 in ERC-20.
 
