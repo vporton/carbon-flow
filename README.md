@@ -418,11 +418,11 @@ N+M tokens. This is a hard to deal with trouble. So, I just recommend the follow
 limit only when the previous one has almost emptied or expired, and do only set a new swap limit
 when a recurring swap limit (if now the limit is recurring) is near to expiration (but no too near
 because otherwise the new period may start before your transaction to set the new swap limit
-confirms). Alternatively, you can set your swap limit to (non-recurring) zero before setting the
-actual new value for a swap limit (this however creates an inconvenience for users, as during some
-time they will be unable to swap). A radical solution would be to set swap limit to be calculated
-as a sum of several (e.g. two) values that could be set independently. But that would harden
-the system somehow.
+confirms). Alternatively, you can set your swap limit to (non-recurring) low enough value before
+setting the actual new value for a swap limit (this however creates an inconvenience for users, as
+during some time they will be unable to swap). A radical solution would be to set swap limit to be
+calculated as a sum of several (e.g. two) values that could be set independently. But that would
+harden the system somehow.
 
 ## Advice
 
