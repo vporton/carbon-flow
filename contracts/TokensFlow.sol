@@ -184,9 +184,8 @@ contract TokensFlow is ERC1155, IERC1155Views {
         // SafeMath will throw with insuficient funds _from
         // or if _id is not valid (balance will be 0)
         balances[_id][_from] = balances[_id][_from].sub(_value);
-        balances[_id][_to]   = _value.add(balances[_id][_to]);
 
-        emit TransferSingle(msg.sender, _from, 0x0, _id, _value);
+        emit TransferSingle(msg.sender, _from, address(0), _id, _value);
     }
 
 // Flow
