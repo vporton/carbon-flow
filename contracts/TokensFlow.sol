@@ -174,6 +174,19 @@ contract TokensFlow is ERC1155, IERC1155Views {
         super._safeBatchTransferFrom(_from, _to, _ids, _values, _data);
     }
 
+// Misc
+
+    function burn(address _from, uint256 _id, uint256 _value) external {
+        if(_from != msg.sender) {
+            allowanceImpl[_id][_from][msg.sender] = allowanceImpl[_id][_from][msg.sender].sub(_value);
+        }
+
+        // SafeMath will throw with insuficient funds _from
+        // or if _id is not valid (balance will be 0)
+        balances[_id][_from] = balances[_id][_from].sub(_value);
+
+        emit TransferSingle(msg.sender, _from, address(0), _id, _value);
+    }
 
 // Flow
 
