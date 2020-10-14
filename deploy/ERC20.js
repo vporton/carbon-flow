@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const retiredCreditsToken = 1;
 const nonRetiredCreditsToken = 2;
 
@@ -10,17 +12,17 @@ module.exports = async ({
 
   const Carbon = await deployments.get("Carbon");
   const carbon = new ethers.Contract(Carbon.address, Carbon.abi, deployer);
-  {
-    const deployResult = await deploy("ERC20LockedERC1155", {
-      from: await deployer.getAddress(), contractName: "NonRetiredERC20", args: [carbon.address, nonRetiredCreditsToken]
-    });
-    log(`contract NonRetiredERC20 was deployed at ${deployResult.address} using ${deployResult.receipt.gasUsed} gas`);
-  }
-  {
-    const deployResult = await deploy("ERC20LockedERC1155", {
-      from: await deployer.getAddress(), contractName: "RetiredERC20", args: [carbon.address, retiredCreditsToken]
-    });
-    log(`contract RetiredERC20 was deployed at ${deployResult.address} using ${deployResult.receipt.gasUsed} gas`);
-  }
+  const deployResultNonRetired = await deploy("ERC20LockedERC1155", {
+    from: await deployer.getAddress(), contractName: "NonRetiredERC20", args: [carbon.address, nonRetiredCreditsToken]
+  });
+  log(`contract NonRetiredERC20 was deployed at ${deployResultNonRetired.address} using ${deployResultNonRetired.receipt.gasUsed} gas`);
+  const deployResultRetired = await deploy("ERC20LockedERC1155", {
+    from: await deployer.getAddress(), contractName: "RetiredERC20", args: [carbon.address, retiredCreditsToken]
+  });
+  log(`contract RetiredERC20 was deployed at ${deployResultRetired.address} using ${deployResultRetired.receipt.gasUsed} gas`);
+  fs.writeFileSync("out/artifacts/addresses.js",
+    `const carbonAddress = '${carbon.address}';\n` + 
+    `const nonRetiredERC20Address = '${deployResultNonRetired.address}';\n` +
+    `const retiredERC20Address = '${deployResultRetired.address}';\n`);
 };
 module.exports.dependencies = ["Carbon"];
