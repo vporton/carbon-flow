@@ -41,9 +41,9 @@ async function loadNumbers() {
         .catch(value => {
             document.getElementById('nonretired').textContent = "(cannot load)";
         });
-        carbon.methods.tax().call()
+    carbon.methods.tax().call()
         .then(value => {
-            document.getElementById('tax').textContent = value !== null ? value / 2**64 * 100 :  "(cannot load)";
+            document.getElementById('tax').textContent = value !== null ? value / 2**64 * 100 : "(cannot load)";
         });
 }
 
