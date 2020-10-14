@@ -2,7 +2,7 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
-// import '@nomiclabs/buidler/console.sol';
+import '@nomiclabs/buidler/console.sol';
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
 
@@ -177,17 +177,17 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
 // Flow
 
-    // TODO: Test for `_levels != 1`.
-    // TODO: `_levels` is unreliable. Provide instead an array of a chain of parents?
-    function exchangeToParent(uint256 _id, uint256 _amount, uint _levels, bytes calldata _data) external {
+    // TODO: Test for `_ids.length != 1`.
+    function exchangeToAncestor(uint256[] calldata _ids, uint256 _amount, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
-        if (_levels == 0) {
-            return;
-        }
-        uint256 _currentId = _id;
         TokenFlow storage _flow;
-        for (uint i = 0; i < _levels; ++i) {
-            _flow = tokenFlow[_currentId];
+        require(_ids[_ids.length - 1] != 0); // The rest elements are checked below.
+        for(uint i = 0; i != _ids.length - 1; ++i) {
+            uint256 _id = _ids[i];
+            require(_id != 0);
+            uint256 _parent = tokenFlow[_id].parentToken;
+            require(_parent == _ids[i + 1]); // i ranges 0 .. _ids.length - 2
+            _flow = tokenFlow[_id];
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
             bool _inSwapCreditResult;
@@ -198,20 +198,21 @@ contract TokensFlow is ERC1155, IERC1155Views {
                 _maxAllowedFlow = _flow.remainingSwapCredit < 0 ? 0 : uint256(_flow.remainingSwapCredit);
             }
             require(_amount <= _maxAllowedFlow);
-            uint256 _balance = balances[_currentId][msg.sender];
+            require(_amount < 1<<128);
+            uint256 _balance = balances[_id][msg.sender];
             require(_amount <= _balance);
             if (_flow.recurring && !_inSwapCreditResult) {
                 _flow.timeEnteredSwapCredit = _currentTimeResult;
                 _flow.remainingSwapCredit = _flow.maxSwapCredit;
             }
             _flow.lastSwapTime = _currentTimeResult; // TODO: no strictly necessary if !_flow.recurring
-            require(_amount < 1<<128);
+            // require(_amount < 1<<128); // done above
             _flow.remainingSwapCredit -= int256(_amount);
-            _currentId = tokenFlow[_currentId].parentToken; // FIXME: check that _currentId != 0
         }
+
         // if (_id == _flow.parentToken) return; // not necessary
-        _doBurn(msg.sender, _id, _amount);
-        _doMint(msg.sender, _flow.parentToken, _amount, _data);
+        _doBurn(msg.sender, _ids[0], _amount);
+        _doMint(msg.sender, _ids[_ids.length - 1], _amount, _data);
     }
 
 // Internal
