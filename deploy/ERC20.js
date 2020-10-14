@@ -24,5 +24,6 @@ module.exports = async ({
     `const carbonAddress = '${carbon.address}';\n` + 
     `const nonRetiredERC20Address = '${deployResultNonRetired.address}';\n` +
     `const retiredERC20Address = '${deployResultRetired.address}';\n`);
+  fs.writeFileSync("out/artifacts/ERC20Locked.abi", JSON.stringify(deployResultRetired.abi));
 };
 module.exports.dependencies = ["Carbon"];

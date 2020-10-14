@@ -6,6 +6,7 @@ const retiredCreditsToken = 1; // M+ token
 const nonRetiredCreditsToken = 2; // M- token
 
 let carbonJsonInterfaceCache = null;
+let lockedERC20JsonInterfaceCache = null;
 
 function carbonJsonInterface() {
     return new Promise((resolve) => {
@@ -15,8 +16,17 @@ function carbonJsonInterface() {
     });
 }
 
+function lockedERC20JsonInterface() {
+    return new Promise((resolve) => {
+        if(lockedERC20JsonInterfaceCache) resolve(lockedERC20JsonInterfaceCache);
+        fetch("artifacts/ERC20Locked.abi")
+            .then(response => resolve(lockedERC20JsonInterfaceCache = response.json()));
+    });
+}
+
 async function loadNumbers() {
     const carbon = new web3.eth.Contract(await carbonJsonInterface(), carbonAddress);
+    const retiredERC20 = new web3.eth.Contract(await lockedERC20JsonInterface(), retiredERC20Address);
     carbon.methods.balanceOf(defaultAccount, retiredCreditsToken).call()
         .then(value => {
             document.getElementById('retired').textContent = web3.utils.fromWei(value);
@@ -31,9 +41,13 @@ async function loadNumbers() {
         .catch(value => {
             document.getElementById('nonretired').textContent = "(cannot load)";
         });
-    carbon.methods.tax().call()
+        carbon.methods.tax().call()
         .then(value => {
             document.getElementById('tax').textContent = value !== null ? value / 2**64 * 100 :  "(cannot load)";
+        });
+    retiredERC20.methods.balanceOf(defaultAccount).call()
+        .then(value => {
+            document.getElementById('retiredERC20').textContent = value !== null ? value / 2**64 * 100 :  "(cannot load)";
         });
 }
 

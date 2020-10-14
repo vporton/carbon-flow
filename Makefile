@@ -10,7 +10,7 @@ ui: ui-quick compile
 ui-quick:
 	-rm -rf out/ui
 	mkdir -p out/ui
-	make out/ui/artifacts/addresses.js out/ui/artifacts/Carbon.abi
+	make out/ui/artifacts/addresses.js out/ui/artifacts/Carbon.abi out/ui/artifacts/ERC20Locked.abi
 	find ui -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.json" -o -name "*.abi" -o -name "*.png" -o -name "*.jpg" -o -name .htaccess | \
 	  xargs cp --parents -t out/
 
