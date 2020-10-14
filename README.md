@@ -143,6 +143,20 @@ Anybody can swap a child token he holds for the same amount of its parent token.
 
 It is useful to build a hieararchical system of authorities with the root in M- token.  
 
+### Backward flow
+
+It is also useful to swap parent token back for its child tokens.
+
+First, we can't make this operation impossible because the DAO (or other entity) controlling
+a child token can "eat" parent tokens and mint according value of child tokens.
+
+So, the remaining issue is whether we should make impossible for a DAO to avoid swapping parents
+for childs.
+
+The answer is "no", it should be always possible. The reason is the following: If the parent token
+is a carbon credits token, then disabling its swapping for a child would somehow devalue carbon
+credits what is clearly bad for the environment. So we should make swapping always possible.
+
 ## Security measures
 
 Among the usual Ethereum security measures like making tokens "owned" by someone
