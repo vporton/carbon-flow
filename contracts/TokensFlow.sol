@@ -180,14 +180,13 @@ contract TokensFlow is ERC1155, IERC1155Views {
     // TODO: Test for `_ids.length != 1`.
     function exchangeToAncestor(uint256[] calldata _ids, uint256 _amount, bytes calldata _data) external {
         // Intentionally no check for `msg.sender`.
-        TokenFlow storage _flow;
         require(_ids[_ids.length - 1] != 0); // The rest elements are checked below.
         for(uint i = 0; i != _ids.length - 1; ++i) {
             uint256 _id = _ids[i];
             require(_id != 0);
             uint256 _parent = tokenFlow[_id].parentToken;
             require(_parent == _ids[i + 1]); // i ranges 0 .. _ids.length - 2
-            _flow = tokenFlow[_id];
+            TokenFlow storage _flow = tokenFlow[_id];
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
             bool _inSwapCreditResult;
