@@ -29,10 +29,10 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
 // IERC1155Views
 
-    mapping (uint256 => uint256) public totalSupplyImpl;
-    mapping (uint256 => string) public nameImpl;
-    mapping (uint256 => string) public symbolImpl;
-    mapping (uint256 => string) public uriImpl;
+    mapping (uint256 => uint256) private totalSupplyImpl;
+    mapping (uint256 => string) private nameImpl;
+    mapping (uint256 => string) private symbolImpl;
+    mapping (uint256 => string) private uriImpl;
 
     function totalSupply(uint256 _id) external override view returns (uint256) {
         return totalSupplyImpl[_id];
@@ -184,6 +184,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         // SafeMath will throw with insuficient funds _from
         // or if _id is not valid (balance will be 0)
         balances[_id][_from] = balances[_id][_from].sub(_value);
+        totalSupplyImpl[_id] -= _value; // no need to check overflow due to previous line
 
         emit TransferSingle(msg.sender, _from, address(0), _id, _value);
     }
