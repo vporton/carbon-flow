@@ -9,7 +9,7 @@ module.exports = async ({
 
   const Carbon = await deployments.get("Carbon");
   const carbon = new ethers.Contract(Carbon.address, Carbon.abi, deployer);
-  const deployResult = await deploy("ERC20OverERC1155", {
+  const deployResult = await deploy("ERC20LockedERC1155", {
     from: await deployer.getAddress(), contractName: "NonRetiredERC20", args: [carbon.address, nonRetiredCreditsToken]
   });
   log(`contract NonRetiredERC20 was deployed at ${deployResult.address} using ${deployResult.receipt.gasUsed} gas`);

@@ -38,8 +38,6 @@ contract ERC20 is Context, IERC20 {
 
     uint256 private _totalSupply;
 
-    string private _name;
-    string private _symbol;
     uint8 private _decimals;
 
     /**
@@ -52,27 +50,10 @@ contract ERC20 is Context, IERC20 {
      * construction.
      */
     // solhint-disable func-visibility
-    constructor (string memory name, string memory symbol) {
-        _name = name;
-        _symbol = symbol;
+    constructor () {
         _decimals = 18;
     }
     // solhint-enable func-visibility
-
-    /**
-     * @dev Returns the name of the token.
-     */
-    function name() public view returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
-    function symbol() public view returns (string memory) {
-        return _symbol;
-    }
 
     /**
      * @dev Returns the number of decimals used to get its user representation.

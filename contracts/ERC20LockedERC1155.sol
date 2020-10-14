@@ -13,8 +13,7 @@ contract ERC20LockedERC1155 is ERC20 {
     uint256 public tokenId;
 
     // solhint-disable func-visibility
-    constructor(IMyERC1155 _erc1155, uint256 _tokenId, string memory _name, string memory _symbol)
-        ERC20(_name, _symbol)
+    constructor(IMyERC1155 _erc1155, uint256 _tokenId)
     {
         erc1155 = _erc1155;
         tokenId = _tokenId;
@@ -31,5 +30,13 @@ contract ERC20LockedERC1155 is ERC20 {
         bytes memory _data = ""; // efficient?
         erc1155.safeTransferFrom(address(this), _to, tokenId, _amount, _data);
         _burn(msg.sender, _amount);
+    }
+
+    function name() external view returns(string memory) {
+        return erc1155.name(tokenId);
+    }
+
+    function symbol() external view returns(string memory) {
+        return erc1155.symbol(tokenId);
     }
 }
