@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: Apache-2.0	
 pragma solidity ^0.7.1;
 
+import '@nomiclabs/buidler/console.sol';
 import "./SafeMath.sol";
 import "./Address.sol";
 import "./Common.sol";
@@ -187,6 +188,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
 
         // SafeMath will throw with insuficient funds _from
         // or if _id is not valid (balance will be 0)
+        console.log(balances[_id][_from], _value);
         balances[_id][_from] = balances[_id][_from].sub(_value);
         balances[_id][_to]   = _value.add(balances[_id][_to]);
 

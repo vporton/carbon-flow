@@ -58,10 +58,13 @@
             <p>Retire <input type="text" id="amount" size="10" class="invalid" oninput="validateAmount()"/> M- tokens
                 <input id="retire" type="button" value="Do it!" onclick="retire()" disabled="disabled"/></p>
             <p>Remark: <span id="tax">(loading&mldr;)</span>% of your sale goes to Global Community Fund.</p>
+            <p>Swap M+ ERC-1155/ERC-20 <input type="text" id="amount2" size="10" class="invalid" oninput="validateAmount2()"/>
+                <input id="buyERC20" type="button" value="Buy ERC-20" onclick="buyERC20()" disabled="disabled"/>
+                <input id="sellERC20" type="button" value="Sell ERC-20" onclick="sellERC20()" disabled="disabled"/></p>
             <h2>Transactions</h2>
             <ul id="transactions">
                 <li id="transactionTmpl" class="transaction pending" style="display: none;">
-                    <span class="tokens"></span> M- tokens sale.
+                    <span class="info"></span>.
                     Status: <span class="status">pending...</span>
                     Hash: <code class="hash">unknown</code>
                 </li>
