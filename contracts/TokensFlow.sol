@@ -235,6 +235,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         require(_parent != 0);
         for(uint i = 1; i != _ids.length; ++i) {
             _parent = tokenFlow[_parent].parentToken;
+            require(_parent != 0);
             require(_parent == _ids[i]); // consequently `_ids[i] != 0`
         }
         _doBurn(msg.sender, _ids[_ids.length - 1], _amount);
