@@ -29,10 +29,10 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
 // IERC1155Views
 
-    mapping (uint256 => uint256) public totalSupplyImpl;
-    mapping (uint256 => string) public nameImpl;
-    mapping (uint256 => string) public symbolImpl;
-    mapping (uint256 => string) public uriImpl;
+    mapping (uint256 => uint256) private totalSupplyImpl;
+    mapping (uint256 => string) private nameImpl;
+    mapping (uint256 => string) private symbolImpl;
+    mapping (uint256 => string) private uriImpl;
 
     function totalSupply(uint256 _id) external override view returns (uint256) {
         return totalSupplyImpl[_id];
