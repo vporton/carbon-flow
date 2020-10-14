@@ -426,11 +426,14 @@ harden the system somehow.
 
 ## Advice
 
-Quadratic voting anti-sybill can be done by using Fuse.io network (not the main Ethereum
-network where gas is far too costly anyway) and GoodDollar private keys as the keys for voting.
-A user of GoodDollar would not give to somebody other his private key easily because the key
-costs money. So it is a good anti-sybill. As a consequence, we should think of deploying our
+Quadratic voting anti-sybill can be done by using Fuse.io network and GoodDollar private keys as the
+keys for voting. A user of GoodDollar would not give to somebody other his private key easily because
+the key costs money. So it is a good anti-sybill. As a consequence, we should think of deploying our
 entire system on Fuse. Another alternative would be Matic.
+
+Note that GoodDollar identity is also deloyed on Ethereum mainnet, so we could just as well use mainnet,
+but currently mainnet transactions are too costly. Transfers of M+ may have more harm to the environment
+than good (but in the future Ethereum transactions cost is expected to come down much due to ETH2 project.)
 
 ## See also
 
