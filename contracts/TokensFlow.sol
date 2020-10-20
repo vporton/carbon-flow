@@ -244,10 +244,10 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
 // Internal
 
-    function _newToken(uint256 _parent,
-                        string memory _name, string memory _symbol, string memory _uri,
-                        address _owner)
-        internal returns (uint256)
+    function _newToken(
+        uint256 _parent,
+        string memory _name, string memory _symbol, string memory _uri,
+        address _owner) internal returns (uint256)
     {
         tokenOwners[++maxTokenId] = _owner;
 
