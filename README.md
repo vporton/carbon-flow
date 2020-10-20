@@ -210,7 +210,8 @@ Any authority token  can be disabled.
 
 Anyone upward in the tree can disable any of its descendants.
 
-Disabled authority cannot create credits, disabled token cannot be transferred.
+Disabled authority cannot create credits, disabled token cannot be transferred,
+disabled tokens cannot be exchanged to parent tokens.
 
 Remark: A malignant or otherwise weird user may produce too long chain of descendants
 of some token, making it impossible to disable all the descendants because of gas

@@ -57,9 +57,9 @@ describe("TokensFlow", function() {
       const tx = await tokensFlow.connect(wallets[i+1]).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      const txE = await tokensFlow.connect(wallets[0]).setEnabled(rootToken, [token], true);
+      await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
-      const tx3 = await tokensFlow.connect(wallets[0]).setEnabled([token], true);
-      await ethers.provider.getTransactionReceipt(tx3.hash);
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
       const tx2 = await tokensFlow.connect(wallets[0]).setNonRecurringFlow(token, veryBigAmount);
       await ethers.provider.getTransactionReceipt(tx2.hash);

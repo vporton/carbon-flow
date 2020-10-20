@@ -45,6 +45,8 @@ describe("TokensFlow (limits)", function() {
       const tx = await tokensFlow.connect(wallet).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      const txE = await tokensFlow.connect(wallet).setEnabled(rootToken, [token], true);
+      await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       tree[token] = rootToken;
     }
@@ -146,6 +148,8 @@ describe("TokensFlow (limits)", function() {
       const tx = await tokensFlow.connect(wallet).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      const txE = await tokensFlow.connect(wallet).setEnabled(rootToken, [token], true);
+      await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       tree[token] = rootToken;
     }
