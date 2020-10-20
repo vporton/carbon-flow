@@ -228,6 +228,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         _doMint(msg.sender, _ids[_ids.length - 1], _amount, _data);
     }
 
+    // Each next token ID must be a parent of the previous one.
     function exchangeToDescendant(uint256[] calldata _ids, uint256 _amount, bytes calldata _data) external {
         uint256 _parent = _ids[0];
         require(_parent != 0);
