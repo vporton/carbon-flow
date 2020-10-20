@@ -33,25 +33,45 @@ describe("TokensFlow (limits)", function() {
     const tx = await owner.sendTransaction({to: wallet.address, value: ethers.utils.parseEther('1')}); // provide gas
     await ethers.provider.getTransactionReceipt(tx.hash);
 
-    let tokens = []; // needed?
+    let tokens = [];
+    let tokens2 = [];
 
     {
-      const tx = await tokensFlow.connect(wallet).newToken(0, "M+C Token", "M+C", "https://example.com");
+      const tx = await tokensFlow.connect(wallet).newToken(0, "SubToken0", "S0", "https://example.com/0");
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
       tokens.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens[0], `SubToken0`, `S0`, `https://example.com/0`);
+      const tx = await tokensFlow.connect(wallet).newToken(tokens[0], `SubToken1`, `S1`, `https://example.com/1`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
       tokens.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens[1], `SubToken1`, `S1`, `https://example.com/1`);
+      const tx = await tokensFlow.connect(wallet).newToken(tokens[1], `SubToken2`, `S2`, `https://example.com/2`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
       tokens.push(token);
+    }
+
+    {
+      const tx = await tokensFlow.connect(wallet).newToken(0, "XSubToken0", "XS0", "https://example.com/0x");
+      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
+      tokens2.push(token);
+    }
+    {
+      const tx = await tokensFlow.connect(wallet).newToken(tokens2[0], `XSubToken1`, `XS1`, `https://example.com/1x`);
+      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      tokens2.push(token);
+    }
+    {
+      const tx = await tokensFlow.connect(wallet).newToken(tokens2[1], `XSubToken2`, `XS2`, `https://example.com/2x`);
+      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      tokens2.push(token);
     }
 
     console.log(`Checking minting and transferring...`); 
@@ -116,5 +136,21 @@ describe("TokensFlow (limits)", function() {
     }
     expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[0])).to.be.equal(ethers.utils.parseEther('1'));
     expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[2])).to.be.equal(ethers.utils.parseEther('4999'));
+
+    {
+      async function mycall(childs) {
+        await tokensFlow.connect(wallet).exchangeToAncestor(childs, ethers.utils.parseEther('0'), [], {gasLimit: 1000000});
+      }
+      await expect(mycall([tokens2[2], tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+      await expect(mycall([tokens2[2], tokens2[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+    }
+
+    {
+      async function mycall(childs) {
+        await tokensFlow.connect(wallet).exchangeToDescendant(childs, ethers.utils.parseEther('0'), [], {gasLimit: 1000000});
+      }
+      await expect(mycall([tokens2[2], tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+      await expect(mycall([tokens2[2], tokens2[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+    }
   });
 });
