@@ -46,12 +46,16 @@ describe("TokensFlow (limits)", function() {
       const tx = await tokensFlow.connect(wallet).newToken(tokens[0], `SubToken1`, `S1`, `https://example.com/1`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      const txE = await tokensFlow.connect(wallet).setEnabled(tokens[0], [token], true);
+      await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
     }
     {
       const tx = await tokensFlow.connect(wallet).newToken(tokens[1], `SubToken2`, `S2`, `https://example.com/2`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      const txE = await tokensFlow.connect(wallet).setEnabled(tokens[1], [token], true);
+      await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
     }
 
@@ -65,12 +69,16 @@ describe("TokensFlow (limits)", function() {
       const tx = await tokensFlow.connect(wallet).newToken(tokens2[0], `XSubToken1`, `XS1`, `https://example.com/1x`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      const txE = await tokensFlow.connect(wallet).setEnabled(tokens2[0], [token], true);
+      await ethers.provider.getTransactionReceipt(txE.hash);
       tokens2.push(token);
     }
     {
       const tx = await tokensFlow.connect(wallet).newToken(tokens2[1], `XSubToken2`, `XS2`, `https://example.com/2x`);
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
       const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
+      const txE = await tokensFlow.connect(wallet).setEnabled(tokens2[1], [token], true);
+      await ethers.provider.getTransactionReceipt(txE.hash);
       tokens2.push(token);
     }
 
@@ -143,6 +151,9 @@ describe("TokensFlow (limits)", function() {
       }
       await expect(mycall([tokens2[2], tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
       await expect(mycall([tokens2[2], tokens2[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+      await expect(mycall([0, tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+      await expect(mycall([tokens[2], 0, tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+      await expect(mycall([tokens[2], tokens[1], 0])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
 
     {
@@ -151,6 +162,9 @@ describe("TokensFlow (limits)", function() {
       }
       await expect(mycall([tokens2[2], tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
       await expect(mycall([tokens2[2], tokens2[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+      await expect(mycall([0, tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+      await expect(mycall([tokens[2], 0, tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
+      await expect(mycall([tokens[2], tokens[1], 0])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
   });
 });

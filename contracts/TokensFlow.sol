@@ -92,7 +92,10 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
     // Each element of `_childs` list must be a child of the next one.
     // TODO: Test. Especially test the case if the last child has no parent. Also test if a child is zero.
-    function setEnabled(uint256[] calldata _childs, bool _enabled) external {
+    function setEnabled(uint256 _ancestor, uint256[] calldata _childs, bool _enabled) external {
+        require(msg.sender == tokenOwners[_ancestor]);
+        require(tokenFlow[_ancestor].enabled);
+        
         uint256 _firstChild = _childs[0]; // asserts on `_childs.length == 0`.
         bool _hasRight = false; // if msg.sender is an ancestor
 
@@ -105,8 +108,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
             if (i < _childs.length - 1) {
                 require(_parent == _childs[i + 1]);
             }
-            if (msg.sender == tokenOwners[_id]) {
-                require(tokenFlow[_id].enabled);
+            if (_id == _ancestor) {
                 _hasRight = true;
                 break;
             }
@@ -204,6 +206,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
             uint256 _parent = tokenFlow[_id].parentToken;
             require(_parent == _ids[i + 1]); // i ranges 0 .. _ids.length - 2
             TokenFlow storage _flow = tokenFlow[_id];
+            require(_flow.enabled);
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
             bool _inSwapCreditResult;
