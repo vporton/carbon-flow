@@ -57,7 +57,7 @@ describe("TokensFlow (limits)", function() {
     console.log(`Checking minting and transferring...`); 
 
     {
-      const tx = await tokensFlow.connect(wallet).mint(wallet.address, tokens[2], ethers.utils.parseEther('1000000'), [], {gasLimit: 1000000});
+      const tx = await tokensFlow.connect(wallet).mint(wallet.address, tokens[2], ethers.utils.parseEther('5000'), [], {gasLimit: 1000000});
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
 
@@ -80,6 +80,8 @@ describe("TokensFlow (limits)", function() {
       const tx = await tokensFlow.connect(wallet).exchangeToAncestor([tokens[2], tokens[1], tokens[0]], ethers.utils.parseEther('1000'), []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
+    expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[0])).to.be.equal(ethers.utils.parseEther('1000'));
+    expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[2])).to.be.equal(ethers.utils.parseEther('4000'));
 
     {
       const tx = await tokensFlow.connect(wallet).setNonRecurringFlow(tokens[1], ethers.utils.parseEther('2000'));
@@ -99,5 +101,20 @@ describe("TokensFlow (limits)", function() {
       const tx = await tokensFlow.connect(wallet).exchangeToAncestor([tokens[2], tokens[1], tokens[0]], ethers.utils.parseEther('1000'), []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
+    expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[0])).to.be.equal(ethers.utils.parseEther('2000'));
+    expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[2])).to.be.equal(ethers.utils.parseEther('3000'));
+
+    {
+      async function mycall() {
+        await tokensFlow.connect(wallet).exchangeToDescendant([tokens[2], tokens[1], tokens[0]], ethers.utils.parseEther('2100'), [], {gasLimit: 1000000});
+      }
+      await expect(mycall()).to.eventually.be.rejectedWith("VM Exception while processing transaction: invalid opcode");
+    }
+    {
+      const tx = await tokensFlow.connect(wallet).exchangeToDescendant([tokens[2], tokens[1], tokens[0]], ethers.utils.parseEther('1999'), []);
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[0])).to.be.equal(ethers.utils.parseEther('1'));
+    expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[2])).to.be.equal(ethers.utils.parseEther('4999'));
   });
 });
