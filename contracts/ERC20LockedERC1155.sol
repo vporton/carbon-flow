@@ -8,7 +8,6 @@ import "./ERC20.sol";
 
 interface IMyERC1155 is IERC1155, IERC1155Views { }
 
-// TODO: Test it.
 contract ERC20LockedERC1155 is ERC20, ERC1155TokenReceiver {
     IMyERC1155 public erc1155;
     uint256 public tokenId;
