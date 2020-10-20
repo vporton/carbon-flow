@@ -2,9 +2,7 @@
 
 See also [this repository](https://github.com/vporton/courts) for the frontend UI.
 
-See also https://youtu.be/Pv7k7FiUbKM (remark: the installation procedure
-changed a little since recoding this video, also now the numbers update
-automatically after confirmed transactions).
+See also https://youtu.be/R8q0rlrQqQc
 
 It is a solution of
 https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty.
