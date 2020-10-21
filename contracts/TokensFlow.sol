@@ -152,29 +152,31 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
 // ERC-1155
 
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _id,
-        uint256 _value,
-        bytes calldata _data) external virtual override
-    {
-        require(tokenFlow[_id].enabled);
-        super._safeTransferFrom(_from, _to, _id, _value, _data);
-    }
+    // A token can anyway change its parent at any moment, so disabling of payments makes no sense.
 
-    function safeBatchTransferFrom(
-        address _from,
-        address _to,
-        uint256[] calldata _ids,
-        uint256[] calldata _values,
-        bytes calldata _data) external virtual override
-    {
-        for (uint i = 0; i < _ids.length; ++i) {
-            require(tokenFlow[_ids[i]].enabled);
-        }
-        super._safeBatchTransferFrom(_from, _to, _ids, _values, _data);
-    }
+    // function safeTransferFrom(
+    //     address _from,
+    //     address _to,
+    //     uint256 _id,
+    //     uint256 _value,
+    //     bytes calldata _data) external virtual override
+    // {
+    //     require(tokenFlow[_id].enabled);
+    //     super._safeTransferFrom(_from, _to, _id, _value, _data);
+    // }
+
+    // function safeBatchTransferFrom(
+    //     address _from,
+    //     address _to,
+    //     uint256[] calldata _ids,
+    //     uint256[] calldata _values,
+    //     bytes calldata _data) external virtual override
+    // {
+    //     for (uint i = 0; i < _ids.length; ++i) {
+    //         require(tokenFlow[_ids[i]].enabled);
+    //     }
+    //     super._safeBatchTransferFrom(_from, _to, _ids, _values, _data);
+    // }
 
 // Misc
 
