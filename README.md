@@ -206,12 +206,12 @@ reason he may write an email to the parent token owner asking to raise the limit
 I will use the word _theft_ to denote both malignant generation of tokens and generating
 too big number fo tokens by mistake.
 
-Any authority token  can be disabled.
+Any authority token can be disabled.
 
 Anyone upward in the tree can disable any of its descendants.
 
-Disabled authority cannot create credits, disabled token cannot be transferred,
-disabled tokens cannot be exchanged to parent tokens.
+Disabled authority cannot create credits, disabled tokens cannot be exchanged to parent
+tokens.
 
 Remark: A malignant or otherwise weird user may produce too long chain of descendants
 of some token, making it impossible to disable all the descendants because of gas
