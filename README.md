@@ -2,6 +2,9 @@
 
 See also [this repository](https://github.com/vporton/courts) for the frontend UI.
 
+Demo (switch to Ropsten network):
+https://arweave.net/-hwwwN8tPm0CrnW8Bn1NH24SrDnuShQOX7ZQ8M3JSig
+
 See also https://youtu.be/R8q0rlrQqQc
 
 It is a solution of
