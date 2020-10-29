@@ -291,7 +291,7 @@ This bug probably could be fixed, but:
 Swapping back from parent to child tokens.
 
 Both `setNonRecurringFlow()` and `setRecurringFlow()` have the same bug as `approve()`
-in ERC-20.
+in ERC-20. TODO: Fix it by checking the old value!
 
 Create 10000 credit records at a public testnet?
 
