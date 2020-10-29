@@ -246,7 +246,7 @@ It is a notable dilemma between democracy and personal freedom.
 
 TODO: More tests.
 
-There are two brdiges built on different principles. `ERC20OverERC1155.sol` has a bug
+There are two bridges built on different principles. `ERC20OverERC1155.sol` has a bug
 but `ERC20LockedERC1155.sol` doesn't (so I recommend to use it).
 
 `ERC20LockedERC1155.sol`
