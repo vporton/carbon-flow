@@ -5,6 +5,8 @@ const fs = require('fs');
 const chaiAsPromised = require('chai-as-promised');
 const random = require('random');
 const seedrandom = require('seedrandom');
+const StupidWallet = require('../lib/stupid-wallet.js');
+const LimitSetter = require('../lib/limit-setter.js');
 
 const { expect, assert } = chai;
 
@@ -82,6 +84,9 @@ describe("TokensFlow (limits)", function() {
       tokens2.push(token);
     }
 
+    const stupidWallet = new StupidWallet(wallet);
+    const limits = new LimitSetter(tokensFlow, stupidWallet);
+
     console.log(`Checking minting and transferring...`); 
 
     {
@@ -91,11 +96,11 @@ describe("TokensFlow (limits)", function() {
 
     // Test flow:
     {
-      const tx = await tokensFlow.connect(wallet).setNonRecurringFlow(tokens[1], ethers.utils.parseEther('1000'));
+      const tx = await limits.setNonRecurringFlow(tokens[1], ethers.utils.parseEther('1000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
-      const tx = await tokensFlow.connect(wallet).setNonRecurringFlow(tokens[2], ethers.utils.parseEther('2000'));
+      const tx = await limits.setNonRecurringFlow(tokens[2], ethers.utils.parseEther('2000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
@@ -112,11 +117,11 @@ describe("TokensFlow (limits)", function() {
     expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[2])).to.be.equal(ethers.utils.parseEther('4000'));
 
     {
-      const tx = await tokensFlow.connect(wallet).setNonRecurringFlow(tokens[1], ethers.utils.parseEther('2000'));
+      const tx = await limits.setNonRecurringFlow(tokens[1], ethers.utils.parseEther('2000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
-      const tx = await tokensFlow.connect(wallet).setNonRecurringFlow(tokens[2], ethers.utils.parseEther('1000'));
+      const tx = await limits.setNonRecurringFlow(tokens[2], ethers.utils.parseEther('1000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {

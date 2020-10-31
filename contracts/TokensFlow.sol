@@ -10,15 +10,23 @@ contract TokensFlow is ERC1155, IERC1155Views {
     using SafeMath for uint256;
     using Address for address;
 
-    struct TokenFlow {
-        uint256 parentToken;
+    // See also _createSwapLimit()
+    struct SwapLimit {
+        bool recurring;
+        int256 initialSwapCredit;
         int256 maxSwapCredit;
         int swapCreditPeriod;
+        int firstTimeEnteredSwapCredit;
+        bytes32 hash;
+    }
+
+    struct TokenFlow {
+        uint256 parentToken;
+        SwapLimit limit;
+        int256 remainingSwapCredit;
         int timeEnteredSwapCredit; // zero means not in a swap credit
         int lastSwapTime; // ignored when not in a swap credit
-        int256 remainingSwapCredit;
         bool enabled;
-        bool recurring;
     }
 
     uint256 public maxTokenId;
@@ -125,29 +133,30 @@ contract TokensFlow is ERC1155, IERC1155Views {
         uint256 _child,
         int256 _maxSwapCredit,
         int256 _remainingSwapCredit,
-        int _swapCreditPeriod, int _timeEnteredSwapCredit) external
+        int _swapCreditPeriod, int _timeEnteredSwapCredit,
+        bytes32 oldLimitHash) external
     {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
+        require(_flow.limit.hash == oldLimitHash);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
-        _flow.maxSwapCredit = _maxSwapCredit;
-        _flow.swapCreditPeriod = _swapCreditPeriod;
+        _flow.limit = _createSwapLimit(true, _remainingSwapCredit, _maxSwapCredit, _swapCreditPeriod, _timeEnteredSwapCredit);
         _flow.timeEnteredSwapCredit = _timeEnteredSwapCredit;
         _flow.remainingSwapCredit = _remainingSwapCredit;
-        _flow.recurring = true;
     }
 
     // User can set negative values. It is a nonsense but does not harm.
-    function setNonRecurringFlow(uint256 _child, int256 _remainingSwapCredit) external {
+    function setNonRecurringFlow(uint256 _child, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
+        require(_flow.limit.hash == oldLimitHash);
 
+        _flow.limit = _createSwapLimit(false, _remainingSwapCredit, 0, 0, 0);
         _flow.remainingSwapCredit = _remainingSwapCredit;
-        _flow.recurring = false;
     }
 
 // ERC-1155
@@ -212,16 +221,16 @@ contract TokensFlow is ERC1155, IERC1155Views {
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
             bool _inSwapCreditResult;
-            if (_flow.recurring) {
+            if (_flow.limit.recurring) {
                 _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
                 _maxAllowedFlow = _maxRecurringSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
             } else {
                 _maxAllowedFlow = _flow.remainingSwapCredit < 0 ? 0 : uint256(_flow.remainingSwapCredit);
             }
             require(_amount <= _maxAllowedFlow);
-            if (_flow.recurring && !_inSwapCreditResult) {
+            if (_flow.limit.recurring && !_inSwapCreditResult) {
                 _flow.timeEnteredSwapCredit = _currentTimeResult;
-                _flow.remainingSwapCredit = _flow.maxSwapCredit;
+                _flow.remainingSwapCredit = _flow.limit.maxSwapCredit;
             }
             _flow.lastSwapTime = _currentTimeResult; // TODO: no strictly necessary if !_flow.recurring
             // require(_amount < 1<<128); // done above
@@ -302,13 +311,11 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
         tokenFlow[_child] = TokenFlow({
             parentToken: _parent,
-            maxSwapCredit: 0,
-            swapCreditPeriod: 0,
+            limit: _createSwapLimit(false, 0, 0, 0, 0),
             timeEnteredSwapCredit: 0, // zero means not in a swap credit
             lastSwapTime: 0,
             remainingSwapCredit: 0,
-            enabled: _parent == 0,
-            recurring: false
+            enabled: _parent == 0
         });
     }
 
@@ -319,7 +326,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
     function _inSwapCredit(TokenFlow memory _flow, int _currentTimeResult) public pure returns(bool) {
         // solhint-disable indent
         return _flow.timeEnteredSwapCredit != 0 &&
-            _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
+            _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.limit.swapCreditPeriod;
     }
 
     function _maxRecurringSwapAmount(TokenFlow memory _flow, int _currentTimeResult, bool _inSwapCreditResult)
@@ -328,12 +335,29 @@ contract TokensFlow is ERC1155, IERC1155Views {
         int256 result;
         if (_inSwapCreditResult) {
             int256 passedTime = _currentTimeResult - _flow.lastSwapTime;
-            int256 delta = _flow.maxSwapCredit * passedTime / _flow.swapCreditPeriod;
+            int256 delta = _flow.limit.maxSwapCredit * passedTime / _flow.limit.swapCreditPeriod;
             result = _flow.remainingSwapCredit - delta;
         } else {
-            result = _flow.maxSwapCredit;
+            result = _flow.limit.maxSwapCredit;
         }
         return result < 0 ? 0 : uint256(result);
+    }
+
+    function _createSwapLimit(
+        bool _recurring,
+        int256 _initialSwapCredit,
+        int256 _maxSwapCredit,
+        int _swapCreditPeriod,
+        int _firstTimeEnteredSwapCredit) pure internal returns (SwapLimit memory)
+    {
+        return SwapLimit({
+            recurring: _recurring,
+            initialSwapCredit: _initialSwapCredit,
+            maxSwapCredit: _maxSwapCredit,
+            swapCreditPeriod: _swapCreditPeriod,
+            firstTimeEnteredSwapCredit: _firstTimeEnteredSwapCredit,
+            hash: keccak256(abi.encodePacked(_recurring, _initialSwapCredit, _maxSwapCredit, _swapCreditPeriod, _firstTimeEnteredSwapCredit))
+        });
     }
 
 // Events

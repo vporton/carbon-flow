@@ -5,6 +5,8 @@ const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 const random = require('random');
 const seedrandom = require('seedrandom');
+const StupidWallet = require('../lib/stupid-wallet.js');
+const LimitSetter = require('../lib/limit-setter.js');
 
 const { expect, assert } = chai;
 
@@ -61,7 +63,9 @@ describe("TokensFlow", function() {
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
-      const tx2 = await tokensFlow.connect(wallets[0]).setNonRecurringFlow(token, veryBigAmount);
+      const stupidWallet = new StupidWallet(wallets[0]);
+      const limits = new LimitSetter(tokensFlow, stupidWallet);
+      const tx2 = await limits.setNonRecurringFlow(token, veryBigAmount);
       await ethers.provider.getTransactionReceipt(tx2.hash);
       tree[token] = rootToken;
     }

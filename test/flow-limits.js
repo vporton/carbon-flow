@@ -5,6 +5,8 @@ const fs = require('fs');
 const chaiAsPromised = require('chai-as-promised');
 const random = require('random');
 const seedrandom = require('seedrandom');
+const StupidWallet = require('../lib/stupid-wallet.js');
+const LimitSetter = require('../lib/limit-setter.js');
 
 const { expect, assert } = chai;
 
@@ -76,9 +78,12 @@ describe("TokensFlow (limits)", function() {
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
 
+    const stupidWallet = new StupidWallet(wallet);
+    const limits = new LimitSetter(tokensFlow, stupidWallet);
+
     // Test non-zero flow:
     {
-      const tx = await tokensFlow.connect(wallet).setRecurringFlow(childToken, ethers.utils.parseEther('1000'), ethers.utils.parseEther('1000'), 10, await tokensFlow.currentTime());
+      const tx = await limits.setRecurringFlow(childToken, ethers.utils.parseEther('1000'), ethers.utils.parseEther('1000'), 10, await tokensFlow.currentTime());
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
@@ -162,6 +167,9 @@ describe("TokensFlow (limits)", function() {
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
 
+    const stupidWallet = new StupidWallet(wallet);
+    const limits = new LimitSetter(tokensFlow, stupidWallet);
+
     // Test initial zero flow:
     {
       const tx = await tokensFlow.connect(wallet).exchangeToAncestor([childToken, ethers.BigNumber.from(1)], ethers.utils.parseEther('0'), 1, []);
@@ -182,7 +190,7 @@ describe("TokensFlow (limits)", function() {
     // Test non-zero flow:
     {
       // Set time to the future
-      const tx = await tokensFlow.connect(wallet).setNonRecurringFlow(childToken, ethers.utils.parseEther('1000'));
+      const tx = await limits.setNonRecurringFlow(childToken, ethers.utils.parseEther('1000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
