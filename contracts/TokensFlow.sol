@@ -2,7 +2,7 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
-// import '@nomiclabs/buidler/console.sol';
+import '@nomiclabs/buidler/console.sol';
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
 
@@ -139,6 +139,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
+        console.log(uint256(_flow.limit.hash), uint256(oldLimitHash));
         require(_flow.limit.hash == oldLimitHash);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
