@@ -16,6 +16,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         int swapCreditPeriod;
         int timeEnteredSwapCredit; // zero means not in a swap credit
         int lastSwapTime; // ignored when not in a swap credit
+        int256 initialSwapCredit;
         int256 remainingSwapCredit;
         bool enabled;
         bool recurring;
@@ -135,7 +136,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         _flow.maxSwapCredit = _maxSwapCredit;
         _flow.swapCreditPeriod = _swapCreditPeriod;
         _flow.timeEnteredSwapCredit = _timeEnteredSwapCredit;
-        _flow.remainingSwapCredit = _remainingSwapCredit;
+        _flow.initialSwapCredit = _flow.remainingSwapCredit = _remainingSwapCredit;
         _flow.recurring = true;
     }
 
@@ -146,7 +147,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
         require(msg.sender == tokenOwners[_flow.parentToken]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
-        _flow.remainingSwapCredit = _remainingSwapCredit;
+        _flow.initialSwapCredit = _flow.remainingSwapCredit = _remainingSwapCredit;
         _flow.recurring = false;
     }
 
@@ -306,6 +307,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
             swapCreditPeriod: 0,
             timeEnteredSwapCredit: 0, // zero means not in a swap credit
             lastSwapTime: 0,
+            initialSwapCredit: 0,
             remainingSwapCredit: 0,
             enabled: _parent == 0,
             recurring: false
