@@ -10,16 +10,22 @@ contract TokensFlow is ERC1155, IERC1155Views {
     using SafeMath for uint256;
     using Address for address;
 
-    struct TokenFlow {
-        uint256 parentToken;
+    // FIXME: initialize it as a whole!
+    struct SwapLimit {
         int256 maxSwapCredit;
         int swapCreditPeriod;
+        int256 initialSwapCredit;
+        int firstTimeEnteredSwapCredit;
+        bool recurring;
+    }
+
+    struct TokenFlow {
+        uint256 parentToken;
+        SwapLimit limit;
+        int256 remainingSwapCredit;
         int timeEnteredSwapCredit; // zero means not in a swap credit
         int lastSwapTime; // ignored when not in a swap credit
-        int256 initialSwapCredit;
-        int256 remainingSwapCredit;
         bool enabled;
-        bool recurring;
     }
 
     uint256 public maxTokenId;
@@ -133,11 +139,15 @@ contract TokensFlow is ERC1155, IERC1155Views {
         require(msg.sender == tokenOwners[_flow.parentToken]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
-        _flow.maxSwapCredit = _maxSwapCredit;
-        _flow.swapCreditPeriod = _swapCreditPeriod;
+        _flow.limit = SwapLimit({
+            maxSwapCredit: _maxSwapCredit,
+            swapCreditPeriod: _swapCreditPeriod,
+            initialSwapCredit: _remainingSwapCredit,
+            firstTimeEnteredSwapCredit: _timeEnteredSwapCredit,
+            recurring: true
+        });
         _flow.timeEnteredSwapCredit = _timeEnteredSwapCredit;
-        _flow.initialSwapCredit = _flow.remainingSwapCredit = _remainingSwapCredit;
-        _flow.recurring = true;
+        _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
     // User can set negative values. It is a nonsense but does not harm.
@@ -147,8 +157,14 @@ contract TokensFlow is ERC1155, IERC1155Views {
         require(msg.sender == tokenOwners[_flow.parentToken]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
-        _flow.initialSwapCredit = _flow.remainingSwapCredit = _remainingSwapCredit;
-        _flow.recurring = false;
+        _flow.limit = SwapLimit({
+            maxSwapCredit: 0,
+            swapCreditPeriod: 0,
+            initialSwapCredit: _remainingSwapCredit,
+            firstTimeEnteredSwapCredit: 0,
+            recurring: false
+        });
+        _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
 // ERC-1155
@@ -213,16 +229,16 @@ contract TokensFlow is ERC1155, IERC1155Views {
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
             bool _inSwapCreditResult;
-            if (_flow.recurring) {
+            if (_flow.limit.recurring) {
                 _inSwapCreditResult = _inSwapCredit(_flow, _currentTimeResult);
                 _maxAllowedFlow = _maxRecurringSwapAmount(_flow, _currentTimeResult, _inSwapCreditResult);
             } else {
                 _maxAllowedFlow = _flow.remainingSwapCredit < 0 ? 0 : uint256(_flow.remainingSwapCredit);
             }
             require(_amount <= _maxAllowedFlow);
-            if (_flow.recurring && !_inSwapCreditResult) {
+            if (_flow.limit.recurring && !_inSwapCreditResult) {
                 _flow.timeEnteredSwapCredit = _currentTimeResult;
-                _flow.remainingSwapCredit = _flow.maxSwapCredit;
+                _flow.remainingSwapCredit = _flow.limit.maxSwapCredit;
             }
             _flow.lastSwapTime = _currentTimeResult; // TODO: no strictly necessary if !_flow.recurring
             // require(_amount < 1<<128); // done above
@@ -303,14 +319,17 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
         tokenFlow[_child] = TokenFlow({
             parentToken: _parent,
-            maxSwapCredit: 0,
-            swapCreditPeriod: 0,
+            limit: SwapLimit({
+                maxSwapCredit: 0,
+                swapCreditPeriod: 0,
+                initialSwapCredit: 0,
+                firstTimeEnteredSwapCredit: 0, // zero means not in a swap credit
+                recurring: false
+            }),
             timeEnteredSwapCredit: 0, // zero means not in a swap credit
             lastSwapTime: 0,
-            initialSwapCredit: 0,
             remainingSwapCredit: 0,
-            enabled: _parent == 0,
-            recurring: false
+            enabled: _parent == 0
         });
     }
 
@@ -321,7 +340,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
     function _inSwapCredit(TokenFlow memory _flow, int _currentTimeResult) public pure returns(bool) {
         // solhint-disable indent
         return _flow.timeEnteredSwapCredit != 0 &&
-            _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.swapCreditPeriod;
+            _currentTimeResult - _flow.timeEnteredSwapCredit < _flow.limit.swapCreditPeriod;
     }
 
     function _maxRecurringSwapAmount(TokenFlow memory _flow, int _currentTimeResult, bool _inSwapCreditResult)
@@ -330,10 +349,10 @@ contract TokensFlow is ERC1155, IERC1155Views {
         int256 result;
         if (_inSwapCreditResult) {
             int256 passedTime = _currentTimeResult - _flow.lastSwapTime;
-            int256 delta = _flow.maxSwapCredit * passedTime / _flow.swapCreditPeriod;
+            int256 delta = _flow.limit.maxSwapCredit * passedTime / _flow.limit.swapCreditPeriod;
             result = _flow.remainingSwapCredit - delta;
         } else {
-            result = _flow.maxSwapCredit;
+            result = _flow.limit.maxSwapCredit;
         }
         return result < 0 ? 0 : uint256(result);
     }
