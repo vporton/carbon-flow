@@ -10,13 +10,12 @@ contract TokensFlow is ERC1155, IERC1155Views {
     using SafeMath for uint256;
     using Address for address;
 
-    // FIXME: initialize it as a whole!
     struct SwapLimit {
+        bool recurring;
+        int256 initialSwapCredit;
         int256 maxSwapCredit;
         int swapCreditPeriod;
-        int256 initialSwapCredit;
         int firstTimeEnteredSwapCredit;
-        bool recurring;
     }
 
     struct TokenFlow {
