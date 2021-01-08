@@ -16,7 +16,7 @@ async function mint(owner, address, amount) {
 
   const arweaveHash = ethers.utils.formatBytes32String('vaeSho5IbaiGh5ui'); // just an arbitrary 32 bits
 
-  const tx = await carbon.connect(owner).createCredit(2, ethers.utils.parseEther(amount), address, arweaveHash);
+  const tx = await carbon.connect(owner).createCredit(2, ethers.utils.parseEther(amount), address, arweaveHash, {gasLimit: '1000000'});
   console.log("Credit creation request sent...");
   const receipt = await provider.getTransactionReceipt(tx.hash);
   console.log("... confirmed.");
