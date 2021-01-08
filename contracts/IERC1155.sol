@@ -93,8 +93,10 @@ interface IERC1155 /* is ERC165 */ {
      */
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory);
 
+    // FIXME: Should instead be `setApprovalForAll()`.
     function approve(address _spender, uint256 _id, uint256 _currentValue, uint256 _value) external;
 
+    // FIXME: Should instead be `isApprovedForAll()`.
     function allowance(uint256 _id, address _owner, address _spender) external view returns (uint256);
 
     /**
