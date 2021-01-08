@@ -22,8 +22,8 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
     // id => (owner => balance)
     mapping (uint256 => mapping(address => uint256)) internal balances;
 
-    // token => (owner => (spender => approved))
-    mapping (uint256 => mapping (address => mapping(address => uint256))) internal allowanceImpl;
+    // for => (operator => bool)
+    mapping (address => mapping (address => bool)) internal operatorApproval;
 
 /////////////////////////////////////////// ERC165 //////////////////////////////////////////////
 
@@ -128,35 +128,28 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         return balances_;
     }
 
-    function approve(address _spender, uint256 _id, uint256 _currentValue, uint256 _value) external override {
-        require(allowanceImpl[_id][msg.sender][_spender] == _currentValue);
-        allowanceImpl[_id][msg.sender][_spender] = _value;
-        // TODO: emit (which event)?
+    /**
+        @notice Enable or disable approval for a third party ("operator") to manage all of the caller's tokens.
+        @dev MUST emit the ApprovalForAll event on success.
+        @param _operator  Address to add to the set of authorized operators
+        @param _approved  True if the operator is approved, false to revoke approval
+    */
+    function setApprovalForAll(address _operator, bool _approved) external override {
+        operatorApproval[msg.sender][_operator] = _approved;
+        emit ApprovalForAll(msg.sender, _operator, _approved);
     }
 
-    function batchApprove(address _spender, uint256[] calldata _ids, uint256[] calldata _currentValues, uint256[] calldata _values) external override {
-        require(_ids.length == _currentValues.length);
-        require(_ids.length == _values.length);
-
-        for (uint256 i = 0; i < _ids.length; ++i) {
-            uint256 _id = _ids[i];
-            uint256 _currentValue = _currentValues[i];
-            uint256 _value = _values[i];
-            require(allowanceImpl[_id][msg.sender][_spender] == _currentValue);
-            allowanceImpl[_id][msg.sender][_spender] = _value;
-        }
-        // TODO: emit (which event)?
-    }
-
-    function allowance(uint256 _id, address _owner, address _spender) external override view returns (uint256) {
-        return _allowance(_id, _owner, _spender);
+    /**
+        @notice Queries the approval status of an operator for a given owner.
+        @param _owner     The owner of the Tokens
+        @param _operator  Address of authorized operator
+        @return           True if the operator is approved, false if not
+    */
+    function isApprovedForAll(address _owner, address _operator) external override view returns (bool) {
+        return operatorApproval[_owner][_operator];
     }
 
 /////////////////////////////////////////// Internal //////////////////////////////////////////////
-
-    function _allowance(uint256 _id, address _owner, address _spender) internal view returns (uint256) {
-        return allowanceImpl[_id][_owner][_spender];
-    }
 
     function _doSafeTransferAcceptanceCheck(address _operator, address _from, address _to, uint256 _id, uint256 _value, bytes memory _data) internal {
 
@@ -181,10 +174,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
 
     function _safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) internal virtual {
         require(_to != address(0x0), "_to must be non-zero.");
-        if(_from != msg.sender) {
-            allowanceImpl[_id][_from][msg.sender] = allowanceImpl[_id][_from][msg.sender].sub(_value);
-        }
-        
+        require(_from == msg.sender || operatorApproval[msg.sender][_from], "No approval.");
 
         // SafeMath will throw with insuficient funds _from
         // or if _id is not valid (balance will be 0)
@@ -205,11 +195,7 @@ contract ERC1155 is IERC1155, ERC165, CommonConstants
         // MUST Throw on errors
         require(_to != address(0x0), "destination address must be non-zero.");
         require(_ids.length == _values.length, "_ids and _values array length must match.");
-        if (_from != msg.sender) {
-            for (uint256 i = 0; i < _ids.length; ++i) {
-                allowanceImpl[_ids[i]][_from][msg.sender] = allowanceImpl[_ids[i]][_from][msg.sender].sub(_values[i]);
-            }
-        }
+        require(_from == msg.sender || operatorApproval[msg.sender][_from], "No approval.");
 
         for (uint256 i = 0; i < _ids.length; ++i) {
             uint256 id = _ids[i];

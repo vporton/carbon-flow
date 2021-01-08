@@ -3,9 +3,6 @@ pragma solidity ^0.7.1;
 
 import "./ERC165.sol";
 
-// solhint-disable max-line-length
-// solhint-disable bracket-align
-
 /**
     @title ERC-1155 Multi Token Standard
     @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1155.md
@@ -35,6 +32,11 @@ interface IERC1155 /* is ERC165 */ {
         When burning/destroying tokens, the `_to` argument MUST be set to `0x0` (i.e. zero address).
     */
     event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
+
+    /**
+        @dev MUST emit when approval for a second party/operator address to manage all tokens for an owner address is enabled or disabled (absense of an event assumes disabled).
+    */
+    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
     /**
         @dev MUST emit when the URI is updated for a token ID.
@@ -93,20 +95,19 @@ interface IERC1155 /* is ERC165 */ {
      */
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory);
 
-    // FIXME: Should instead be `setApprovalForAll()`.
-    function approve(address _spender, uint256 _id, uint256 _currentValue, uint256 _value) external;
-
-    // FIXME: Should instead be `isApprovedForAll()`.
-    function allowance(uint256 _id, address _owner, address _spender) external view returns (uint256);
+    /**
+        @notice Enable or disable approval for a third party ("operator") to manage all of the caller's tokens.
+        @dev MUST emit the ApprovalForAll event on success.
+        @param _operator  Address to add to the set of authorized operators
+        @param _approved  True if the operator is approved, false to revoke approval
+    */
+    function setApprovalForAll(address _operator, bool _approved) external;
 
     /**
-        @dev Allow other accounts/contracts to spend tokens on behalf of msg.sender
-        Also, to minimize the risk of the approve/transferFrom attack vector
-        (see https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM/), this function will throw if the current approved allowance does not equal the expected _currentValue, unless _value is 0
-        @param _spender        Address to approve
-        @param _ids            IDs of the CryptoItems
-        @param _currentValues  Expected current values of allowances per item type
-        @param _values         Allowance amounts per item type
+        @notice Queries the approval status of an operator for a given owner.
+        @param _owner     The owner of the Tokens
+        @param _operator  Address of authorized operator
+        @return           True if the operator is approved, false if not
     */
-    function batchApprove(address _spender, uint256[] calldata _ids, uint256[] calldata _currentValues, uint256[] calldata _values) external;
+    function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 }

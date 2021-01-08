@@ -190,9 +190,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
 // Misc
 
     function burn(address _from, uint256 _id, uint256 _value) external {
-        if(_from != msg.sender) {
-            allowanceImpl[_id][_from][msg.sender] = allowanceImpl[_id][_from][msg.sender].sub(_value);
-        }
+        require(_from == msg.sender || operatorApproval[msg.sender][_from], "No approval.");
 
         // SafeMath will throw with insuficient funds _from
         // or if _id is not valid (balance will be 0)
