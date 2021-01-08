@@ -288,13 +288,6 @@ This bug probably could be fixed, but:
 
 ## TODO
 
-Swapping back from parent to child tokens.
-
-Both `setNonRecurringFlow()` and `setRecurringFlow()` do not have the same bug as `approve()`
-in ERC-20.
-
-Create 10000 credit records at a public testnet?
-
 Documentation comments in contracts.
 
 Test batch transfers.
