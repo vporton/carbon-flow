@@ -37,13 +37,6 @@ yarn install
 npx buidler test
 ```
 
-### Creating 10000 credit records
-
-First run
-```sh
-yarn install
-```
-
 ### Testing the Web app
 
 Run Ganache (a blockchain for testing)
