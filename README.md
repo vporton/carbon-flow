@@ -12,18 +12,9 @@ https://arweave.net/-hwwwN8tPm0CrnW8Bn1NH24SrDnuShQOX7ZQ8M3JSig
 
 See also https://youtu.be/R8q0rlrQqQc
 
-It is a solution of
-https://gitcoin.co/issue/MPlus4Climate/MPlusToolKit/1/100023834 bounty.
-The bounty is fulfilled except of creating 10000 carbon credits records
-(in fact I did it on my local blockchain and explained how to repeat it, but not
-yet did it on a public blockchain because it is costly and time consuming). I will
-keep fixing bugs after bounty submission.
+[Screenshot](https://raw.githubusercontent.com/vporton/carbon-flow/main/doc/screenshot.png "Screenshot")
 
-![Screenshot](https://raw.githubusercontent.com/vporton/carbon-flow/main/doc/screenshot.png "Screenshot")
-
-The task was formulated to produce an ERC-20 token, but I do a ERC-1155 token.
-The discrepancy is easily solvable by creating a ERC-1155/ERC-20 bridge.
-I produced _two_ different ERC-20 bridges: `ERC20OverERC1155.sol` and `ERC20LockedERC1155.sol`.
+It is a ERC-1155 token. I have wrappers to covert it to ERC-20.
 
 ## Installation
 
@@ -51,15 +42,6 @@ npx buidler test
 First run
 ```sh
 yarn install
-```
-
-The requested 10000 credit records can be created by first running
-```sh
-npx ganache-cli -d
-```
-and then (without exiting from `ganache-cli`) running
-```sh
-npx buidler run scripts/create-10000-credits.js
 ```
 
 ### Testing the Web app
@@ -303,53 +285,15 @@ Improve solhint rules.
 
 Add freely mintable tokens. It is useless for carbon, but useful for other applications.
 
-### Things intentionally not done or done differently
-
-### Marker for retired carbon credit serial numbers
-
-The bounty required
-_Create 10.000 carbon credit serial numbers, including a marker to identify them as “retired”_.
-That's a nonsense, because a carbon credit record may be retired partially, so it makes no sense to
-mark it either as retired or non-retired.
-
 ### Manual approval process
 
-The specification says:
-
-> Create that protocol as a) manual approval process by an authorized member of the M+ governance team, and b) as an automatically executing smart contract.
-
-This makes no sense in my system: The only way to check if M- tokens belong to a certain owner is
-to check if he has them on its Ethereum account. But if he has Ethereum account (and intends to use
-the resulting M+ tokens) then he has a private key, an Ethereum wallet and can trigger the M- -> M+
-swap procedure himself, it just makes no sense to ask a member of M+ governance team to do it for him.
-
-Well, it makes a little sense: It may be useful for owners of Ethereum wallets not supporting smart
-contract calls. So, if you request me to add this feature I _will_ do it, but again it makes quite
-little sense.
-
-Oh, also it makes sense in the case if the account owner lost his private key and wants an
-authorized member of the M+ governance team to restore his funds, but that thing is against the
-Ethereum philosopy (however see the alternative solution of this problem below).
-
-It could be implemented by having two kinds of authority tokens: M- tree issuers and retirers.
-M- tree issuers would do the same as authorities do now, and retirers would instead do retirement
-on behalf of users (net reducers). Before doing the swap on behalf of a user, need to check in
-the smart contract that this retirer is a descendant of a certain token (any token can be choosen,
-e.g. M- or M+; note that the amounts of these tokens on any wallets would be always zero) and all
-its ancestors are not disabled before doing the retirement operation. The amount of retirement would
-be restricted by rules like limiting tokens flow above.
-
-Anyway, if somebody wants to operate in the system without having an Ethereum account, an authority
+If somebody wants to operate in the system without having an Ethereum account, an authority
 may arrange for him for somebody to hold a wallet with a private key (or a smart wallet, e.g. a DAO
 if the money hold a big to be sure not one M+ representative is in control of that account) for him and
 issue for him M- and M+ tokens to this wallet instead of his own wallet (and do trade/exchange
 operations for him instead of himself). The amount of transfers/swaps may be restricted by using a
 smart wallet as such a "bank account".
 
-So, accordingly the above paragraph consider that task done (that pargraph is the "manual approval
-process"):
-
-> Create that protocol as a) manual approval process by an authorized member of the M+ governance team, and b) as an automatically executing smart contract.
 
 ## FAQ
 
