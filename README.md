@@ -1,5 +1,7 @@
 # Carbon Flow
 
+_This is **the only** reasonable carbon accounting project for the world, because it has world-best anti-theft protection to scale to store and transfer trillions dollars of value._
+
 See also [this repository](https://github.com/vporton/courts) for the frontend UI.
 
 Demo (switch to Ropsten network):
