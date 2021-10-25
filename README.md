@@ -7,6 +7,8 @@ https://gitcoin.co/grants/177/social-charity-tokens-and-dao-carbon-accounting
 
 See also [this repository](https://github.com/vporton/courts) for the frontend UI. But better to use DAOstack voting system to create this site.
 
+For big amounts of carbon, this software can be installed on Ethereum, for energy-efficient accounting of small amounts it can be used xDAI blockchain.
+
 Demo (switch to Ropsten network):
 https://arweave.net/-hwwwN8tPm0CrnW8Bn1NH24SrDnuShQOX7ZQ8M3JSig
 
