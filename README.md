@@ -12,7 +12,7 @@ https://arweave.net/-hwwwN8tPm0CrnW8Bn1NH24SrDnuShQOX7ZQ8M3JSig
 
 See also https://youtu.be/R8q0rlrQqQc
 
-[Screenshot](https://raw.githubusercontent.com/vporton/carbon-flow/main/doc/screenshot.png "Screenshot")
+![Screenshot](https://raw.githubusercontent.com/vporton/carbon-flow/main/doc/screenshot.png "Screenshot")
 
 It is a ERC-1155 token. I have wrappers to covert it to ERC-20.
 
