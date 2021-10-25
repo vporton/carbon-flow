@@ -309,45 +309,6 @@ You should use ERC-1155 tokens if you can, because they are both more secure (th
 is a security bug in ERC-20 that affects for example crypto exchanges) and use less
 gas. But many legacy softwares don't support ERC-1155, in this case use ERC-20.
 
-## Sum of Several Tokens
-
-_When starting to work on this bounty, I first overengineered: My system of summing
-several tokens in fact protects only as much as the capacities of exchanges would
-allow. So instead just issue several independent tokens and allow to exchange at a
-limited rate the main token._
-
-The code for sum of several tokens is slow, supports only a very small number of
-issuers, and is not recommended to be used. Nevertheless I keep that code (and this
-its description) in the repository for art and history of programming purposes.
-
-It tackles the problem if once of the token issuing entities would be hijacked
-by each of them having its own token. The M+C token is formed as a sum of values
-of several tokens.
-
-So, I create a child/parent tree of ERC-1155 tokens. To each parent balance the
-sum of all its child balances is added.
-
-When a parent token is transferred and its own balance is not enough, the
-contract chooses its first child (among the tokens that the given user holds in
-a non-zero amount) and transfers it (recursively). If its amount at a particular
-user is not enough for the transfer, then the next token (among the tokens that
-the given user holds in a non-zero amount) is transferred (recursively), etc.
-
-The tokens that a given user holds in non-zero amounts are kept in a double linked
-list. This avoids considering zero-amount tokens when doing a transfer (to improve
-performance).
-
-The above solves the cheating by one of the lower parties trouble, as allows removal
-of a child token. However, if the hijacker or anyone else sells fake tokens at an
-exchange, this security measure does not work. So it is recommended to trader to limit
-their allocated funds at exchanges that they provide to exchange for my tokens to limit
-the damage. When a hijacking is found, the hijacking token should be removed from the
-list of children tokens ASAP to limit the damage.
-
-The structure of the tree can be set only by the owner, because otherwise a malicious
-issuer could make the tree big, so producing high gas consumption or even out-of-gas
-errors.
-
 ## Other problems
 
 Some DAOs cannot be ERC-1155 smart wallets (because ERC-1155 smart wallet must implement
@@ -367,7 +328,7 @@ up quadratic voting and use old-school linear voting?
 
 If you set your swap limit to N and later make it M, then (surprise!) a hacker sometimes
 [can send](https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM/edit)
-N+M tokens. This is a hard to deal with trouble. So, I just recommend the following: Set new swap
+N+M tokens. This is a hard to deal with trouble. So, I just recommend the following to frontend developers: Set new swap
 limit only when the previous one has almost emptied or expired, and do only set a new swap limit
 when a recurring swap limit (if now the limit is recurring) is near to expiration (but no too near
 because otherwise the new period may start before your transaction to set the new swap limit
