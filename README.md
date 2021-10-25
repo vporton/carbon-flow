@@ -2,6 +2,9 @@
 
 _This is **the only** reasonable carbon accounting project for the world, because it has world-best anti-theft protection to scale to store and transfer trillions dollars of value._
 
+The project is in desperate need of a few thousand dollars to pay to a certified error-checker. We also need to finish development of carbon accounting by creating a site for accounters. Donate: 
+https://gitcoin.co/grants/177/social-charity-tokens-and-dao-carbon-accounting
+
 See also [this repository](https://github.com/vporton/courts) for the frontend UI.
 
 Demo (switch to Ropsten network):
