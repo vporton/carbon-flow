@@ -462,4 +462,4 @@ If you find this project useful, donate:
 - https://paypal.me/ViktorPorton
 - https://www.patreon.com/porton
 - BitCoin 174HGm3PfoxYZkx59hoxVseQZzW5KnCPij
-- Ethereum 0x722cE03C15670c313f9596544CDB582c19f810e2
+- Ethereum and other: https://gitcoin.co/grants/177/social-charity-tokens-and-dao-carbon-accounting
