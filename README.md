@@ -14,7 +14,7 @@ See also https://youtu.be/R8q0rlrQqQc
 
 ![Screenshot](https://raw.githubusercontent.com/vporton/carbon-flow/main/doc/screenshot.png "Screenshot")
 
-It is a ERC-1155 token. I have wrappers to covert it to ERC-20.
+It is a ERC-1155 token. I have wrappers to convert it to ERC-20.
 
 ## Installation
 
