@@ -1,5 +1,7 @@
 # Carbon Flow
 
+`multifunds` branch will contain improved API.
+
 _This is **the only** reasonable carbon accounting project for the world, because it has world-best anti-theft protection to scale to store and transfer trillions dollars of value._
 
 The project is in desperate need of a few thousand dollars to pay to a certified error-checker. We also need to finish development of carbon accounting by creating an UI (a site) for accounters. Donate: 
