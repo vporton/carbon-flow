@@ -5,9 +5,11 @@ pragma experimental ABIEncoderV2;
 // import 'hardhat/console.sol';
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
+import "./ABDKMath64x64.sol";
 
 contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     using SafeMath for uint256;
+    using ABDKMath64x64 for int128;
     using Address for address;
 
     // See also _createSwapLimit()
@@ -225,7 +227,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             _flow.lastSwapTime = _currentTimeResult; // TODO: not strictly necessary if !_flow.recurring
             // require(_amount < 1<<128); // done above
             _flow.remainingSwapCredit -= int256(_amount);
-            _newAmount = _newAmount.mul(_flow.coefficient);
+            _newAmount = _flow.coefficient.mulu(_newAmount);
         }
 
         // if (_id == _flow.parentToken) return; // not necessary
