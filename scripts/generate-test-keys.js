@@ -1,4 +1,4 @@
-const bre = require("@nomiclabs/buidler");
+const bre = require("@nomiclabs/hardhat");
 const fs = require('fs');
 const yesno = require('yesno');
 

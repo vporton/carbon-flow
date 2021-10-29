@@ -1,4 +1,4 @@
-const { deployments } = require("@nomiclabs/buidler");
+const { deployments } = require("@nomiclabs/hardhat");
 const mainTest = require('../lib/main-test.js');;
 
 const chai = require("chai");

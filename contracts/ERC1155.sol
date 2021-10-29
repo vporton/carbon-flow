@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Apache-2.0	
 pragma solidity ^0.7.1;
 
-// import '@nomiclabs/buidler/console.sol';
+// import '@nomiclabs/hardhat/console.sol';
 import "./SafeMath.sol";
 import "./Address.sol";
 import "./Common.sol";

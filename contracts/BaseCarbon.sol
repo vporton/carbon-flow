@@ -2,7 +2,7 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "@nomiclabs/buidler/console.sol";
+import "hardhat/console.sol";
 import "./TokensFlow.sol";
 import "./ABDKMath64x64.sol";
 

@@ -14,7 +14,7 @@ chai.use(chaiAsPromised);
 
 // random.use(seedrandom('rftg'));
 
-// const bre = require("@nomiclabs/buidler");
+// const bre = require("@nomiclabs/hardhat");
 function range(size, startAt = 0) {
   return [...Array(size).keys()].map(i => i + startAt);
 }

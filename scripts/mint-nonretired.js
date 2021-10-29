@@ -1,4 +1,4 @@
-const bre = require("@nomiclabs/buidler");
+const bre = require("@nomiclabs/hardhat");
 
 function usage() {
   console.log("Mints non-retired tokens M-.\n" +

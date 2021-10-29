@@ -4,8 +4,8 @@
   "description": "Secure counting carbon credits and retire carbon credits",
   "dependencies": {
     "@myetherwallet/mewconnect-web-client": "^2.1.5-beta.1",
-    "@nomiclabs/buidler": "^1.4.7",
-    "@nomiclabs/buidler-solhint": "^1.3.3",
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@vporton/wrap-tokens": "^2.1.1",
     "browserify": "^17.0.0",
     "buidler-deploy": "^0.6.0-beta.16",
@@ -17,8 +17,7 @@
     "yesno": "^0.3.1"
   },
   "devDependencies": {
-    "@nomiclabs/buidler-ethers": "^2.0.0",
-    "@nomiclabs/buidler-waffle": "^2.0.0",
+    "@nomiclabs/hardhat-solhint": "^2.0.0",
     "chai": "^4.2.0",
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0"
