@@ -1,6 +1,6 @@
 # Carbon Flow
 
-`multifunds` branch will contain improved API.
+`multifunds` branch contains an improved API.
 
 _This is **the only** reasonable carbon accounting project for the world, because it has world-best anti-theft protection to scale to store and transfer trillions dollars of value._
 
