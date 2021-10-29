@@ -41,7 +41,7 @@ contract Carbon is BaseCarbon {
     function createAuthority(uint256 _parent, string calldata _nonRetiredUri, string calldata _retiredUri) external {
         // Minting restricted because minting can happen only through createCredit().
         uint256 _nonRetiredToken = _newToken(_parent, _nonRetiredUri, msg.sender); // always odd, see also `isNonRetiredToken`.
-        /*uint256 _retiredToken = */_newToken(address(0), _retiredUri, address(0)); // + 1
+        /*uint256 _retiredToken = */_newToken(0, _retiredUri, address(0)); // + 1
         Authority memory _authority = Authority({maxSerial: 0, token: _nonRetiredToken});
         authorities[_nonRetiredToken] = _authority;
         emit AuthorityCreated(msg.sender, _nonRetiredToken);
