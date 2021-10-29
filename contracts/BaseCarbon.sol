@@ -8,6 +8,7 @@ import "./ABDKMath64x64.sol";
 
 // TODO: We need multiple competing community funds.
 //       Problem: If a local fund (or even a commercial accounter) has too cheap retirement, it's bad for the global community.
+//       We can make retired tokens just another kind of fund and retiring be just transfer with tax (energy-efficient?)
 
 contract BaseCarbon is TokensFlow {
     using SafeMath for uint256;
