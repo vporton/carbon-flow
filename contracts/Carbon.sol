@@ -31,14 +31,16 @@ contract Carbon is BaseCarbon {
     // TODO: Set token URIs.
     constructor()
         BaseCarbon()
-    { }
+    {
+        nextTokenId = 1;
+    }
     // solhint-enable bracket-align
     // solhint-enable func-visibility
 
     // Anybody can create an authority, but its parent decides if its tokens can be swapped.
     function createAuthority(uint256 _parent, string calldata _nonRetiredUri, string calldata _retiredUri) external {
         // Minting restricted because minting can happen only through createCredit().
-        uint256 _nonRetiredToken = _newToken(_parent, _nonRetiredUri, msg.sender); // always even, see also `isNonRetiredToken`.
+        uint256 _nonRetiredToken = _newToken(_parent, _nonRetiredUri, msg.sender); // always odd, see also `isNonRetiredToken`.
         /*uint256 _retiredToken = */_newToken(address(0), _retiredUri, address(0)); // + 1
         Authority memory _authority = Authority({maxSerial: 0, token: _nonRetiredToken});
         authorities[_nonRetiredToken] = _authority;

@@ -31,7 +31,6 @@ contract BaseCarbon is TokensFlow {
 
     // function setMainTokens(uint256 _retiredCreditsToken, uint256 _nonRetiredCreditsToken) external { // needed?
     //     require(msg.sender == globalCommunityFund);
-    //     require(_retiredCreditsToken != 0 && _nonRetiredCreditsToken != 0);
     //     retiredCreditsToken = _retiredCreditsToken;
     //     nonRetiredCreditsToken = _nonRetiredCreditsToken;
     // }
@@ -58,7 +57,7 @@ contract BaseCarbon is TokensFlow {
 
     // See also `createAuthority()`.
     modifier isNonRetiredToken(uint256 _nonRetiredToken) {
-        require(_nonRetiredToken % 2 == 0);
+        require(_nonRetiredToken % 2 == 1);
         _;
     }
 }

@@ -35,8 +35,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     mapping (uint256 => TokenFlow) public tokenFlow;
 
-// IERC1155Views
-
     mapping (uint256 => uint256) private totalSupplyImpl;
     mapping (uint256 => string) private uriImpl;
 
@@ -50,11 +48,12 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
 // Administrativia
 
-    function newToken(uint256 _parent, string calldata _uri)
-        external returns (uint256)
-    {
-        return _newToken(_parent, _uri, msg.sender);
-    }
+    // Disallowed for carbon token because it would increase `nextToken` by 1 and we need by 2.
+    // function newToken(uint256 _parent, string calldata _uri)
+    //     external returns (uint256)
+    // {
+    //     return _newToken(_parent, _uri, msg.sender);
+    // }
 
     function setTokenOwner(uint256 _id, address _newOwner) external {
         require(msg.sender == tokenOwners[_id]);
