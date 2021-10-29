@@ -22,6 +22,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     struct TokenFlow {
         uint256 parentToken;
+        int128 coefficient;
         SwapLimit limit;
         int256 remainingSwapCredit;
         int timeEnteredSwapCredit; // zero means not in a swap credit
@@ -117,6 +118,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     // User can set negative values. It is a nonsense but does not harm.
     function setRecurringFlow(
         uint256 _child,
+        int128 _coefficient,
         int256 _maxSwapCredit,
         int256 _remainingSwapCredit,
         int _swapCreditPeriod, int _timeEnteredSwapCredit,
@@ -128,19 +130,21 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         require(_flow.limit.hash == oldLimitHash);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
+        _flow.coefficient = _coefficient;
         _flow.limit = _createSwapLimit(true, _remainingSwapCredit, _maxSwapCredit, _swapCreditPeriod, _timeEnteredSwapCredit);
         _flow.timeEnteredSwapCredit = _timeEnteredSwapCredit;
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
     // User can set negative values. It is a nonsense but does not harm.
-    function setNonRecurringFlow(uint256 _child, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
+    function setNonRecurringFlow(uint256 _child, int128 _coefficient, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
         TokenFlow storage _flow = tokenFlow[_child];
 
         require(msg.sender == tokenOwners[_flow.parentToken]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
         require(_flow.limit.hash == oldLimitHash);
 
+        _flow.coefficient = _coefficient;
         _flow.limit = _createSwapLimit(false, _remainingSwapCredit, 0, 0, 0);
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
@@ -195,12 +199,14 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         require(_amount < 1<<128);
         uint256 _balance = balances[_ids[0]][msg.sender];
         require(_amount <= _balance);
+        TokenFlow storage _flow;
+        uint256 _newAmount = _amount;
         for(uint i = 0; i != _ids.length - 1; ++i) {
             uint256 _id = _ids[i];
             require(_id != 0);
             uint256 _parent = tokenFlow[_id].parentToken;
             require(_parent == _ids[i + 1]); // i ranges 0 .. _ids.length - 2
-            TokenFlow storage _flow = tokenFlow[_id];
+            _flow = tokenFlow[_id];
             require(_flow.enabled);
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
@@ -219,25 +225,29 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             _flow.lastSwapTime = _currentTimeResult; // TODO: not strictly necessary if !_flow.recurring
             // require(_amount < 1<<128); // done above
             _flow.remainingSwapCredit -= int256(_amount);
+            _newAmount = _newAmount.mul(_flow.coefficient);
         }
 
         // if (_id == _flow.parentToken) return; // not necessary
         _doBurn(msg.sender, _ids[0], _amount);
-        _doMint(msg.sender, _ids[_ids.length - 1], _amount, _data);
+        _doMint(msg.sender, _ids[_ids.length - 1], _newAmount, _data);
     }
 
     // Each next token ID must be a parent of the previous one.
-    function exchangeToDescendant(uint256[] calldata _ids, uint256 _amount, bytes calldata _data) external {
-        uint256 _parent = _ids[0];
-        require(_parent != 0);
-        for(uint i = 1; i != _ids.length; ++i) {
-            _parent = tokenFlow[_parent].parentToken;
-            require(_parent != 0);
-            require(_parent == _ids[i]); // consequently `_ids[i] != 0`
-        }
-        _doBurn(msg.sender, _ids[_ids.length - 1], _amount);
-        _doMint(msg.sender, _ids[0], _amount, _data);
-    }
+    // Removed to prevent higher authorities to meddle with our tokens. (One can just make a higher authority his parent instead.)
+    // function exchangeToDescendant(uint256[] calldata _ids, uint256 _amount, bytes calldata _data) external {
+    //     uint256 _parent = _ids[0];
+    //     require(_parent != 0);
+    //     uint256 _newAmount = _amount;
+    //     for(uint i = 1; i != _ids.length; ++i) {
+    //         _parent = tokenFlow[_parent].parentToken;
+    //         require(_parent != 0);
+    //         require(_parent == _ids[i]); // consequently `_ids[i] != 0`
+    //         _newAmount = _newAmount.mul(_parent.coefficient);
+    //     }
+    //     _doBurn(msg.sender, _ids[_ids.length - 1], _newAmount);
+    //     _doMint(msg.sender, _ids[0], _amount, _data); 
+    // }
 
 // Internal
 
@@ -289,6 +299,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
         tokenFlow[_child] = TokenFlow({
             parentToken: _parent,
+            coefficient: 1<<64, // 1.0
             limit: _createSwapLimit(false, 0, 0, 0, 0),
             timeEnteredSwapCredit: 0, // zero means not in a swap credit
             lastSwapTime: 0,

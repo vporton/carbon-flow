@@ -6,8 +6,6 @@ import "hardhat/console.sol";
 import "./TokensFlow.sol";
 import "./ABDKMath64x64.sol";
 
-// TODO: We need also multiplier in swaps: Consider if some carbon accounter was found a thief, we need to divide his tokens after transferring ownership away.
-
 contract BaseCarbon is TokensFlow {
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
@@ -22,7 +20,7 @@ contract BaseCarbon is TokensFlow {
     // solhint-enable bracket-align
     // solhint-enable func-visibility
 
-    // TODO: Allow several non-retired token have one retired?
+    // We could allow several non-retired token have one retired, but this way is less gas usage.
     function setTax(uint256 _nonRetiredToken, int128 _tax) external isNonRetiredToken(_nonRetiredToken) {
         require(msg.sender == tokenOwners[_nonRetiredToken]);
         require(_tax >= 0 && _tax <= 1<<64); // 0-100%
@@ -43,7 +41,6 @@ contract BaseCarbon is TokensFlow {
         uint256 _taxAmount = uint256(taxes[_nonRetiredToken].mulu(_amount));
         bytes memory _data = ""; // efficient?
         uint256 _retiredTokenId = _retiredToken(_nonRetiredToken);
-        // TODO: Multiply by a coefficient?
         _doMint(tokenOwners[_retiredTokenId], _retiredTokenId, _taxAmount, _data);
         _doMint(msg.sender, _retiredTokenId, _amount - _taxAmount, _data);
         // emit CreditRetired(creditId); // not needed as _doBurn() emits a suitable event

@@ -28,7 +28,6 @@ contract Carbon is BaseCarbon {
 
     // solhint-disable func-visibility
     // solhint-disable bracket-align
-    // TODO: Set token URIs.
     constructor()
         BaseCarbon()
     {
