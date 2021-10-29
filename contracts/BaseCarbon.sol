@@ -15,36 +15,21 @@ contract BaseCarbon is TokensFlow {
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
 
-    address public globalCommunityFund;
-    // uint256 public retiredCreditsToken; // M+ token
-    // uint256 public nonRetiredCreditsToken;
-    int128 public tax = int128(10).div(100); // 10%
+    mapping (uint256 => int128) public taxes; // 2**64 is 100%
 
 // Admin
 
     // solhint-disable func-visibility
     // solhint-disable bracket-align
-    constructor(address _globalCommunityFund,
-                string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
-                string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
-    {
-        globalCommunityFund = _globalCommunityFund;
-        _newToken(0, _retiredName, _retiredSymbol, _retiredUri, _globalCommunityFund); // 1
-        _newToken(0, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri, _globalCommunityFund); // 2
-    }
+    constructor() { }
     // solhint-enable bracket-align
     // solhint-enable func-visibility
 
-    function setGlobalCommunityFundAddress(address _globalCommunityFund) external {
-        require(msg.sender == globalCommunityFund);
-        require(_globalCommunityFund != address(0));
-        globalCommunityFund = _globalCommunityFund;
-    }
-
-    function setTax(int128 _tax) external {
-        require(msg.sender == globalCommunityFund);
-        require(_tax >= 0 && _tax < 1<<64); // 0-100%
-        tax = _tax;
+    // TODO: Allow several non-retired token have one retired?
+    function setTax(uint256 _nonRetiredToken, int128 _tax) external isNonRetiredToken(_nonRetiredToken) {
+        require(msg.sender == tokenOwners[_nonRetiredToken]);
+        require(_tax >= 0 && _tax <= 1<<64); // 0-100%
+        taxes[_nonRetiredToken] = _tax;
     }
 
     // function setMainTokens(uint256 _retiredCreditsToken, uint256 _nonRetiredCreditsToken) external { // needed?
@@ -57,23 +42,26 @@ contract BaseCarbon is TokensFlow {
 // Credits
 
     // WARNING: If the caller of this function is a contract, it must implement ERC1155TokenReceiver interface.
-    function retireCredit(uint _amount) external {
-        _doBurn(msg.sender, _nonRetiredCreditsToken(), _amount);
-        uint256 _taxAmount = uint256(tax.mulu(_amount));
+    function retireCredit(uint256 _nonRetiredToken, uint _amount) external isNonRetiredToken(_nonRetiredToken) {
+        _doBurn(msg.sender, _nonRetiredToken, _amount);
+        uint256 _taxAmount = uint256(taxes[_nonRetiredToken].mulu(_amount));
         bytes memory _data = ""; // efficient?
-        _doMint(globalCommunityFund, _retiredCreditsToken(), _taxAmount, _data);
-        _doMint(msg.sender, _retiredCreditsToken(), _amount - _taxAmount, _data);
+        uint256 _retiredTokenId = _retiredToken(_nonRetiredToken);
+        // TODO: Multiply by a coefficient?
+        _doMint(tokenOwners[_retiredTokenId], _retiredTokenId, _taxAmount, _data);
+        _doMint(msg.sender, _retiredTokenId, _amount - _taxAmount, _data);
         // emit CreditRetired(creditId); // not needed as _doBurn() emits a suitable event
     }
 
 // Internal
 
-    function _retiredCreditsToken() internal pure returns(uint256) {
-        return 1; // M+ token
+    function _retiredToken(uint256 _nonRetiredToken) internal pure isNonRetiredToken(_nonRetiredToken) returns(uint256) {
+        return _nonRetiredToken + 1;
     }
 
-    function _nonRetiredCreditsToken() internal pure returns(uint256) {
-        return 2;
+    // See also `createAuthority()`.
+    modifier isNonRetiredToken(uint256 _nonRetiredToken) {
+        require(_nonRetiredToken % 2 == 0);
+        _;
     }
-
 }

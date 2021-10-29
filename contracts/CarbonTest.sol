@@ -11,12 +11,8 @@ contract CarbonTest is Carbon {
 
     // solhint-disable func-visibility
     // solhint-disable bracket-align
-    constructor(address _globalCommunityFund,
-                string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
-                string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
-        Carbon(
-            _globalCommunityFund,
-            _retiredName, _retiredSymbol, _retiredUri, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri)
+    constructor()
+        Carbon()
     { }
     // solhint-enable bracket-align
     // solhint-enable func-visibility

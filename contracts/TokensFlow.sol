@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "./ERC1155.sol";
 import "./IERC1155Views.sol";
 
-contract TokensFlow is ERC1155, IERC1155Views {
+contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     using SafeMath for uint256;
     using Address for address;
 
@@ -38,36 +38,22 @@ contract TokensFlow is ERC1155, IERC1155Views {
 // IERC1155Views
 
     mapping (uint256 => uint256) private totalSupplyImpl;
-    mapping (uint256 => string) private nameImpl;
-    mapping (uint256 => string) private symbolImpl;
     mapping (uint256 => string) private uriImpl;
 
-    function totalSupply(uint256 _id) external override view returns (uint256) {
+    function totalSupply(uint256 _id) external view returns (uint256) {
         return totalSupplyImpl[_id];
     }
 
-    function name(uint256 _id) external override view returns (string memory) {
-        return nameImpl[_id];
-    }
-
-    function symbol(uint256 _id) external override view returns (string memory) {
-        return symbolImpl[_id];
-    }
-
-    function decimals(uint256) external override pure returns (uint8) {
-        return 18;
-    }
-
-    function uri(uint256 _id) external override view returns (string memory) {
+    function uri(uint256 _id) external view returns (string memory) {
         return uriImpl[_id];
     }
 
 // Administrativia
 
-    function newToken(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)
+    function newToken(uint256 _parent, string calldata _uri)
         external returns (uint256)
     {
-        return _newToken(_parent, _name, _symbol, _uri, msg.sender);
+        return _newToken(_parent, _uri, msg.sender);
     }
 
     function setTokenOwner(uint256 _id, address _newOwner) external {
@@ -230,7 +216,7 @@ contract TokensFlow is ERC1155, IERC1155Views {
                 _flow.timeEnteredSwapCredit = _currentTimeResult;
                 _flow.remainingSwapCredit = _flow.limit.maxSwapCredit;
             }
-            _flow.lastSwapTime = _currentTimeResult; // TODO: no strictly necessary if !_flow.recurring
+            _flow.lastSwapTime = _currentTimeResult; // TODO: not strictly necessary if !_flow.recurring
             // require(_amount < 1<<128); // done above
             _flow.remainingSwapCredit -= int256(_amount);
         }
@@ -255,20 +241,16 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
 // Internal
 
-    function _newToken(
-        uint256 _parent,
-        string memory _name, string memory _symbol, string memory _uri,
-        address _owner) internal returns (uint256)
-    {
-        tokenOwners[++maxTokenId] = _owner;
+    function _newToken(uint256 _parent, string memory _uri, address _owner) internal returns (uint256) {
+        tokenOwners[maxTokenId] = _owner;
 
-        nameImpl[maxTokenId] = _name;
-        symbolImpl[maxTokenId] = _symbol;
         uriImpl[maxTokenId] = _uri;
 
         _setTokenParentNoCheck(maxTokenId, _parent);
 
-        emit NewToken(maxTokenId, _owner, _name, _symbol, _uri);
+        maxTokenId++;
+
+        emit NewToken(maxTokenId, _owner, _uri);
 
         return maxTokenId;
     }
@@ -360,5 +342,5 @@ contract TokensFlow is ERC1155, IERC1155Views {
 
 // Events
 
-    event NewToken(uint256 indexed id, address indexed owner, string name, string symbol, string uri);
+    event NewToken(uint256 indexed id, address indexed owner, string uri);
 }
