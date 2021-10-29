@@ -1,6 +1,6 @@
 # Carbon Flow
 
-`multifunds` branch will contain improved API.
+`multifunds` branch will contains improved API, but this new branch is not yet tested.
 
 _This is **the only** reasonable carbon accounting project for the world, because it has world-best anti-theft protection to scale to store and transfer trillions dollars of value._
 
@@ -99,34 +99,32 @@ There are basically two kinds of tokens:
 
 - retired carbon tokens.
 
-Each token has a token owner. Each token has either a parent token or no parent token.
+Each non-retired token may have a token owner. Each token has either a parent token or no parent token.
 
-There are two "main tokens" (they have no parents):
+The token owner is called an _carbon credit authority_.
 
-- the M+ token represents retired carbon credits;
-- the M- token represents non-retired carbon credits.
-
-The token owner whose ultimate ancestor is the owner of M- is called an _carbon credit authority_.
-
-So, we have the M+ token _and_ a tree of tokens of child/parent
-relationships between authorities rooting in M- token (there may be more, see the next paragraph).
+So, we have the tokens _and_ a tree of tokens of child/parent
+relationships between authorities rooting in non-retired tokens with no parents (there may be more, see the next paragraph).
 
 Remark: In fact they are not trees but directed graphs.
 
 There may be token owners who are not authorities (either tokens
 unrelated with our carbon counting project (That's fine, there is no reason to use my project only
-for carbon counting, it may be useful also for something other.) or token owners temporarily not having
-M+ or M- as the ultimate ancestor).
+for carbon counting, it may be useful also for something other.)
 
 A token owner can change its parent at any moment of time by its own will. (But
 if he does this, his token is disabled (unless now has no parent) and his swap limits
 (see below) are reset to zero until its new parent wishes to increase his limits.)
 
+TODO: Maybe we instead should have many-to-many child-parent relationship,
+with child enabling/disabling and parent setting limits?
+See also **Backward flow**
+
 ## Token flow
 
-Anybody can swap a child token he holds for the same amount of its parent token.
+Anybody can swap a child token he holds for an amount (by an exchange rate set by parent) of its parent token.
 
-It is useful to build a hieararchical system of authorities with the root in M- token.  
+It is useful to build a hieararchical system of authorities with roots in international carbon tokens.
 
 ### Backward flow
 
@@ -291,17 +289,17 @@ issue for him M- and M+ tokens to this wallet instead of his own wallet (and do 
 operations for him instead of himself). The amount of transfers/swaps may be restricted by using a
 smart wallet as such a "bank account".
 
-
 ## FAQ
 
 **Which tokens do you have?**
 
-M+ token is the retired carbon credits.
+Anybody can create his own two tokens:
 
-M- token is the non-retired carbon credits.
+- non-retired carbon credits.
+- retired carbon credits.
 
-Each authority has also its own token for carbon credits that could be exchanged
-for the token of its upper level issuer and ultimately for the M- token.
+Each authority has its own token for carbon credits that could be exchanged
+for the token of its upper level issuer and ultimately for international tokens.
 
 **There are both ERC-20 and ERC-1155 tokens. Which tokens should I use?**
 
@@ -318,16 +316,16 @@ gas. But many legacy softwares don't support ERC-1155, in this case use ERC-20.
 Some DAOs cannot be ERC-1155 smart wallets (because ERC-1155 smart wallet must implement
 certain functions that may be missing in a DAO). The trouble is solvable by making the DAO
 to control a separate contract acting as a ERC-1155 smart wallet. Another solution is to
-use (one of the two of) my ERC-20 wrapper.
+use (one of the three of) my ERC-20 wrappers.
 
-Voting with balance my tokens is impossible: Somebody could vote, transfer to another account
+Voting with balance of my tokens is impossible: Somebody could vote, transfer to another account
 and vote again (many times). It could be made by storing the token balance (as in MiniMeToken)
 at the beginning of the vote period, but that requires complex code and rather much gas
-(electricity, carbon) usage on every transfer of M+. As a cheaper and easier alternative
-solution I propose to vote not with balances of M+ tokens but instead transfer the voted
-amount of M+ to the fund's account (as a side effect, we get more donations). Note also that
+(electricity, carbon) usage on every transfer of. As a cheaper and easier alternative
+solution I propose to vote not with balances of tokens but instead transfer the voted
+amount of such a token to the fund's account (as a side effect, we get more donations). Note also that
 this solution has a deciency: With quadratic voting it becomes possible for spoofers to transfer
-little amounts of M+ to many of their friends and ask them to vote for them. Maybe we should give
+little amounts of it to many of their friends and ask them to vote for them. Maybe we should give
 up quadratic voting and use old-school linear voting?
 
 If you set your swap limit to N and later make it M, then (surprise!) a hacker sometimes
@@ -355,7 +353,7 @@ than good (but in the future Ethereum transactions cost is expected to come down
 
 ## See also
 
-`doc/` folder. Use LibreOffice to read these files.
+`doc/` folder (outdated). Use LibreOffice to read these files.
 
 ## Donations
 
