@@ -321,7 +321,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             maxSwapCredit: _maxSwapCredit,
             swapCreditPeriod: _swapCreditPeriod,
             firstTimeEnteredSwapCredit: _firstTimeEnteredSwapCredit,
-            // FIXME: Set the following when new pair?
             hash: keccak256(abi.encodePacked(_recurring, _initialSwapCredit, _maxSwapCredit, _swapCreditPeriod, _firstTimeEnteredSwapCredit))
         });
     }
