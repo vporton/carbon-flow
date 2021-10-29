@@ -6,6 +6,9 @@ import "@nomiclabs/buidler/console.sol";
 import "./TokensFlow.sol";
 import "./ABDKMath64x64.sol";
 
+// TODO: We need multiple competing community funds.
+//       Problem: If a local fund (or even a commercial accounter) has too cheap retirement, it's bad for the global community.
+
 contract BaseCarbon is TokensFlow {
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
