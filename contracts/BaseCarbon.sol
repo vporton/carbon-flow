@@ -6,10 +6,7 @@ import "hardhat/console.sol";
 import "./TokensFlow.sol";
 import "./ABDKMath64x64.sol";
 
-// TODO: We need multiple competing community funds.
-//       Problem: If a local fund (or even a commercial accounter) has too cheap retirement, it's bad for the global community.
-//       We can make retired tokens just another kind of fund and retiring be just transfer with tax (energy-efficient?)
-//       We need also multiplier in swaps: Consider if some carbon accounter was found a thief, we need to dive his tokens after transferring ownership away.
+// TODO: We need also multiplier in swaps: Consider if some carbon accounter was found a thief, we need to divide his tokens after transferring ownership away.
 
 contract BaseCarbon is TokensFlow {
     using SafeMath for uint256;
