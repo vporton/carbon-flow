@@ -29,7 +29,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         bool enabled;
     }
 
-    uint256 public maxTokenId;
+    uint256 public nextTokenId;
 
     mapping (uint256 => address) public tokenOwners;
 
@@ -78,7 +78,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     // We don't check for circularities.
     function setTokenParent(uint256 _child, uint256 _parent) external {
-        // require(_child != 0 && _child <= maxTokenId); // not needed
+        // require(_child != 0 && _child < nextTokenId); // not needed
         require(msg.sender == tokenOwners[_child]);
 
         _setTokenParentNoCheck(_child, _parent);
@@ -242,17 +242,15 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 // Internal
 
     function _newToken(uint256 _parent, string memory _uri, address _owner) internal returns (uint256) {
-        tokenOwners[maxTokenId] = _owner;
+        tokenOwners[nextTokenId] = _owner;
 
-        uriImpl[maxTokenId] = _uri;
+        uriImpl[nextTokenId] = _uri;
 
-        _setTokenParentNoCheck(maxTokenId, _parent);
+        _setTokenParentNoCheck(nextTokenId, _parent);
 
-        maxTokenId++;
+        emit NewToken(nextTokenId, _owner, _uri);
 
-        emit NewToken(maxTokenId, _owner, _uri);
-
-        return maxTokenId;
+        return nextTokenId++;
     }
 
     function _doMint(address _to, uint256 _id, uint256 _value, bytes memory _data) public {
@@ -287,7 +285,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     // Allow this even if `!enabled` and set `enabled` to `true` if no parent,
     // as otherwise impossible to enable it again.
     function _setTokenParentNoCheck(uint256 _child, uint256 _parent) internal virtual {
-        require(_parent <= maxTokenId);
+        require(_parent < nextTokenId);
 
         tokenFlow[_child] = TokenFlow({
             parentToken: _parent,
