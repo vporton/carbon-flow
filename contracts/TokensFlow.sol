@@ -23,7 +23,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     }
 
     struct TokenFlow {
-        uint256 parentToken;
         int128 coefficient;
         SwapLimit limit;
         int256 remainingSwapCredit;
@@ -34,9 +33,10 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     uint256 public nextTokenId;
 
-    mapping (uint256 => address) public tokenOwners;
+    mapping (uint256 => mapping (uint256 => bool)) public parentTokens; // child => (parent => true)
+    mapping (uint256 => mapping (uint256 => TokenFlow)) public tokenFlow; // child => (parent => flow)
 
-    mapping (uint256 => TokenFlow) public tokenFlow;
+    mapping (uint256 => address) public tokenOwners;
 
     mapping (uint256 => uint256) private totalSupplyImpl;
     mapping (uint256 => string) private uriImpl;
@@ -80,55 +80,42 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     }
 
     // We don't check for circularities.
-    function setTokenParent(uint256 _child, uint256 _parent) external {
+    function setTokenParent(uint256 _child, uint256 _parent, bool _value) external {
         // require(_child != 0 && _child < nextTokenId); // not needed
         require(msg.sender == tokenOwners[_child]);
 
-        _setTokenParentNoCheck(_child, _parent);
+        _setTokenParentNoCheck(_child, _parent, _value);
     }
 
     // Each element of `_childs` list must be a child of the next one.
     // TODO: Test. Especially test the case if the last child has no parent. Also test if a child is zero.
-    function setEnabled(uint256 _ancestor, uint256[] calldata _childs, bool _enabled) external {
+    function setEnabled(uint256[] calldata _childs, bool _enabled) external {
+        uint256 _ancestor = _childs[_childs.length - 1];
         require(msg.sender == tokenOwners[_ancestor]);
-        require(tokenFlow[_ancestor].enabled);
         
-        uint256 _firstChild = _childs[0]; // asserts on `_childs.length == 0`.
-        bool _hasRight = false; // if msg.sender is an ancestor
-
-        // Note that if in the below loops we disable ourselves, then it will be detected by a require
-
-        uint i = 0;
-        uint256 _parent;
-        for (uint256 _id = _firstChild; _id != 0; _id = _parent) {
-            _parent = tokenFlow[_id].parentToken;
-            if (i < _childs.length - 1) {
-                require(_parent == _childs[i + 1]);
+        for (uint i = 0; i != _childs.length - 1; ++i) {
+            uint256 _id = _childs[i];
+            require(_id != _ancestor); // Prevent (irreversibly) enabling ourselves using a cycle.
+            if (i != _childs.length - 1) {
+                uint256 _parent = _childs[i + 1];
+                require(parentTokens[_id][_parent]);
+                tokenFlow[_id][_parent].enabled = _enabled;
             }
-            if (_id == _ancestor) {
-                _hasRight = true;
-                break;
-            }
-            // We are not msg.sender
-            tokenFlow[_id].enabled = _enabled; // cannot enable for msg.sender
-            ++i;
         }
-
-        require(_hasRight);
     }
 
     // User can set negative values. It is a nonsense but does not harm.
     function setRecurringFlow(
         uint256 _child,
+        uint256 _parent,
         int128 _coefficient,
         int256 _maxSwapCredit,
         int256 _remainingSwapCredit,
         int _swapCreditPeriod, int _timeEnteredSwapCredit,
         bytes32 oldLimitHash) external
     {
-        TokenFlow storage _flow = tokenFlow[_child];
-
-        require(msg.sender == tokenOwners[_flow.parentToken]);
+        require(msg.sender == tokenOwners[_parent]);
+        TokenFlow storage _flow = tokenFlow[_child][_parent];
         require(_flow.limit.hash == oldLimitHash);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
@@ -139,11 +126,11 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     }
 
     // User can set negative values. It is a nonsense but does not harm.
-    function setNonRecurringFlow(uint256 _child, int128 _coefficient, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
-        TokenFlow storage _flow = tokenFlow[_child];
-
-        require(msg.sender == tokenOwners[_flow.parentToken]);
+    function setNonRecurringFlow(uint256 _child, uint256 _parent, int128 _coefficient, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
+        require(msg.sender == tokenOwners[_parent]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
+        // require(tokenParents[_child][_parent]); // not needed
+        TokenFlow storage _flow = tokenFlow[_child][_parent];
         require(_flow.limit.hash == oldLimitHash);
 
         _flow.coefficient = _coefficient;
@@ -205,10 +192,10 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         uint256 _newAmount = _amount;
         for(uint i = 0; i != _ids.length - 1; ++i) {
             uint256 _id = _ids[i];
-            require(_id != 0);
-            uint256 _parent = tokenFlow[_id].parentToken;
-            require(_parent == _ids[i + 1]); // i ranges 0 .. _ids.length - 2
-            _flow = tokenFlow[_id];
+            uint256 _parent = _ids[i + 1];
+            require(parentTokens[_id][_parent]);
+            // require(_id != 0 && _parent != 0); // not needed
+            _flow = tokenFlow[_id][_parent];
             require(_flow.enabled);
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
@@ -253,12 +240,10 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
 // Internal
 
-    function _newToken(uint256 _parent, string memory _uri, address _owner) internal returns (uint256) {
+    function _newToken(string memory _uri, address _owner) internal returns (uint256) {
         tokenOwners[nextTokenId] = _owner;
 
         uriImpl[nextTokenId] = _uri;
-
-        _setTokenParentNoCheck(nextTokenId, _parent);
 
         emit NewToken(nextTokenId, _owner, _uri);
 
@@ -293,21 +278,10 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         emit TransferSingle(msg.sender, _from, address(0), _id, _value);
     }
 
-    // Also resets swap credits and `enabled`, so use with caution.
-    // Allow this even if `!enabled` and set `enabled` to `true` if no parent,
-    // as otherwise impossible to enable it again.
-    function _setTokenParentNoCheck(uint256 _child, uint256 _parent) internal virtual {
+    function _setTokenParentNoCheck(uint256 _child, uint256 _parent, bool _value) internal virtual {
         require(_parent < nextTokenId);
 
-        tokenFlow[_child] = TokenFlow({
-            parentToken: _parent,
-            coefficient: 1<<64, // 1.0
-            limit: _createSwapLimit(false, 0, 0, 0, 0),
-            timeEnteredSwapCredit: 0, // zero means not in a swap credit
-            lastSwapTime: 0,
-            remainingSwapCredit: 0,
-            enabled: _parent == 0
-        });
+        parentTokens[_child][_parent] = _value;
     }
 
     function _currentTime() internal virtual view returns(int) {
@@ -347,6 +321,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             maxSwapCredit: _maxSwapCredit,
             swapCreditPeriod: _swapCreditPeriod,
             firstTimeEnteredSwapCredit: _firstTimeEnteredSwapCredit,
+            // FIXME: Set the following when new pair?
             hash: keccak256(abi.encodePacked(_recurring, _initialSwapCredit, _maxSwapCredit, _swapCreditPeriod, _firstTimeEnteredSwapCredit))
         });
     }

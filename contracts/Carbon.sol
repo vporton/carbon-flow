@@ -37,10 +37,10 @@ contract Carbon is BaseCarbon {
     // solhint-enable func-visibility
 
     // Anybody can create an authority, but its parent decides if its tokens can be swapped.
-    function createAuthority(uint256 _parent, string calldata _nonRetiredUri, string calldata _retiredUri) external {
+    function createAuthority(string calldata _nonRetiredUri, string calldata _retiredUri) external {
         // Minting restricted because minting can happen only through createCredit().
-        uint256 _nonRetiredToken = _newToken(_parent, _nonRetiredUri, msg.sender); // always odd, see also `isNonRetiredToken`.
-        /*uint256 _retiredToken = */_newToken(0, _retiredUri, address(0)); // + 1
+        uint256 _nonRetiredToken = _newToken(_nonRetiredUri, msg.sender); // always odd, see also `isNonRetiredToken`.
+        /*uint256 _retiredToken = */_newToken(_retiredUri, address(0)); // + 1
         Authority memory _authority = Authority({maxSerial: 0, token: _nonRetiredToken});
         authorities[_nonRetiredToken] = _authority;
         emit AuthorityCreated(msg.sender, _nonRetiredToken);
@@ -51,7 +51,7 @@ contract Carbon is BaseCarbon {
     function createCredit(uint256 _token, uint256 _amount, address _owner, bytes32 _arweaveHash)
         external returns(uint256)
     {
-        require(tokenOwners[_token] == msg.sender && tokenFlow[_token].enabled);
+        require(tokenOwners[_token] == msg.sender);
         Authority storage _authority = authorities[_token];
         MintRecord memory _credit = MintRecord({
             authority: msg.sender,
@@ -67,11 +67,12 @@ contract Carbon is BaseCarbon {
         return maxCreditId;
     }
 
-    function _setTokenParent(uint256 _child, uint256 _parent) internal {
+    function _setTokenParent(uint256 _child, uint256 _parent, bool _value) internal {
         // require(_child != 0 && _child < nextTokenId); // not needed
+        // require(_parent != 0 && _parent < nextTokenId); // caller's responsibility
         require(msg.sender == tokenOwners[_child]);
 
-        _setTokenParentNoCheck(_child, _parent);
+        _setTokenParentNoCheck(_child, _parent, _value);
     }
 
     event AuthorityCreated(address indexed owner, uint256 indexed token);
