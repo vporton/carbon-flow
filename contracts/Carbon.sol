@@ -32,7 +32,7 @@ contract Carbon is BaseCarbon {
     constructor()
         BaseCarbon()
     {
-        nextTokenId = 1;
+        nextTokenId = 1; // Non-retired token IDs are odd numbers,
     }
     // solhint-enable bracket-align
     // solhint-enable func-visibility
