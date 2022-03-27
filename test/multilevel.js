@@ -27,7 +27,7 @@ describe("TokensFlow (limits)", function() {
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/TokensFlowTest.json')).abi;
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/TokensFlowTest.sol/TokensFlowTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     const wallet0 = ethers.Wallet.createRandom();

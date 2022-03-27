@@ -2,6 +2,10 @@
   "name": "@porton/carbon-flow",
   "version": "0.0.1",
   "description": "Secure counting carbon credits and retire carbon credits",
+  "scripts": {
+    "build": "npx hardhat compile",
+    "test": "npx hardhat test"
+  },
   "dependencies": {
     "@myetherwallet/mewconnect-web-client": "^2.1.5-beta.1",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
