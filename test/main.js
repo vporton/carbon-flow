@@ -1,6 +1,6 @@
 "strict";
 
-const { deployments } = require("@nomiclabs/hardhat");
+const { deployments } = require("hardhat");
 const chai = require("chai");
 const chaiAsPromised = require('chai-as-promised');
 const mainTest = require('../lib/main-test.js');;
