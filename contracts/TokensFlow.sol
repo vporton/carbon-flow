@@ -33,13 +33,21 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     uint256 public nextTokenId;
 
-    mapping (uint256 => mapping (uint256 => bool)) public parentTokens; // child => (parent => true)
-    mapping (uint256 => mapping (uint256 => TokenFlow)) public tokenFlow; // child => (parent => flow)
+    mapping (uint256 => mapping (uint256 => bool)) private parentTokensImpl; // child => (parent => true)
+    mapping (uint256 => mapping (uint256 => TokenFlow)) private tokenFlowImpl; // child => (parent => flow)
 
     mapping (uint256 => address) public tokenOwners;
 
     mapping (uint256 => uint256) private totalSupplyImpl;
     mapping (uint256 => string) private uriImpl;
+
+    function isChild(uint256 _child, uint256 _parent) external view returns (bool) {
+        return parentTokensImpl[_child][_parent];
+    }
+
+    function tokenFlow(uint256 _child, uint256 _parent) external view returns (TokenFlow memory) {
+        return tokenFlowImpl[_child][_parent];
+    }
 
     function totalSupply(uint256 _id) external view returns (uint256) {
         return totalSupplyImpl[_id];
@@ -98,8 +106,8 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             require(_id != _ancestor); // Prevent (irreversibly) enabling ourselves using a cycle.
             if (i != _childs.length - 1) {
                 uint256 _parent = _childs[i + 1];
-                require(parentTokens[_id][_parent]);
-                tokenFlow[_id][_parent].enabled = _enabled;
+                require(parentTokensImpl[_id][_parent]);
+                tokenFlowImpl[_id][_parent].enabled = _enabled;
             }
         }
     }
@@ -115,7 +123,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         bytes32 oldLimitHash) external
     {
         require(msg.sender == tokenOwners[_parent]);
-        TokenFlow storage _flow = tokenFlow[_child][_parent];
+        TokenFlow storage _flow = tokenFlowImpl[_child][_parent];
         require(_flow.limit.hash == oldLimitHash);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
@@ -130,7 +138,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         require(msg.sender == tokenOwners[_parent]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
         // require(tokenParents[_child][_parent]); // not needed
-        TokenFlow storage _flow = tokenFlow[_child][_parent];
+        TokenFlow storage _flow = tokenFlowImpl[_child][_parent];
         require(_flow.limit.hash == oldLimitHash);
 
         _flow.coefficient = _coefficient;
@@ -149,7 +157,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     //     uint256 _value,
     //     bytes calldata _data) external virtual override
     // {
-    //     require(tokenFlow[_id].enabled);
+    //     require(tokenFlowImpl[_id].enabled);
     //     super._safeTransferFrom(_from, _to, _id, _value, _data);
     // }
 
@@ -161,7 +169,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     //     bytes calldata _data) external virtual override
     // {
     //     for (uint i = 0; i < _ids.length; ++i) {
-    //         require(tokenFlow[_ids[i]].enabled);
+    //         require(tokenFlowImpl[_ids[i]].enabled);
     //     }
     //     super._safeBatchTransferFrom(_from, _to, _ids, _values, _data);
     // }
@@ -193,9 +201,9 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         for(uint i = 0; i != _ids.length - 1; ++i) {
             uint256 _id = _ids[i];
             uint256 _parent = _ids[i + 1];
-            require(parentTokens[_id][_parent]);
+            require(parentTokensImpl[_id][_parent]);
             // require(_id != 0 && _parent != 0); // not needed
-            _flow = tokenFlow[_id][_parent];
+            _flow = tokenFlowImpl[_id][_parent];
             require(_flow.enabled);
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
@@ -229,7 +237,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     //     require(_parent != 0);
     //     uint256 _newAmount = _amount;
     //     for(uint i = 1; i != _ids.length; ++i) {
-    //         _parent = tokenFlow[_parent].parentToken;
+    //         _parent = tokenFlowImpl[_parent].parentToken;
     //         require(_parent != 0);
     //         require(_parent == _ids[i]); // consequently `_ids[i] != 0`
     //         _newAmount = _newAmount.mul(_parent.coefficient);
@@ -281,7 +289,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     function _setTokenParentNoCheck(uint256 _child, uint256 _parent, bool _value) internal virtual {
         require(_parent < nextTokenId);
 
-        parentTokens[_child][_parent] = _value;
+        parentTokensImpl[_child][_parent] = _value;
     }
 
     function _currentTime() internal virtual view returns(int) {
