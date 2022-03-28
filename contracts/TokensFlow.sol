@@ -19,7 +19,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         int256 maxSwapCredit;
         int swapCreditPeriod;
         int firstTimeEnteredSwapCredit;
-        bytes32 hash;
+        bytes32 hash; // FIXME: Instead of writing it down, enough to calculate when comparing.
     }
 
     struct TokenFlow {
