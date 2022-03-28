@@ -7,6 +7,7 @@ const random = require('random');
 const seedrandom = require('seedrandom');
 const StupidWallet = require('../lib/stupid-wallet.js');
 const LimitSetter = require('../lib/limit-setter.js');
+const { createAuthority } = require('../lib/carbon-flow.js');
 
 const { expect, assert } = chai;
 
@@ -22,12 +23,12 @@ describe("TokensFlow (limits)", function() {
 
     const [ deployer, owner ] = await ethers.getSigners();
 
-    const TokensFlow = await ethers.getContractFactory("TokensFlowTest");
+    const TokensFlow = await ethers.getContractFactory("CarbonTest");
     const tokensFlow = await TokensFlow.deploy();
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/TokensFlowTest.sol/TokensFlowTest.json')).abi;
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/CarbonTest.sol/CarbonTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     const wallet0 = ethers.Wallet.createRandom();
@@ -38,16 +39,12 @@ describe("TokensFlow (limits)", function() {
     let tokens = []; // needed?
     let tree = {};
 
-    const tx2 = await tokensFlow.connect(wallet).newToken(0, "M+C Token", "M+C", "https://example.com");
-    const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
-    const rootToken = createTokenEventIface.parseLog(receipt2.logs[0]).args.id;
+    const [rootToken] = await createAuthority(tokensFlow, wallet, "", "");
 
     tokens.push(rootToken);
     for(let i = 0; i < 1; ++i) {
-      const tx = await tokensFlow.connect(wallet).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(rootToken, [token], true);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      const txE = await tokensFlow.connect(wallet).setEnabled([rootToken, token], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       tree[token] = rootToken;
@@ -128,12 +125,12 @@ describe("TokensFlow (limits)", function() {
 
     const [ deployer, owner ] = await ethers.getSigners();
 
-    const TokensFlow = await ethers.getContractFactory("TokensFlowTest");
+    const TokensFlow = await ethers.getContractFactory("CarbonTest");
     const tokensFlow = await TokensFlow.deploy();
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/TokensFlowTest.sol/TokensFlowTest.json')).abi;
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/CarbonTest.sol/CarbonTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     const wallet0 = ethers.Wallet.createRandom();
@@ -144,16 +141,12 @@ describe("TokensFlow (limits)", function() {
     let tokens = []; // needed?
     let tree = {};
 
-    const tx2 = await tokensFlow.connect(wallet).newToken(0, "M+C Token", "M+C", "https://example.com");
-    const receipt2 = await ethers.provider.getTransactionReceipt(tx2.hash);
-    const rootToken = createTokenEventIface.parseLog(receipt2.logs[0]).args.id;
+    const [rootToken] = await createAuthority(tokensFlow, wallet, "", "")
 
     tokens.push(rootToken);
     for(let i = 0; i < 1; ++i) {
-      const tx = await tokensFlow.connect(wallet).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(rootToken, [token], true);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      const txE = await tokensFlow.connect(wallet).setEnabled([rootToken, token], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       tree[token] = rootToken;

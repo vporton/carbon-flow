@@ -7,6 +7,7 @@ const random = require('random');
 const seedrandom = require('seedrandom');
 const StupidWallet = require('../lib/stupid-wallet.js');
 const LimitSetter = require('../lib/limit-setter.js');
+const { createAuthority } = require('../lib/carbon-flow.js');
 
 const { expect, assert } = chai;
 
@@ -29,12 +30,12 @@ describe("TokensFlow", function() {
 
     const [ deployer, owner ] = await ethers.getSigners();
 
-    const TokensFlow = await ethers.getContractFactory("TokensFlowTest");
+    const TokensFlow = await ethers.getContractFactory("CarbonTest");
     const tokensFlow = await TokensFlow.deploy();
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/TokensFlowTest.sol/TokensFlowTest.json')).abi;
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/CarbonTest.sol/CarbonTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     let wallets = [];
@@ -50,16 +51,13 @@ describe("TokensFlow", function() {
     let tokens = []; // correspond to a first few wallets
     let tree = {};
 
-    const tx = await tokensFlow.connect(wallets[0]).newToken(0, "M+C Token", "M+C", "https://example.com");
-    const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-    const rootToken = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
+    const [rootToken] = await createAuthority(tokensFlow, wallets[0], "", "");
 
     tokens.push(rootToken);
     for(let i = 0; i < 4; ++i) {
-      const tx = await tokensFlow.connect(wallets[i+1]).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallets[0]).setEnabled(rootToken, [token], true);
+      const [token] = await createAuthority(tokensFlow, wallets[i+1], "", "");
+      console.log('zzz', await tokensFlow.tokenOwners(token), wallets[i+1].address)
+      const txE = await tokensFlow.connect(wallets[i+1]).setEnabled([rootToken, token], true); // FIXME: Here invalid BigNumber value (argument="value", value=undefined, code=INVALID_ARGUMENT, version=bignumber/5.0.8)
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');

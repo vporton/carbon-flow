@@ -7,6 +7,7 @@ const random = require('random');
 const seedrandom = require('seedrandom');
 const StupidWallet = require('../lib/stupid-wallet.js');
 const LimitSetter = require('../lib/limit-setter.js');
+const { createAuthority } = require('../lib/carbon-flow.js');
 
 const { expect, assert } = chai;
 
@@ -22,12 +23,12 @@ describe("TokensFlow (limits)", function() {
 
     const [ deployer, owner ] = await ethers.getSigners();
 
-    const TokensFlow = await ethers.getContractFactory("TokensFlowTest");
+    const TokensFlow = await ethers.getContractFactory("CarbonTest");
     const tokensFlow = await TokensFlow.deploy();
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/TokensFlowTest.sol/TokensFlowTest.json')).abi;
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/CarbonTest.sol/CarbonTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     const wallet0 = ethers.Wallet.createRandom();
@@ -39,47 +40,36 @@ describe("TokensFlow (limits)", function() {
     let tokens2 = [];
 
     {
-      const tx = await tokensFlow.connect(wallet).newToken(0, "SubToken0", "S0", "https://example.com/0");
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
       tokens.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens[0], `SubToken1`, `S1`, `https://example.com/1`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(tokens[0], [token], true);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      const txE = await tokensFlow.connect(wallet).setEnabled([tokens[0], token], true);
+      return;
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens[1], `SubToken2`, `S2`, `https://example.com/2`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(tokens[1], [token], true);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      const txE = await tokensFlow.connect(wallet).setEnabled([tokens[1], token], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
     }
 
     {
-      const tx = await tokensFlow.connect(wallet).newToken(0, "XSubToken0", "XS0", "https://example.com/0x");
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
       tokens2.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens2[0], `XSubToken1`, `XS1`, `https://example.com/1x`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(tokens2[0], [token], true);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      const txE = await tokensFlow.connect(wallet).setEnabled([tokens2[0], token], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens2.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens2[1], `XSubToken2`, `XS2`, `https://example.com/2x`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(tokens2[1], [token], true);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      const txE = await tokensFlow.connect(wallet).setEnabled([tokens2[1], token], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens2.push(token);
     }
