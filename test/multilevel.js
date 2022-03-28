@@ -45,14 +45,13 @@ describe("TokensFlow (limits)", function() {
     }
     {
       const [token] = await createAuthority(tokensFlow, wallet, "", "");
-      const txE = await tokensFlow.connect(wallet).setEnabled([tokens[0], token], true);
-      return;
+      const txE = await tokensFlow.connect(wallet).setEnabled([token, tokens[0]], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
     }
     {
       const [token] = await createAuthority(tokensFlow, wallet, "", "");
-      const txE = await tokensFlow.connect(wallet).setEnabled([tokens[1], token], true);
+      const txE = await tokensFlow.connect(wallet).setEnabled([token, tokens[1]], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
     }
@@ -63,13 +62,13 @@ describe("TokensFlow (limits)", function() {
     }
     {
       const [token] = await createAuthority(tokensFlow, wallet, "", "");
-      const txE = await tokensFlow.connect(wallet).setEnabled([tokens2[0], token], true);
+      const txE = await tokensFlow.connect(wallet).setEnabled([token, tokens2[0]], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens2.push(token);
     }
     {
       const [token] = await createAuthority(tokensFlow, wallet, "", "");
-      const txE = await tokensFlow.connect(wallet).setEnabled([tokens2[1], token], true);
+      const txE = await tokensFlow.connect(wallet).setEnabled([token, tokens2[1]], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens2.push(token);
     }

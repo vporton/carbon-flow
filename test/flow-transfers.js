@@ -56,8 +56,7 @@ describe("TokensFlow", function() {
     tokens.push(rootToken);
     for(let i = 0; i < 4; ++i) {
       const [token] = await createAuthority(tokensFlow, wallets[i+1], "", "");
-      console.log('zzz', await tokensFlow.tokenOwners(token), wallets[i+1].address)
-      const txE = await tokensFlow.connect(wallets[i+1]).setEnabled([rootToken, token], true); // FIXME: Here invalid BigNumber value (argument="value", value=undefined, code=INVALID_ARGUMENT, version=bignumber/5.0.8)
+      const txE = await tokensFlow.connect(wallets[0]).setEnabled([token, rootToken], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');

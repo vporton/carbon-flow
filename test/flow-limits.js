@@ -44,7 +44,7 @@ describe("TokensFlow (limits)", function() {
     tokens.push(rootToken);
     for(let i = 0; i < 1; ++i) {
       const [token] = await createAuthority(tokensFlow, wallet, "", "");
-      const txE = await tokensFlow.connect(wallet).setEnabled([rootToken, token], true);
+      const txE = await tokensFlow.connect(wallet).setEnabled([token, rootToken], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       tree[token] = rootToken;
@@ -146,7 +146,7 @@ describe("TokensFlow (limits)", function() {
     tokens.push(rootToken);
     for(let i = 0; i < 1; ++i) {
       const [token] = await createAuthority(tokensFlow, wallet, "", "");
-      const txE = await tokensFlow.connect(wallet).setEnabled([rootToken, token], true);
+      const txE = await tokensFlow.connect(wallet).setEnabled([token, rootToken], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       tree[token] = rootToken;

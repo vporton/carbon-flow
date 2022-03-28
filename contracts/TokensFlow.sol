@@ -98,7 +98,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             require(_id != _ancestor); // Prevent (irreversibly) enabling ourselves using a cycle.
             if (i != _childs.length - 1) {
                 uint256 _parent = _childs[i + 1];
-                require(parentTokens[_id][_parent]); // FIXME: This check isn't enough: childs control parents.
+                require(parentTokens[_id][_parent]);
                 tokenFlow[_id][_parent].enabled = _enabled;
             }
         }
