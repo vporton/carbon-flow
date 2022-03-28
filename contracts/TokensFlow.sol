@@ -19,7 +19,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         int256 maxSwapCredit;
         int swapCreditPeriod;
         int firstTimeEnteredSwapCredit;
-        bytes32 hash; // FIXME: Instead of writing it down, enough to calculate when comparing.
     }
 
     struct TokenFlow {
@@ -124,7 +123,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     {
         require(msg.sender == tokenOwners[_parent]);
         TokenFlow storage _flow = tokenFlowImpl[_child][_parent];
-        require(_flow.limit.hash == oldLimitHash);
+        require(oldLimitHash == _swapLimitHash(_flow.limit));
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
         _flow.coefficient = _coefficient;
@@ -139,7 +138,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
         // require(tokenParents[_child][_parent]); // not needed
         TokenFlow storage _flow = tokenFlowImpl[_child][_parent];
-        require(_flow.limit.hash == oldLimitHash);
+        require(oldLimitHash == _swapLimitHash(_flow.limit));
 
         _flow.coefficient = _coefficient;
         _flow.limit = _createSwapLimit(false, _remainingSwapCredit, 0, 0, 0);
@@ -328,9 +327,12 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             initialSwapCredit: _initialSwapCredit,
             maxSwapCredit: _maxSwapCredit,
             swapCreditPeriod: _swapCreditPeriod,
-            firstTimeEnteredSwapCredit: _firstTimeEnteredSwapCredit,
-            hash: keccak256(abi.encodePacked(_recurring, _initialSwapCredit, _maxSwapCredit, _swapCreditPeriod, _firstTimeEnteredSwapCredit))
+            firstTimeEnteredSwapCredit: _firstTimeEnteredSwapCredit
         });
+    }
+
+    function _swapLimitHash(SwapLimit memory limit) pure internal returns (bytes32) {
+        return keccak256(abi.encodePacked(limit.recurring, limit.initialSwapCredit, limit.maxSwapCredit, limit.swapCreditPeriod, limit.firstTimeEnteredSwapCredit));
     }
 
 // Events
