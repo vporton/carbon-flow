@@ -65,7 +65,8 @@ describe("TokensFlow", function() {
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
       const stupidWallet = new StupidWallet(wallets[0]);
       const limits = new LimitSetter(tokensFlow, stupidWallet);
-      const tx2 = await limits.setNonRecurringFlow(token, rootToken, 1<<128, veryBigAmount);
+      const oneFrac = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64)).add(ethers.BigNumber.from(1));
+      const tx2 = await limits.setNonRecurringFlow(token, rootToken, oneFrac, veryBigAmount);
       await ethers.provider.getTransactionReceipt(tx2.hash);
       tree[token] = rootToken;
     }
@@ -163,7 +164,7 @@ describe("TokensFlow", function() {
             : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
           await skipTime();
           if(oldFromBalance.gte(amount)) {
-            const tx = await tokensFlow.connect(wallet).exchangeToAncestor([fromToken, ethers.BigNumber.from(1)], amount, [], {gasLimit: 1000000});
+            const tx = await tokensFlow.connect(wallet).exchangeToAncestor([fromToken, toToken], amount, [], {gasLimit: 1000000});
             await ethers.provider.getTransactionReceipt(tx.hash);
             const newFromBalance = await tokensFlow.balanceOf(wallet.address, fromToken);
             const newFromTotal = await tokensFlow.totalSupply(fromToken);
@@ -171,7 +172,7 @@ describe("TokensFlow", function() {
             const newToTotal = await tokensFlow.totalSupply(toToken);
             {
               const change = newToBalance.sub(oldToBalance);
-              console.log('zzz', [newToBalance, oldToBalance, change])
+              console.log('zzz', [newToBalance, oldToBalance, change, amount])
               expect(change).to.equal(amount);
             }
             {
