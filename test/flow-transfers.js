@@ -2,6 +2,7 @@
 
 const chai = require("chai");
 const chaiAsPromised = require('chai-as-promised');
+const { solidity } = require("ethereum-waffle");
 const fs = require('fs');
 const random = require('random');
 const seedrandom = require('seedrandom');
@@ -12,6 +13,7 @@ const { createAuthority } = require('../lib/carbon-flow.js');
 const { expect, assert } = chai;
 
 chai.use(chaiAsPromised);
+chai.use(solidity);
 
 // random.use(seedrandom('rftg'));
 
@@ -89,7 +91,7 @@ describe("TokensFlow", function() {
           const oldToBalance = await tokensFlow.balanceOf(to.address, token);
           const oldTotal = await tokensFlow.totalSupply(token);
           // console.log("Mint");
-          await tokensFlow.connect(wallets[tokenIndex]).mint(to.address, token, amount, [], {gasLimit: 1000000});
+          const tx = await tokensFlow.connect(wallets[tokenIndex]).mint(to.address, token, amount, [], {gasLimit: 1000000});
           await ethers.provider.getTransactionReceipt(tx.hash);
           const newToBalance = await tokensFlow.balanceOf(to.address, token);
           const newTotal = await tokensFlow.totalSupply(token);
@@ -161,7 +163,7 @@ describe("TokensFlow", function() {
             : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
           await skipTime();
           if(oldFromBalance.gte(amount)) {
-            await tokensFlow.connect(wallet).exchangeToAncestor([fromToken, ethers.BigNumber.from(1)], amount, [], {gasLimit: 1000000});
+            const tx = await tokensFlow.connect(wallet).exchangeToAncestor([fromToken, ethers.BigNumber.from(1)], amount, [], {gasLimit: 1000000});
             await ethers.provider.getTransactionReceipt(tx.hash);
             const newFromBalance = await tokensFlow.balanceOf(wallet.address, fromToken);
             const newFromTotal = await tokensFlow.totalSupply(fromToken);
