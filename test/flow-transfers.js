@@ -86,7 +86,7 @@ describe("TokensFlow", function() {
           const token = tokens[tokenIndex];
           const amount = random.int(0, 10) == 0
             ? ethers.BigNumber.from('0')
-            : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
+            : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary not to overflow digits number
           const to = wallets[random.int(0, wallets.length -1)];
           const oldToBalance = await tokensFlow.balanceOf(to.address, token);
           const oldTotal = await tokensFlow.totalSupply(token);
