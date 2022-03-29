@@ -8,6 +8,7 @@ const seedrandom = require('seedrandom');
 const StupidWallet = require('../lib/stupid-wallet.js');
 const LimitSetter = require('../lib/limit-setter.js');
 const { createAuthority } = require('../lib/carbon-flow.js');
+const { ethers } = require("hardhat");
 
 const { expect, assert } = chai;
 
@@ -44,10 +45,11 @@ describe("TokensFlow (limits)", function() {
     tokens.push(rootToken);
     for(let i = 0; i < 1; ++i) {
       const [token] = await createAuthority(tokensFlow, wallet, "", "");
-      const txE = await tokensFlow.connect(wallet).setEnabled([token, rootToken], true);
-      await ethers.provider.getTransactionReceipt(txE.hash);
+      // const txE = await tokensFlow.connect(wallet).setEnabled([token, rootToken], true);
+      // await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       tree[token] = rootToken;
+      await await tokensFlow.connect(wallet).setTokenParent(token, rootToken, true);
     }
     const childToken = tokens[1];
 
@@ -58,14 +60,28 @@ describe("TokensFlow (limits)", function() {
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
 
+    const stupidWallet = new StupidWallet(wallet);
+    {
+      const limits = new LimitSetter(tokensFlow, stupidWallet);
+      const tx = await limits.setRecurringFlow(
+        childToken,
+        rootToken,
+        ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64)),
+        ethers.utils.parseEther('1000'),
+        ethers.utils.parseEther('1000'),
+        10,
+        await tokensFlow.currentTime());
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+
     // Test initial zero flow:
     {
-      const tx = await tokensFlow.connect(wallet).exchangeToAncestor([childToken, ethers.BigNumber.from(1)], ethers.utils.parseEther('0'), 1, []);
+      const tx = await tokensFlow.connect(wallet).exchangeToAncestor([childToken, rootToken], ethers.utils.parseEther('0'), 1, []);
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
       async function mycall() {
-        await tokensFlow.connect(wallet).exchangeToAncestor([childToken, ethers.BigNumber.from(1)], ethers.utils.parseEther('0.01'), [], {gasLimit: 1000000});
+        await tokensFlow.connect(wallet).exchangeToAncestor([childToken, rootToken], ethers.utils.parseEther('1001'), [], {gasLimit: 1000000});
       }
       await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
@@ -75,14 +91,7 @@ describe("TokensFlow (limits)", function() {
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
 
-    const stupidWallet = new StupidWallet(wallet);
-    const limits = new LimitSetter(tokensFlow, stupidWallet);
-
     // Test non-zero flow:
-    {
-      const tx = await limits.setRecurringFlow(childToken, ethers.utils.parseEther('1000'), ethers.utils.parseEther('1000'), 10, await tokensFlow.currentTime());
-      await ethers.provider.getTransactionReceipt(tx.hash);
-    }
     {
       async function mycall() {
         await tokensFlow.connect(wallet).exchangeToAncestor([childToken, ethers.BigNumber.from(1)], ethers.utils.parseEther('1001'), [], {gasLimit: 1000000});
@@ -146,10 +155,11 @@ describe("TokensFlow (limits)", function() {
     tokens.push(rootToken);
     for(let i = 0; i < 1; ++i) {
       const [token] = await createAuthority(tokensFlow, wallet, "", "");
-      const txE = await tokensFlow.connect(wallet).setEnabled([token, rootToken], true);
-      await ethers.provider.getTransactionReceipt(txE.hash);
+      // const txE = await tokensFlow.connect(wallet).setEnabled([token, rootToken], true);
+      // await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       tree[token] = rootToken;
+      await await tokensFlow.connect(wallet).setTokenParent(token, rootToken, true);
     }
     const childToken = tokens[1];
 
@@ -163,14 +173,21 @@ describe("TokensFlow (limits)", function() {
     const stupidWallet = new StupidWallet(wallet);
     const limits = new LimitSetter(tokensFlow, stupidWallet);
 
-    // Test initial zero flow:
     {
-      const tx = await tokensFlow.connect(wallet).exchangeToAncestor([childToken, ethers.BigNumber.from(1)], ethers.utils.parseEther('0'), 1, []);
+      // Set time to the future
+      const tx = await limits.setNonRecurringFlow(childToken, rootToken, ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64)), ethers.utils.parseEther('1000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
+
+    // Test initial zero flow:
+    {
+      const tx = await tokensFlow.connect(wallet).exchangeToAncestor([childToken, rootToken], ethers.utils.parseEther('0'), []);
+      await ethers.provider.getTransactionReceipt(tx.hash);
+    }
+    return; // FIXME: Remove.
     {
       async function mycall() {
-        await tokensFlow.connect(wallet).exchangeToAncestor([childToken, ethers.BigNumber.from(1)], ethers.utils.parseEther('0.01'), [], {gasLimit: 1000000});
+        await tokensFlow.connect(wallet).exchangeToAncestor([childToken, rootToken], ethers.utils.parseEther('0.01'), [], {gasLimit: 1000000});
       }
       await expect(mycall()).to.eventually.be.rejectedWith("Transaction reverted without a reason");
     }
@@ -181,11 +198,6 @@ describe("TokensFlow (limits)", function() {
     }
 
     // Test non-zero flow:
-    {
-      // Set time to the future
-      const tx = await limits.setNonRecurringFlow(childToken, ethers.utils.parseEther('1000'));
-      await ethers.provider.getTransactionReceipt(tx.hash);
-    }
     {
       async function mycall() {
         await tokensFlow.connect(wallet).exchangeToAncestor([childToken, ethers.BigNumber.from(1)], ethers.utils.parseEther('1001'), [], {gasLimit: 1000000});
