@@ -56,13 +56,14 @@ describe("TokensFlow", function() {
     tokens.push(rootToken);
     for(let i = 0; i < 4; ++i) {
       const [token] = await createAuthority(tokensFlow, wallets[i+1], "", "");
+      await tokensFlow.connect(wallets[i+1]).setTokenParent(token, rootToken, true);
       const txE = await tokensFlow.connect(wallets[0]).setEnabled([token, rootToken], true);
       await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
       const stupidWallet = new StupidWallet(wallets[0]);
       const limits = new LimitSetter(tokensFlow, stupidWallet);
-      const tx2 = await limits.setNonRecurringFlow(token, veryBigAmount);
+      const tx2 = await limits.setNonRecurringFlow(token, rootToken, 1<<128, veryBigAmount);
       await ethers.provider.getTransactionReceipt(tx2.hash);
       tree[token] = rootToken;
     }
