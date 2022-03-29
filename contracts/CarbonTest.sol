@@ -29,4 +29,9 @@ contract CarbonTest is Carbon {
         require(_timestamp >= timestamp);
         timestamp = _timestamp;
     }
+
+    function mint(address _to, uint256 _id, uint256 _value, bytes memory _data) external {
+        return _doMint(_to, _id, _value, _data);
+    }
+
 }
