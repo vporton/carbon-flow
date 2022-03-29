@@ -171,6 +171,7 @@ describe("TokensFlow", function() {
             const newToTotal = await tokensFlow.totalSupply(toToken);
             {
               const change = newToBalance.sub(oldToBalance);
+              console.log('zzz', [newToBalance, oldToBalance, change])
               expect(change).to.equal(amount);
             }
             {
