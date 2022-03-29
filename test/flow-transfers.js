@@ -65,7 +65,7 @@ describe("TokensFlow", function() {
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
       const stupidWallet = new StupidWallet(wallets[0]);
       const limits = new LimitSetter(tokensFlow, stupidWallet);
-      const oneFrac = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64)).add(ethers.BigNumber.from(1));
+      const oneFrac = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64));
       const tx2 = await limits.setNonRecurringFlow(token, rootToken, oneFrac, veryBigAmount);
       await ethers.provider.getTransactionReceipt(tx2.hash);
       tree[token] = rootToken;
@@ -88,7 +88,7 @@ describe("TokensFlow", function() {
           const amount = random.int(0, 10) == 0
             ? ethers.BigNumber.from('0')
             : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary not to overflow digits number
-          const to = wallets[random.int(0, wallets.length -1)];
+          const to = wallets[random.int(0, wallets.length-1)];
           const oldToBalance = await tokensFlow.balanceOf(to.address, token);
           const oldTotal = await tokensFlow.totalSupply(token);
           // console.log("Mint");
@@ -172,7 +172,6 @@ describe("TokensFlow", function() {
             const newToTotal = await tokensFlow.totalSupply(toToken);
             {
               const change = newToBalance.sub(oldToBalance);
-              console.log('zzz', [newToBalance, oldToBalance, change, amount])
               expect(change).to.equal(amount);
             }
             {
