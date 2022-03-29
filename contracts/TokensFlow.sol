@@ -27,7 +27,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         int256 remainingSwapCredit;
         int timeEnteredSwapCredit; // zero means not in a swap credit
         int lastSwapTime; // ignored when not in a swap credit
-        bool enabled;
+        bool disabled;
     }
 
     uint256 public nextTokenId;
@@ -96,7 +96,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     // Each element of `_childs` list must be a child of the next one.
     // TODO: Test. Especially test the case if the last child has no parent. Also test if a child is zero.
-    function setEnabled(uint256[] calldata _childs, bool _enabled) external {
+    function setDisabled(uint256[] calldata _childs, bool _disabled) external {
         uint256 _ancestor = _childs[_childs.length - 1];
         require(msg.sender == tokenOwners[_ancestor]);
         
@@ -106,7 +106,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             if (i != _childs.length - 1) {
                 uint256 _parent = _childs[i + 1];
                 require(parentTokensImpl[_id][_parent]);
-                tokenFlowImpl[_id][_parent].enabled = _enabled;
+                tokenFlowImpl[_id][_parent].disabled = _disabled;
             }
         }
     }
@@ -156,7 +156,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     //     uint256 _value,
     //     bytes calldata _data) external virtual override
     // {
-    //     require(tokenFlowImpl[_id].enabled);
+    //     require(!tokenFlowImpl[_id].disabled);
     //     super._safeTransferFrom(_from, _to, _id, _value, _data);
     // }
 
@@ -168,7 +168,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     //     bytes calldata _data) external virtual override
     // {
     //     for (uint i = 0; i < _ids.length; ++i) {
-    //         require(tokenFlowImpl[_ids[i]].enabled);
+    //         require(!tokenFlowImpl[_ids[i]].disabled);
     //     }
     //     super._safeBatchTransferFrom(_from, _to, _ids, _values, _data);
     // }
@@ -203,7 +203,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             require(parentTokensImpl[_id][_parent]);
             // require(_id != 0 && _parent != 0); // not needed
             _flow = tokenFlowImpl[_id][_parent];
-            require(_flow.enabled);
+            require(!_flow.disabled);
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;
             bool _inSwapCreditResult;
