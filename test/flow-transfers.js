@@ -161,7 +161,7 @@ describe("TokensFlow", function() {
             ? ethers.BigNumber.from('0')
             : random.bool()
             ? oldFromBalance
-            : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
+            : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary not to overflow digits number
           await skipTime();
           if(oldFromBalance.gte(amount)) {
             const tx = await tokensFlow.connect(wallet).exchangeToAncestor([fromToken, toToken], amount, [], {gasLimit: 1000000});
