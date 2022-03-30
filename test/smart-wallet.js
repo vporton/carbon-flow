@@ -1,6 +1,6 @@
 "strict";
 
-const { deployments } = require("hardhat");
+const { deployments, ethers } = require("hardhat");
 const chai = require("chai");
 const { expect, assert } = chai;
 const chaiAsPromised = require('chai-as-promised');
@@ -31,16 +31,14 @@ describe("SmartWallet", function() {
       walletOwners.push(wallet);
     }
 
-    const erc20DeployResult = await deploy("SimpleERC20", {
-      from: await owner.getAddress(), args: ['TST', 'Test', 18, ethers.utils.parseEther('1000000')]
-    });
-    const erc20Contract = new ethers.Contract(erc20DeployResult.address, erc20DeployResult.abi, owner);
+    const SimpleERC20 = await ethers.getContractFactory("SimpleERC20");
+    const erc20Contract = await SimpleERC20.connect(owner).deploy('TST', 'Test', 18, ethers.utils.parseEther('1000000'));
 
     let smartWallets = [];
     for(let i = 0; i < walletOwners.length; ++i) {
-      const deployResult = await deploy("TestSmartWallet", { from: await deployer.getAddress(), args: [walletOwners[i].address] });
+      const TestSmartWallet = await ethers.getContractFactory("TestSmartWallet")
+      const contract = await TestSmartWallet.connect(walletOwners[i]).deploy(walletOwners[i].address);
       const smartWallet = new SmartWallet();
-      const contract = new ethers.Contract(deployResult.address, deployResult.abi, walletOwners[i]);
       await smartWallet.init(contract);
       smartWallets.push(smartWallet);
     }
