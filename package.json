@@ -10,7 +10,7 @@
     "@myetherwallet/mewconnect-web-client": "^2.1.5-beta.1",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@vporton/wrap-tokens": "^2.1.1",
+    "@vporton/wrap-tokens": "^2.1.7",
     "browserify": "^17.0.0",
     "buidler-deploy": "^0.6.0-beta.16",
     "chai-as-promised": "^7.1.1",

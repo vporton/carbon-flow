@@ -974,7 +974,7 @@
   resolved "https://registry.yarnpkg.com/@ungap/promise-all-settled/-/promise-all-settled-1.1.2.tgz#aa58042711d6e3275dd37dc597e5d31e8c290a44"
   integrity sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==
 
-"@vporton/wrap-tokens@^2.1.1":
+"@vporton/wrap-tokens@^2.1.7":
   version "2.1.7"
   resolved "https://registry.yarnpkg.com/@vporton/wrap-tokens/-/wrap-tokens-2.1.7.tgz#5913dfcd8bd76b1532b03df436fa5a3b076157e4"
   integrity sha512-rhygT54ux73XDRd1dx09zWe9nVJ5CoPNuVV7PjYF7rLyl2LKgcAPsGtycS6UQdNcz2GcnIn1pOGrhzm8DMEkwg==
