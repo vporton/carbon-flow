@@ -2,6 +2,8 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
+// FIXME: Voting by retiring carbon. It requires third-party approvals of retiring. (Also approvals of swaps?)
+
 // import '@nomiclabs/hardhat/console.sol';
 import "./BaseCarbon.sol";
 
