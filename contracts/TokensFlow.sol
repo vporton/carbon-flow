@@ -189,11 +189,12 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 // Flow
 
     // Each next token ID must be a parent of the previous one.
-    function exchangeToAncestor(uint256[] calldata _ids, uint256 _amount, bytes calldata _data) external {
-        // Intentionally no check for `msg.sender`.
+    function exchangeToAncestor(uint256[] calldata _ids, uint256 _amount, address _from, bytes calldata _data) external {
+        require(_from == msg.sender || operatorApproval[msg.sender][_from], "No approval.");
+
         require(_ids[_ids.length - 1] != 0); // The rest elements are checked below.
         require(_amount < 1<<128);
-        uint256 _balance = balances[_ids[0]][msg.sender];
+        uint256 _balance = balances[_ids[0]][_from];
         require(_amount <= _balance);
         TokenFlow storage _flow;
         uint256 _newAmount = _amount;
@@ -225,8 +226,8 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         }
 
         // if (_id == _flow.parentToken) return; // not necessary
-        _doBurn(msg.sender, _ids[0], _amount);
-        _doMint(msg.sender, _ids[_ids.length - 1], _newAmount, _data);
+        _doBurn(_from, _ids[0], _amount);
+        _doMint(_from, _ids[_ids.length - 1], _newAmount, _data);
     }
 
     // Each next token ID must be a parent of the previous one.
