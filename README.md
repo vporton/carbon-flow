@@ -373,3 +373,37 @@ but failed to compile that package. Can anyone with good Node.js skills help?
 
 I want to change that package to vote not just by locking tokens but by paying in
 tokens: this will help to spend less carbon on voting than teh voting saves.
+
+On `yarn start` I have:
+
+```
+✔ Start a local Ethereum network
+  ✔ Check IPFS
+  ❯ Setup before publish
+    ✔ Running prepublish script
+    ✔ Applying version bump (major)
+    ✔ Building frontend
+    ❯ Deploy contract
+      ⠇ Compile contracts
+        Deploy 'HCVoting' to network
+        Generate deployment artifacts
+      Determine contract address for version
+    Prepare for publish
+    Publish app to aragonPM
+    Fetch published repo
+    Create DAO
+    Open DAO
+node:internal/fs/utils:344
+    throw err;
+    ^
+
+Error: EAGAIN: resource temporarily unavailable, write
+    at Object.writeSync (node:fs:884:3)
+    at printErrorAndExit (/home/porton/Projects/hc-burn/node_modules/@aragon/cli/node_modules/truffle/build/webpack:/~/source-map-support/source-map-support.js:437:1)
+    at process.emit (/home/porton/Projects/hc-burn/node_modules/@aragon/cli/node_modules/truffle/build/webpack:/~/source-map-support/source-map-support.js:450:1)
+    at process._fatalException (node:internal/process/execution:170:25) {
+  errno: -11,
+  syscall: 'write',
+  code: 'EAGAIN'
+}
+```
