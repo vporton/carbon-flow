@@ -2,19 +2,22 @@
 
 const chai = require("chai");
 const chaiAsPromised = require('chai-as-promised');
+const { solidity } = require("ethereum-waffle");
 const fs = require('fs');
 const random = require('random');
 const seedrandom = require('seedrandom');
 const StupidWallet = require('../lib/stupid-wallet.js');
 const LimitSetter = require('../lib/limit-setter.js');
+const { createAuthority } = require('../lib/carbon-flow.js');
 
 const { expect, assert } = chai;
 
 chai.use(chaiAsPromised);
+chai.use(solidity);
 
 // random.use(seedrandom('rftg'));
 
-// const bre = require("@nomiclabs/hardhat");
+// const bre = require("hardhat");
 function range(size, startAt = 0) {
   return [...Array(size).keys()].map(i => i + startAt);
 }
@@ -29,12 +32,12 @@ describe("TokensFlow", function() {
 
     const [ deployer, owner ] = await ethers.getSigners();
 
-    const TokensFlow = await ethers.getContractFactory("TokensFlowTest");
+    const TokensFlow = await ethers.getContractFactory("CarbonTest");
     const tokensFlow = await TokensFlow.deploy();
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/TokensFlowTest.json')).abi;
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/CarbonTest.sol/CarbonTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     let wallets = [];
@@ -50,22 +53,20 @@ describe("TokensFlow", function() {
     let tokens = []; // correspond to a first few wallets
     let tree = {};
 
-    const tx = await tokensFlow.connect(wallets[0]).newToken(0, "M+C Token", "M+C", "https://example.com");
-    const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-    const rootToken = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
+    const [rootToken] = await createAuthority(tokensFlow, wallets[0], "", "");
 
     tokens.push(rootToken);
     for(let i = 0; i < 4; ++i) {
-      const tx = await tokensFlow.connect(wallets[i+1]).newToken(rootToken, `SubToken${i}`, `S${i}`, `https://example.com/${i}`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallets[0]).setEnabled(rootToken, [token], true);
-      await ethers.provider.getTransactionReceipt(txE.hash);
+      const [token] = await createAuthority(tokensFlow, wallets[i+1], "", "");
+      await tokensFlow.connect(wallets[i+1]).setTokenParent(token, rootToken, true);
+      // const txE = await tokensFlow.connect(wallets[0]).setDisabled([token, rootToken], false);
+      // await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
       const veryBigAmount = ethers.utils.parseEther('100000000000000000000000000000');
       const stupidWallet = new StupidWallet(wallets[0]);
       const limits = new LimitSetter(tokensFlow, stupidWallet);
-      const tx2 = await limits.setNonRecurringFlow(token, veryBigAmount);
+      const oneFrac = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64));
+      const tx2 = await limits.setNonRecurringFlow(token, rootToken, oneFrac, veryBigAmount);
       await ethers.provider.getTransactionReceipt(tx2.hash);
       tree[token] = rootToken;
     }
@@ -86,12 +87,12 @@ describe("TokensFlow", function() {
           const token = tokens[tokenIndex];
           const amount = random.int(0, 10) == 0
             ? ethers.BigNumber.from('0')
-            : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
-          const to = wallets[random.int(0, wallets.length -1)];
+            : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary not to overflow digits number
+          const to = wallets[random.int(0, wallets.length-1)];
           const oldToBalance = await tokensFlow.balanceOf(to.address, token);
           const oldTotal = await tokensFlow.totalSupply(token);
           // console.log("Mint");
-          await tokensFlow.connect(wallets[tokenIndex]).mint(to.address, token, amount, [], {gasLimit: 1000000});
+          const tx = await tokensFlow.connect(wallets[tokenIndex]).mint(to.address, token, amount, [], {gasLimit: 1000000});
           await ethers.provider.getTransactionReceipt(tx.hash);
           const newToBalance = await tokensFlow.balanceOf(to.address, token);
           const newTotal = await tokensFlow.totalSupply(token);
@@ -160,10 +161,10 @@ describe("TokensFlow", function() {
             ? ethers.BigNumber.from('0')
             : random.bool()
             ? oldFromBalance
-            : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary ot to overflow digits number
+            : ethers.utils.parseEther(random.float(0, 1000.0).toFixed(15)); // toFixed necessary not to overflow digits number
           await skipTime();
           if(oldFromBalance.gte(amount)) {
-            await tokensFlow.connect(wallet).exchangeToAncestor([fromToken, ethers.BigNumber.from(1)], amount, [], {gasLimit: 1000000});
+            const tx = await tokensFlow.connect(wallet).exchangeToAncestor([fromToken, toToken], amount, [], {gasLimit: 1000000});
             await ethers.provider.getTransactionReceipt(tx.hash);
             const newFromBalance = await tokensFlow.balanceOf(wallet.address, fromToken);
             const newFromTotal = await tokensFlow.totalSupply(fromToken);

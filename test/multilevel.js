@@ -7,6 +7,8 @@ const random = require('random');
 const seedrandom = require('seedrandom');
 const StupidWallet = require('../lib/stupid-wallet.js');
 const LimitSetter = require('../lib/limit-setter.js');
+const { createAuthority } = require('../lib/carbon-flow.js');
+const { ethers } = require("hardhat");
 
 const { expect, assert } = chai;
 
@@ -22,12 +24,12 @@ describe("TokensFlow (limits)", function() {
 
     const [ deployer, owner ] = await ethers.getSigners();
 
-    const TokensFlow = await ethers.getContractFactory("TokensFlowTest");
+    const TokensFlow = await ethers.getContractFactory("CarbonTest");
     const tokensFlow = await TokensFlow.deploy();
 
     await tokensFlow.deployed();
 
-    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/TokensFlowTest.json')).abi;
+    const createTokenEventAbi = JSON.parse(fs.readFileSync('artifacts/contracts/CarbonTest.sol/CarbonTest.json')).abi;
     const createTokenEventIface = new ethers.utils.Interface(createTokenEventAbi);
 
     const wallet0 = ethers.Wallet.createRandom();
@@ -39,55 +41,43 @@ describe("TokensFlow (limits)", function() {
     let tokens2 = [];
 
     {
-      const tx = await tokensFlow.connect(wallet).newToken(0, "SubToken0", "S0", "https://example.com/0");
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
       tokens.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens[0], `SubToken1`, `S1`, `https://example.com/1`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(tokens[0], [token], true);
-      await ethers.provider.getTransactionReceipt(txE.hash);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      // const txE = await tokensFlow.connect(wallet).setDisabled([token, tokens[0]], false);
+      // await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens[1], `SubToken2`, `S2`, `https://example.com/2`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(tokens[1], [token], true);
-      await ethers.provider.getTransactionReceipt(txE.hash);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      // const txE = await tokensFlow.connect(wallet).setDisabled([token, tokens[1]], false);
+      // await ethers.provider.getTransactionReceipt(txE.hash);
       tokens.push(token);
     }
 
     {
-      const tx = await tokensFlow.connect(wallet).newToken(0, "XSubToken0", "XS0", "https://example.com/0x");
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id;
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
       tokens2.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens2[0], `XSubToken1`, `XS1`, `https://example.com/1x`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(tokens2[0], [token], true);
-      await ethers.provider.getTransactionReceipt(txE.hash);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      // const txE = await tokensFlow.connect(wallet).setDisabled([token, tokens2[0]], false);
+      // await ethers.provider.getTransactionReceipt(txE.hash);
       tokens2.push(token);
     }
     {
-      const tx = await tokensFlow.connect(wallet).newToken(tokens2[1], `XSubToken2`, `XS2`, `https://example.com/2x`);
-      const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const token = createTokenEventIface.parseLog(receipt.logs[0]).args.id
-      const txE = await tokensFlow.connect(wallet).setEnabled(tokens2[1], [token], true);
-      await ethers.provider.getTransactionReceipt(txE.hash);
+      const [token] = await createAuthority(tokensFlow, wallet, "", "");
+      // const txE = await tokensFlow.connect(wallet).setDisabled([token, tokens2[1]], false);
+      // await ethers.provider.getTransactionReceipt(txE.hash);
       tokens2.push(token);
     }
 
     const stupidWallet = new StupidWallet(wallet);
     const limits = new LimitSetter(tokensFlow, stupidWallet);
 
-    console.log(`Checking minting and transferring...`); 
+    console.log(`Checking minting and transferring...`);
 
     {
       const tx = await tokensFlow.connect(wallet).mint(wallet.address, tokens[2], ethers.utils.parseEther('5000'), [], {gasLimit: 1000000});
@@ -96,11 +86,13 @@ describe("TokensFlow (limits)", function() {
 
     // Test flow:
     {
-      const tx = await limits.setNonRecurringFlow(tokens[1], ethers.utils.parseEther('1000'));
+      await await tokensFlow.connect(wallet).setTokenParent(tokens[1], tokens[0], true);
+      const tx = await limits.setNonRecurringFlow(tokens[1], tokens[0], ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64)), ethers.utils.parseEther('1000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
-      const tx = await limits.setNonRecurringFlow(tokens[2], ethers.utils.parseEther('2000'));
+      await await tokensFlow.connect(wallet).setTokenParent(tokens[2], tokens[1], true);
+      const tx = await limits.setNonRecurringFlow(tokens[2], tokens[1], ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64)), ethers.utils.parseEther('2000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
@@ -117,11 +109,11 @@ describe("TokensFlow (limits)", function() {
     expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[2])).to.be.equal(ethers.utils.parseEther('4000'));
 
     {
-      const tx = await limits.setNonRecurringFlow(tokens[1], ethers.utils.parseEther('2000'));
+      const tx = await limits.setNonRecurringFlow(tokens[1], tokens[0], ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64)), ethers.utils.parseEther('2000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
-      const tx = await limits.setNonRecurringFlow(tokens[2], ethers.utils.parseEther('1000'));
+      const tx = await limits.setNonRecurringFlow(tokens[2], tokens[1], ethers.BigNumber.from(2).pow(ethers.BigNumber.from(64)), ethers.utils.parseEther('1000'));
       await ethers.provider.getTransactionReceipt(tx.hash);
     }
     {
@@ -138,32 +130,8 @@ describe("TokensFlow (limits)", function() {
     expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[2])).to.be.equal(ethers.utils.parseEther('3000'));
 
     {
-      async function mycall() {
-        await tokensFlow.connect(wallet).exchangeToDescendant([tokens[2], tokens[1], tokens[0]], ethers.utils.parseEther('2100'), [], {gasLimit: 1000000});
-      }
-      await expect(mycall()).to.eventually.be.rejectedWith("VM Exception while processing transaction: invalid opcode");
-    }
-    {
-      const tx = await tokensFlow.connect(wallet).exchangeToDescendant([tokens[2], tokens[1], tokens[0]], ethers.utils.parseEther('1999'), []);
-      await ethers.provider.getTransactionReceipt(tx.hash);
-    }
-    expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[0])).to.be.equal(ethers.utils.parseEther('1'));
-    expect(await tokensFlow.balanceOf(await wallet.getAddress(), tokens[2])).to.be.equal(ethers.utils.parseEther('4999'));
-
-    {
       async function mycall(childs) {
         await tokensFlow.connect(wallet).exchangeToAncestor(childs, ethers.utils.parseEther('0'), [], {gasLimit: 1000000});
-      }
-      await expect(mycall([tokens2[2], tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
-      await expect(mycall([tokens2[2], tokens2[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
-      await expect(mycall([0, tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
-      await expect(mycall([tokens[2], 0, tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
-      await expect(mycall([tokens[2], tokens[1], 0])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
-    }
-
-    {
-      async function mycall(childs) {
-        await tokensFlow.connect(wallet).exchangeToDescendant(childs, ethers.utils.parseEther('0'), [], {gasLimit: 1000000});
       }
       await expect(mycall([tokens2[2], tokens[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");
       await expect(mycall([tokens2[2], tokens2[1], tokens[0]])).to.eventually.be.rejectedWith("Transaction reverted without a reason");

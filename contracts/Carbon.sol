@@ -2,6 +2,8 @@
 pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
+// FIXME: Voting by retiring carbon. It requires third-party approvals of retiring. (Also approvals of swaps?)
+
 // import '@nomiclabs/hardhat/console.sol';
 import "./BaseCarbon.sol";
 
@@ -28,26 +30,22 @@ contract Carbon is BaseCarbon {
 
     // solhint-disable func-visibility
     // solhint-disable bracket-align
-    constructor(address _globalCommunityFund,
-                string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
-                string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
-        BaseCarbon(
-            _globalCommunityFund,
-            _retiredName, _retiredSymbol, _retiredUri, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri)
-    { }
+    constructor()
+        BaseCarbon()
+    {
+        nextTokenId = 1; // Non-retired token IDs are odd numbers,
+    }
     // solhint-enable bracket-align
     // solhint-enable func-visibility
 
     // Anybody can create an authority, but its parent decides if its tokens can be swapped.
-    function createAuthority(uint256 _parent, string calldata _name, string calldata _symbol, string calldata _uri)
-        external
-    {
-        // require(msg.sender == globalCommunityFund;
+    function createAuthority(string calldata _nonRetiredUri, string calldata _retiredUri) external {
         // Minting restricted because minting can happen only through createCredit().
-        uint256 _token = _newToken(_parent, _name, _symbol, _uri, msg.sender);
-        Authority memory _authority = Authority({maxSerial: 0, token: _token});
-        authorities[_token] = _authority;
-        emit AuthorityCreated(msg.sender, _token, _name, _symbol, _uri);
+        uint256 _nonRetiredToken = _newToken(_nonRetiredUri, msg.sender); // always odd, see also `isNonRetiredToken`.
+        /*uint256 _retiredToken = */_newToken(_retiredUri, address(0)); // + 1
+        Authority memory _authority = Authority({maxSerial: 0, token: _nonRetiredToken});
+        authorities[_nonRetiredToken] = _authority;
+        emit AuthorityCreated(msg.sender, _nonRetiredToken);
     }
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
@@ -55,7 +53,7 @@ contract Carbon is BaseCarbon {
     function createCredit(uint256 _token, uint256 _amount, address _owner, bytes32 _arweaveHash)
         external returns(uint256)
     {
-        require(tokenOwners[_token] == msg.sender && tokenFlow[_token].enabled);
+        require(tokenOwners[_token] == msg.sender);
         Authority storage _authority = authorities[_token];
         MintRecord memory _credit = MintRecord({
             authority: msg.sender,
@@ -71,14 +69,15 @@ contract Carbon is BaseCarbon {
         return maxCreditId;
     }
 
-    function _setTokenParent(uint256 _child, uint256 _parent) internal {
-        // require(_child != 0 && _child <= maxTokenId); // not needed
+    function _setTokenParent(uint256 _child, uint256 _parent, bool _value) internal {
+        // require(_child != 0 && _child < nextTokenId); // not needed
+        // require(_parent != 0 && _parent < nextTokenId); // caller's responsibility
         require(msg.sender == tokenOwners[_child]);
 
-        _setTokenParentNoCheck(_child, _parent);
+        _setTokenParentNoCheck(_child, _parent, _value);
     }
 
-    event AuthorityCreated(address indexed owner, uint256 indexed token, string name, string symbol, string uri);
+    event AuthorityCreated(address indexed owner, uint256 indexed token);
     event CreditCreated(uint256 indexed id,
                         address indexed authority,
                         uint indexed serial,

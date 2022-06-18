@@ -11,12 +11,8 @@ contract CarbonTest is Carbon {
 
     // solhint-disable func-visibility
     // solhint-disable bracket-align
-    constructor(address _globalCommunityFund,
-                string memory _retiredName, string memory _retiredSymbol, string memory _retiredUri,
-                string memory _nonRetiredName, string memory _nonRetiredSymbol, string memory _nonRetiredUri)
-        Carbon(
-            _globalCommunityFund,
-            _retiredName, _retiredSymbol, _retiredUri, _nonRetiredName, _nonRetiredSymbol, _nonRetiredUri)
+    constructor()
+        Carbon()
     { }
     // solhint-enable bracket-align
     // solhint-enable func-visibility
@@ -33,4 +29,9 @@ contract CarbonTest is Carbon {
         require(_timestamp >= timestamp);
         timestamp = _timestamp;
     }
+
+    function mint(address _to, uint256 _id, uint256 _value, bytes memory _data) external {
+        return _doMint(_to, _id, _value, _data);
+    }
+
 }
