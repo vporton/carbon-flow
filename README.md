@@ -1,5 +1,7 @@
 # Carbon Flow
 
+**Help needed!** - see at the bottom.
+
 `manyfunds` branch contains improved API, but this new branch is not yet tested.
 
 _This is **the only** reasonable carbon accounting project for the world, because it has world-best anti-theft protection to scale to store and transfer trillions dollars of value. Carbon thieves exist: I was not paid $1000 for [this project](https://gitcoin.co/issue/mplus4climate/mplustoolkit/1/100023834) by Ingo Puhl (I consider him a disappeared criminal.) from South Pole and $500 for [this](https://gitcoin.co/issue/mplus4climate/mplustoolkit/1/100023834). So every time I do a climate project, I was stolen, total $1500.
@@ -363,3 +365,11 @@ If you find this project useful, donate:
 - https://www.patreon.com/porton
 - BitCoin 174HGm3PfoxYZkx59hoxVseQZzW5KnCPij
 - Ethereum and other: https://gitcoin.co/grants/177/social-charity-tokens-and-dao-carbon-accounting
+
+## Help needed
+
+I tried to integrate holographic consensus from https://github.com/ajsantander/hc
+but failed to compile that package. Can anyone with good Node.js skills help?
+
+I want to change that package to vote not just by locking tokens but by paying in
+tokens: this will help to spend less carbon on voting than teh voting saves.
