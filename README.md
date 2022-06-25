@@ -7,7 +7,7 @@ We have improved API, but this new API is not yet tested.
 _This project has anti-theft allowing to use it as the global backbone of carbon accounting.
 (Nothing prevents to use it for small accounting, too.)_
 
-_This is **the only** reasonable carbon accounting project for the world, because it has world-best anti-theft protection to scale to store and transfer trillions dollars of value. Carbon thieves exist: I was not paid $1000 for [this project](https://gitcoin.co/issue/mplus4climate/mplustoolkit/1/100023834) by Ingo Puhl (I consider him a disappeared criminal.) from South Pole and $500 for [this](https://gitcoin.co/issue/mplus4climate/mplustoolkit/1/100023834). So every time I do a climate project, I was stolen, total $1500._
+_This is **the only** reasonable carbon accounting project for the global scale, because it has world-best anti-theft protection to scale to store and transfer trillions dollars of value. Carbon thieves exist: I was not paid $1000 for [this project](https://gitcoin.co/issue/mplus4climate/mplustoolkit/1/100023834) by Ingo Puhl (I consider him a disappeared criminal.) from South Pole and $500 for [this](https://gitcoin.co/issue/mplus4climate/mplustoolkit/1/100023834). So every time I do a climate project, I was stolen, total $1500._
 
 The project is in desperate need of a few thousand dollars to pay to a certified error-checker. We also need to finish development of carbon accounting by creating an UI (a site) for accounters. Donate: 
 https://gitcoin.co/grants/177/social-charity-tokens-and-dao-carbon-accounting
