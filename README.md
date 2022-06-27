@@ -356,6 +356,21 @@ Note that GoodDollar identity is also deloyed on Ethereum mainnet, so we could j
 but currently mainnet transactions are too costly. Transfers of M+ may have more harm to the environment
 than good (but in the future Ethereum transactions cost is expected to come down much due to ETH2 project.)
 
+## Case analysis of exchange rate
+
+Let carbon token X is exchangeable for carbon token Y. That is for example X is Paris carbon token,
+Y is France carbon token.
+
+If some X was stolen, its value should decrease, therefore the exchange rate should decrease and
+after decreasing exchange rate the allowed amount of X exchanged for Y should increase. This
+emergency can be done as first decreasing exchange rate and then increasing amount.
+
+If some Y was stolen, its value should decrease, therefore the allowed amount of X exchanged for Y
+should reamin the same and the exchange rate should increase.
+
+The conclusion: In all theft cases the exchange rate can be changed without prior change of allowed amount.
+This allows the exchange rate to be controlled separately, e.g. by ChainLink aggregating multiple sources.
+
 ## See also
 
 `doc/` folder (outdated). Use LibreOffice to read these files.
