@@ -18,7 +18,7 @@ contract Carbon is BaseCarbon {
         uint serial;
         uint256 amount;
         address owner;
-        bytes32 arweaveHash;
+        string fileCoinHash;
     }
 
     // token => Authority
@@ -50,7 +50,7 @@ contract Carbon is BaseCarbon {
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
     // Additional data (such as the list of signers) is provided in FileCoin.
-    function createCredit(uint256 _token, uint256 _amount, address _owner, string _fileCoinHash)
+    function createCredit(uint256 _token, uint256 _amount, address _owner, string calldata _fileCoinHash)
         external returns(uint256)
     {
         require(tokenOwners[_token] == msg.sender);
@@ -60,7 +60,7 @@ contract Carbon is BaseCarbon {
             serial: ++_authority.maxSerial,
             amount: _amount,
             owner: _owner,
-            arweaveHash: _arweaveHash
+            fileCoinHash: _fileCoinHash
         });
         credits[++maxCreditId] = _credit;
         bytes memory _data = ""; // efficient?
