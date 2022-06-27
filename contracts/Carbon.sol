@@ -49,7 +49,7 @@ contract Carbon is BaseCarbon {
     }
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
-    // Additional data (such as the list of signers) is provided in Arweave.
+    // Additional data (such as the list of signers) is provided in FileCoin.
     function createCredit(uint256 _token, uint256 _amount, address _owner, bytes32 _arweaveHash)
         external returns(uint256)
     {
