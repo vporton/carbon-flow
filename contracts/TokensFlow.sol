@@ -22,7 +22,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     }
 
     struct TokenFlow {
-        int128 coefficient;
         SwapLimit limit;
         int256 remainingSwapCredit;
         int timeEnteredSwapCredit; // zero means not in a swap credit
@@ -34,6 +33,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     mapping (uint256 => mapping (uint256 => bool)) private parentTokensImpl; // child => (parent => true)
     mapping (uint256 => mapping (uint256 => TokenFlow)) private tokenFlowImpl; // child => (parent => flow)
+    mapping (uint256 => mapping (uint256 => int128)) private coefficientsImpl; // child => (parent => coefficient)
 
     mapping (uint256 => address) public tokenOwners;
 
@@ -42,6 +42,10 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     function isChild(uint256 _child, uint256 _parent) external view returns (bool) {
         return parentTokensImpl[_child][_parent];
+    }
+
+    function coeffient(uint256 _child, uint256 _parent) external view returns (int128) {
+        return coefficientsImpl[_child][_parent];
     }
 
     function tokenFlow(uint256 _child, uint256 _parent) external view returns (TokenFlow memory) {
@@ -115,7 +119,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     function setRecurringFlow(
         uint256 _child,
         uint256 _parent,
-        int128 _coefficient,
         int256 _maxSwapCredit,
         int256 _remainingSwapCredit,
         int _swapCreditPeriod, int _timeEnteredSwapCredit,
@@ -126,23 +129,26 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         require(oldLimitHash == _swapLimitHash(_flow.limit));
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
 
-        _flow.coefficient = _coefficient;
         _flow.limit = _createSwapLimit(true, _remainingSwapCredit, _maxSwapCredit, _swapCreditPeriod, _timeEnteredSwapCredit);
         _flow.timeEnteredSwapCredit = _timeEnteredSwapCredit;
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
     // User can set negative values. It is a nonsense but does not harm.
-    function setNonRecurringFlow(uint256 _child, uint256 _parent, int128 _coefficient, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
+    function setNonRecurringFlow(uint256 _child, uint256 _parent, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
         require(msg.sender == tokenOwners[_parent]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
         // require(tokenParents[_child][_parent]); // not needed
         TokenFlow storage _flow = tokenFlowImpl[_child][_parent];
         require(oldLimitHash == _swapLimitHash(_flow.limit));
 
-        _flow.coefficient = _coefficient;
         _flow.limit = _createSwapLimit(false, _remainingSwapCredit, 0, 0, 0);
         _flow.remainingSwapCredit = _remainingSwapCredit;
+    }
+
+    function setCoefficient(uint256 _child, uint256 _parent, int128 _coefficient) external {
+        require(msg.sender == tokenOwners[_parent]);
+        coefficientsImpl[_child][_parent] = _coefficient;
     }
 
 // ERC-1155
@@ -222,7 +228,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
             _flow.lastSwapTime = _currentTimeResult; // TODO: not strictly necessary if !_flow.recurring
             // require(_amount < 1<<128); // done above
             _flow.remainingSwapCredit -= int256(_amount);
-            _newAmount = _flow.coefficient.mulu(_newAmount);
+            _newAmount = coefficientsImpl[_id][_parent].mulu(_newAmount);
         }
 
         // if (_id == _flow.parentToken) return; // not necessary
