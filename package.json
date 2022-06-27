@@ -14,6 +14,7 @@
     "browserify": "^17.0.0",
     "buidler-deploy": "^0.6.0-beta.16",
     "chai-as-promised": "^7.1.1",
+    "chainlink": "^0.8.2",
     "ganache-cli": "^6.11.0",
     "hardhat": "^2.9.2",
     "hardhat-deploy": "^0.11.2",
