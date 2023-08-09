@@ -194,6 +194,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
 // Flow
 
+    // FIXME: What's about retired tokens?
     // Each next token ID must be a parent of the previous one.
     function exchangeToAncestor(uint256[] calldata _ids, uint256 _amount, address _from, bytes calldata _data) external {
         require(_from == msg.sender || operatorApproval[msg.sender][_from], "No approval.");
