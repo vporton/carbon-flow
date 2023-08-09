@@ -391,6 +391,8 @@ If you find this project useful, donate:
 
 ## Help needed
 
+See https://gitcoin.co/issue/29033 for a work request to make this project usable by people.
+
 I tried to integrate holographic consensus from https://github.com/ajsantander/hc
 but failed to compile that package. Can anyone with good Node.js skills help?
 
