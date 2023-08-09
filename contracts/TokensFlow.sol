@@ -100,6 +100,8 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     // Each element of `_childs` list must be a child of the next one.
     // TODO: Test. Especially test the case if the last child has no parent. Also test if a child is zero.
+    //
+    // You are recommended to disable only non-retired tokens, because disabling retired will be ignored.
     function setDisabled(uint256[] calldata _childs, bool _disabled) external {
         uint256 _ancestor = _childs[_childs.length - 1];
         require(msg.sender == tokenOwners[_ancestor]);
@@ -115,7 +117,9 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         }
     }
 
-    // User can set negative values. It is a nonsense but does not harm.
+    /// User can set negative values. It is a nonsense but does not harm.
+    ///
+    /// You are recommended to set flow only for non-retired tokens, because retired tokens flow is ignored.
     function setRecurringFlow(
         uint256 _child,
         uint256 _parent,
@@ -134,7 +138,9 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         _flow.remainingSwapCredit = _remainingSwapCredit;
     }
 
-    // User can set negative values. It is a nonsense but does not harm.
+    /// User can set negative values. It is a nonsense but does not harm.
+    ///
+    /// You are recommended to set flow only for non-retired tokens, because retired tokens flow is ignored.
     function setNonRecurringFlow(uint256 _child, uint256 _parent, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
         require(msg.sender == tokenOwners[_parent]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
@@ -194,7 +200,11 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
 // Flow
 
-    // FIXME: What's about retired tokens?
+    function getFlow(uint256 _child, uint256 _parent) private pure virtual override returns (TokenFlow storage) {
+        require(parentTokensImpl[_child][_parent]);
+        return tokenFlowImpl[_child][_parent];
+    }
+
     // Each next token ID must be a parent of the previous one.
     function exchangeToAncestor(uint256[] calldata _ids, uint256 _amount, address _from, bytes calldata _data) external {
         require(_from == msg.sender || operatorApproval[msg.sender][_from], "No approval.");
@@ -208,9 +218,8 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         for(uint i = 0; i != _ids.length - 1; ++i) {
             uint256 _id = _ids[i];
             uint256 _parent = _ids[i + 1];
-            require(parentTokensImpl[_id][_parent]);
             // require(_id != 0 && _parent != 0); // not needed
-            _flow = tokenFlowImpl[_id][_parent];
+            _flow = getFlow(_id, _parent);
             require(!_flow.disabled);
             int _currentTimeResult = _currentTime();
             uint256 _maxAllowedFlow;

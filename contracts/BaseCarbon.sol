@@ -48,6 +48,15 @@ contract BaseCarbon is TokensFlow {
 
 // Internal
 
+    function getFlow(uint256 _child, uint256 _parent) private pure virtual override returns (TokenFlow storage) {
+        uint256 _baseChild = _child & ~1;
+        uint256 _baseParent = _parent & ~1;
+        require(parentTokensImpl[_baseChild][_baseParent]);
+        require(_child & 1 == _parent & 1); // both retired or both non-retired
+
+        return tokenFlowImpl[_baseChild][_baseParent];
+    }
+
     function _retiredToken(uint256 _nonRetiredToken) internal pure isNonRetiredToken(_nonRetiredToken) returns(uint256) {
         return _nonRetiredToken + 1;
     }
