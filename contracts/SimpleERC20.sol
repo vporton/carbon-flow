@@ -13,10 +13,10 @@ contract SimpleERC20 is IERC20 {
     address public owner;
  
     // Balances for each account
-    mapping(address => uint256) private balances;
+    mapping(address => uint256) internal balances;
  
     // Owner of account approves the transfer of an amount to another account
-    mapping(address => mapping (address => uint256)) private allowed;
+    mapping(address => mapping (address => uint256)) internal allowed;
  
     // Functions with this modifier can only be executed by the owner
     modifier onlyOwner() {

@@ -37,8 +37,8 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     mapping (uint256 => address) public tokenOwners;
 
-    mapping (uint256 => uint256) private totalSupplyImpl;
-    mapping (uint256 => string) private uriImpl;
+    mapping (uint256 => uint256) internal totalSupplyImpl;
+    mapping (uint256 => string) internal uriImpl;
 
     function isChild(uint256 _child, uint256 _parent) external view returns (bool) {
         return parentTokensImpl[_child][_parent];
