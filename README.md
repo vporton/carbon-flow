@@ -12,7 +12,7 @@ _This is **the only** reasonable carbon accounting project for the global scale,
 The project is in desperate need of a few thousand dollars to pay to a certified error-checker. We also need to finish development of carbon accounting by creating an UI (a site) for accounters. Donate: 
 https://gitcoin.co/grants/177/social-charity-tokens-and-dao-carbon-accounting
 
-See also [this repository](https://github.com/vporton/courts) for the frontend UI. But better to use DAOstack voting system to create this site.
+See also [this repository](https://github.com/vporton/carbon-flow_colony) for the frontend UI. But better to use DAOstack voting system to create this site.
 
 For big amounts of carbon, this software can be installed on Ethereum, for energy-efficient accounting of small amounts it can be used xDAI blockchain.
 
