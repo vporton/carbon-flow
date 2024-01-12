@@ -31,9 +31,9 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     uint256 public nextTokenId;
 
-    mapping (uint256 => mapping (uint256 => bool)) private parentTokensImpl; // child => (parent => true)
-    mapping (uint256 => mapping (uint256 => TokenFlow)) private tokenFlowImpl; // child => (parent => flow)
-    mapping (uint256 => mapping (uint256 => int128)) private coefficientsImpl; // child => (parent => coefficient)
+    mapping (uint256 => mapping (uint256 => bool)) internal parentTokensImpl; // child => (parent => true)
+    mapping (uint256 => mapping (uint256 => TokenFlow)) internal tokenFlowImpl; // child => (parent => flow)
+    mapping (uint256 => mapping (uint256 => int128)) internal coefficientsImpl; // child => (parent => coefficient)
 
     mapping (uint256 => address) public tokenOwners;
 
@@ -200,7 +200,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
 // Flow
 
-    function getFlow(uint256 _child, uint256 _parent) private pure virtual override returns (TokenFlow storage) {
+    function getFlow(uint256 _child, uint256 _parent) internal view virtual returns (TokenFlow storage) {
         require(parentTokensImpl[_child][_parent]);
         return tokenFlowImpl[_child][_parent];
     }
