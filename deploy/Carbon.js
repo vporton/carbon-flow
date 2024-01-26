@@ -7,12 +7,22 @@ module.exports = async ({
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const globalCommunityFund = process.env.GLOBAL_COMMUNITY_FUND;
+  // const globalCommunityFund = process.env.GLOBAL_COMMUNITY_FUND;
 
   const deployResult = await deploy("Carbon", { from: deployer, args: [] });
   log(`contract Carbon was deployed at ${deployResult.address} using ${deployResult.receipt.gasUsed} gas`);
-  log(`Global Community Fund controlling account: ${globalCommunityFund}`);
-  log(`Write ABI and addresses...`)
-  // fs.writeFileSync("out/artifacts/Carbon.abi", JSON.stringify(deployResult.abi));
+  // log(`Global Community Fund controlling account: ${globalCommunityFund}`);
+  log(`Write ABI and addresses...`);
+
+  const filename = "artifacts/Carbon.deployed.json";
+  let j;
+  try {
+    j = JSON.parse(fs.readFileSync(filename));
+  }
+  catch(_) {
+    j = {};
+  }
+  const j2 = {...j, ...deployResult.abi};
+  fs.writeFileSync(filename, JSON.stringify(j2));
 };
 module.exports.tags = ["Carbon"];
