@@ -22,7 +22,7 @@ module.exports = async ({
   catch(_) {
     j = {};
   }
-  const j2 = {...j, ...deployResult.abi};
+  const j2 = {...j, ...deployResult};
   fs.writeFileSync(filename, JSON.stringify(j2));
 };
 module.exports.tags = ["Carbon"];
