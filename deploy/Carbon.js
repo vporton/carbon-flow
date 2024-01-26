@@ -1,3 +1,4 @@
+const hre = require('hardhat');
 const fs = require('fs');
 
 module.exports = async ({
@@ -22,7 +23,10 @@ module.exports = async ({
   catch(_) {
     j = {};
   }
-  const j2 = {...j, ...deployResult};
+  const j2 = {
+    ...j,
+    ...{[hre.network.config.chainId]: deployResult},
+  };
   fs.writeFileSync(filename, JSON.stringify(j2));
 };
 module.exports.tags = ["Carbon"];
