@@ -100,8 +100,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
 
     // Each element of `_childs` list must be a child of the next one.
     // TODO: Test. Especially test the case if the last child has no parent. Also test if a child is zero.
-    //
-    // You are recommended to disable only non-retired tokens, because disabling retired will be ignored.
     function setDisabled(uint256[] calldata _childs, bool _disabled) external {
         uint256 _ancestor = _childs[_childs.length - 1];
         require(msg.sender == tokenOwners[_ancestor]);
@@ -118,8 +116,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     }
 
     /// User can set negative values. It is a nonsense but does not harm.
-    ///
-    /// You are recommended to set flow only for non-retired tokens, because retired tokens flow is ignored.
     function setRecurringFlow(
         uint256 _child,
         uint256 _parent,
@@ -139,8 +135,6 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
     }
 
     /// User can set negative values. It is a nonsense but does not harm.
-    ///
-    /// You are recommended to set flow only for non-retired tokens, because retired tokens flow is ignored.
     function setNonRecurringFlow(uint256 _child, uint256 _parent, int256 _remainingSwapCredit, bytes32 oldLimitHash) external {
         require(msg.sender == tokenOwners[_parent]);
         // require(_remainingSwapCredit <= _maxSwapCredit); // It is caller's responsibility.
