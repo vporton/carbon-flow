@@ -1,5 +1,7 @@
 # Carbon Flow
 
+See also [the DAO that will control this software](https://github.com/vporton/carbon-flow_colony).
+
 **Help needed!** - see at the bottom.
 
 We have improved API, but this new API is not yet tested.
