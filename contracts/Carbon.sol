@@ -39,13 +39,14 @@ contract Carbon is BaseCarbon {
     // solhint-enable func-visibility
 
     // Anybody can create an authority, but its parent decides if its tokens can be swapped.
-    function createAuthority(string calldata _nonRetiredUri, string calldata _retiredUri) external {
+    function createAuthority(string calldata _nonRetiredUri, string calldata _retiredUri) external returns (uint256) {
         // Minting restricted because minting can happen only through createCredit().
         uint256 _nonRetiredToken = _newToken(_nonRetiredUri, msg.sender); // always odd, see also `isNonRetiredToken`.
         /*uint256 _retiredToken = */_newToken(_retiredUri, address(0)); // + 1
         Authority memory _authority = Authority({maxSerial: 0, token: _nonRetiredToken});
         authorities[_nonRetiredToken] = _authority;
         emit AuthorityCreated(msg.sender, _nonRetiredToken);
+        return _nonRetiredToken;
     }
 
     // WARNING: If `_owner` is a contract, it must implement ERC1155TokenReceiver interface.
