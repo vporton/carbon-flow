@@ -21,6 +21,7 @@ contract TokensFlow is ERC1155 /*, IERC1155Views*/ {
         int firstTimeEnteredSwapCredit;
     }
 
+    // FIXME: Disable operation should also disable retired. Devalue should also devalue retired.
     struct TokenFlow {
         SwapLimit limit;
         int256 remainingSwapCredit;

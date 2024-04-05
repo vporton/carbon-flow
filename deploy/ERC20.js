@@ -7,15 +7,21 @@ module.exports = async ({
   getNamedAccounts,
   deployments,
 }) => {
-  // const { deploy, log } = deployments;
-  // const [ deployer ] = await ethers.getSigners();
+  if (!process.env.TEST) {
+    return;
+  }
 
-  // const Carbon = await deployments.get("Carbon");
-  // const carbon = new ethers.Contract(Carbon.address, Carbon.abi, deployer);
-  // const deployResultNonRetired = await deploy("ERC20LockedERC1155", {
-  //   from: await deployer.getAddress(), contractName: "NonRetiredERC20"
-  // });
-  // console.log(deployResultNonRetired);
+  const { deploy, log } = deployments;
+  const [ deployer ] = await ethers.getSigners();
+
+  const Carbon = await deployments.get("Carbon");
+  const carbon = new ethers.Contract(Carbon.address, Carbon.abi, deployer);
+  const deployResult = await deploy("ERC20ToCarbon", {
+    from: await deployer.getAddress(),
+    contractName: "ERC20ToCarbon",
+    args: [crypto.randomUUID(), crypto.randomUUID(), carbon.address, IERC20 erc20_]
+  });
+  console.log(deployResult);
   // await deployResultNonRetired.initialize(carbon.address, nonRetiredCreditsToken);
   // log(`contract NonRetiredERC20 was deployed at ${deployResultNonRetired.address} using ${deployResultNonRetired.receipt.gasUsed} gas`);
   // const deployResultRetired = await deploy("ERC20LockedERC1155", {
